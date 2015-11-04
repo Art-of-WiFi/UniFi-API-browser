@@ -31,5 +31,5 @@ REQUIREMENTS:
 
 SECURITY NOTICE:
 The use of this tool is not secured in any way! Make sure to prevent
-unauthorised access to it, preventing exposure of details and credentials such as
-user names and passwords for access to the Unifi controller!
+unauthorised access to it, preventing exposure of details and credentials such
+as user names and passwords for access to the Unifi controller!
