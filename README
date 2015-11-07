@@ -5,7 +5,7 @@ Controller API. Please keep the following in mind:
 -   not all data collections are supported (yet)
 -   there is still work to be done to add/improve functionality and usability of
     this tool so suggestions/comments are welcome. Please use github issue
-    list or this thread on the Ubiquiti Community forums:
+    list or this thread on the Ubiquiti Community forums for feedback:
     https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651
 
 CREDITS:
