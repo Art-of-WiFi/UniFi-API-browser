@@ -41,7 +41,7 @@ The phpapi that comes bundled with this tool is based on the work done by the fo
 - clients using this tool should have internet access to be able to load the required css files because they are loaded from CDN's.
 
 ### Security notice
-The use of this tool is not secured in any way! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
+The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
 
 ### Screenshot
 Here's a screenshot of the tool in action showing this site's health metrics:
