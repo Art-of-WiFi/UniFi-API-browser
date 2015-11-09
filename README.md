@@ -3,6 +3,29 @@ This tool is for browsing data that is accessible through Ubiquiti's Unifi Contr
 - not all data collections are supported (yet)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
 
+## Data collections currently implemented
+- Users/clients
+  - list online clients
+  - list guests
+  - list users
+  - stat all users
+  - stat authorisations
+  - stat sessions
+- Access points
+  - list access points
+  - list rogue access points
+- Stats
+  - hourly site stats
+  - hourly access point stats
+  - daily site stats
+- Configuration
+  - wlan config
+  - list site settings
+  - health metrics
+- Messages
+  - list events
+  - list alarms
+
 ### Credits
 The phpapi that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
