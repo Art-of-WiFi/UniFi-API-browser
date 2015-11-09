@@ -3,7 +3,7 @@ This tool is for browsing data that is accessible through Ubiquiti's Unifi Contr
 - not all data collections are supported (yet)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
 
-## Data collections currently implemented
+### Data collections currently implemented
 - Users/clients
   - list online clients
   - list guests
