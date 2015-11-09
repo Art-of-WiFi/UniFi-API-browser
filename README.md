@@ -19,3 +19,7 @@ The phpapi that comes bundled with this tool is based on the work done by the fo
 
 ### Security notice
 The use of this tool is not secured in any way! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
+
+### Screenshot
+Here's a screenshot of the tool in action:
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/11031627/1a74a712-86d6-11e5-966d-c9ff3de0e8c3.jpg "Sample screenshot")
