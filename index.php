@@ -35,6 +35,8 @@ $action = '';
 $siteid = 'none';
 $sitename = 'no site selected';
 $selection = 'nothing selected';
+$outputformat = 'json';
+$theme = 'default';
 $data = '';
 $result = 0;
 
@@ -48,6 +50,23 @@ if(isset($_GET['action'])){
     }
 }
 
+if(isset($_GET['outputformat'])){
+    $outputformat = $_GET['outputformat'];
+    $_SESSION['outputformat'] = $outputformat;
+} else {
+    if(isset($_SESSION['outputformat'])){
+        $outputformat = $_SESSION['outputformat'];
+    }
+}
+
+if(isset($_GET['theme'])){
+    $theme = $_GET['theme'];
+    $_SESSION['theme'] = $theme;
+} else {
+    if(isset($_SESSION['theme'])){
+        $theme = $_SESSION['theme'];
+    }
+}
 if(isset($_GET['siteid'])){
     $siteid = $_GET['siteid'];
     $_SESSION['siteid'] = $siteid;
@@ -72,6 +91,7 @@ $sites = $unifidata->list_sites();
 
 $time_1 = microtime(true);
 
+// select the required call to the Unifi Controller API based on the action selected
 switch ($action) {
     case 'list_clients':
         $selection = 'list online clients';
@@ -141,6 +161,13 @@ switch ($action) {
         break;
 }
 
+// create the url to the css file based on the selected theme (standard bootstrap or one of the bootswatch themes)
+if($theme === 'default') {
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
+} else {
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
+}  
+
 $timeafterlogin = $time_1 - $time_start;
 if($action!=''){
     $result = count($data);
@@ -176,100 +203,157 @@ Total elapsed time: '.$timetotal.' seconds<br>\
 <html>
 <head>
     <title>Unifi API browser</title>
-    <!-- Latest compiled and minified Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <!-- Latest compiled and minified Bootstrap and Font-awesome CSS -->
+    <link rel="stylesheet" href="<?php echo $cssurl ?>">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <style>
+    body {
+      min-height: 2000px;
+      padding-top: 70px;
+    }
+    </style>
 </head>
 <body>
 <!-- top navbar -->
-<div class="bs-example">
-    <nav id="navbar-example" class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-example-js-navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-          </button>
-          <a class="navbar-brand" href="index.php">Unifi API browser</a>
-        </div>
-        <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li id="site-menu" class="dropdown">
-              <a id="drop6" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Select a site here
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu" id="siteslist">
-              </ul>
-            </li>            
-            <li class="dropdown">
-              <a id="drop1" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Users
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="?action=list_clients">list online clients</a></li>
-                <li><a href="?action=list_guests">list guests</a></li>
-                <li><a href="?action=list_users">list users</a></li>
-                <li><a href="?action=stat_allusers">stat all users</a></li>
-                <li><a href="?action=stat_auths">stat authorisations</a></li>
-                <li><a href="?action=stat_sessions">stat sessions</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a id="ap-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Access Points
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="?action=list_aps">list access points</a></li>
-                <li><a href="?action=list_rogueaps">list rogue access points</a></li>
-              </ul>
-            </li>
-            <li id="stats-menu" class="dropdown">
-              <a id="drop3" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Stats
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="?action=stat_hourly_site">hourly site stats</a></li>
-                <li><a href="?action=stat_daily_site">daily site stats</a></li>
-                <li><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
-                <li><a href="?action=list_health">health metrics</a></li>
-              </ul>
-            </li>
-            <li id="config-menu" class="dropdown">
-              <a id="drop4" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Configuration
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="?action=list_wlanconf">wireless configuration</a></li>
-                <li><a href="?action=list_settings">list site settings</a></li>
-              </ul>
-            </li>
-            <li id="msg-menu" class="dropdown">
-              <a id="drop5" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Messages
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="?action=list_alarms">list alarms</a></li>
-                <li><a href="?action=list_events">list events</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!-- /.nav-collapse -->
-      </div><!-- /.container-fluid -->
-    </nav><!-- /navbar-example -->
-  </div><!-- top navbar -->
-<div class="col-md-10 col-md-offset-1">
-<div class="panel panel-default">
-    <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, # of objects: <b><?php echo $result ?></b></div>
-    <div class="panel-body">
-        <span id = "progressbar"></span>
-        <pre><?php echo json_encode($data, JSON_PRETTY_PRINT) ?></pre>
+<nav id="navbar" class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-example-js-navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <a class="navbar-brand" href="index.php">Unifi API browser</a>
     </div>
+    <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li id="site-menu" class="dropdown">
+          <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Select site
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" id="siteslist">
+          </ul>
+        </li>
+        <li id="output-menu" class="dropdown">
+          <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Output format
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" id="outputselection">
+            <li><a href="?outputformat=json">json</a></li>
+            <li><a href="?outputformat=phparray">PHP array</a></li>
+          </ul>
+        </li>
+        <li id="user-menu" class="dropdown">
+          <a id="user-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Users
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?action=list_clients">list online clients</a></li>
+            <li><a href="?action=list_guests">list guests</a></li>
+            <li><a href="?action=list_users">list users</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="?action=stat_allusers">stat all users</a></li>
+            <li><a href="?action=stat_auths">stat authorisations</a></li>
+            <li><a href="?action=stat_sessions">stat sessions</a></li>
+          </ul>
+        </li>
+        <li id="ap-menu" class="dropdown">
+          <a id="ap-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            APs
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?action=list_aps">list access points</a></li>
+            <li><a href="?action=list_rogueaps">list rogue access points</a></li>
+          </ul>
+        </li>
+        <li id="stats-menu" class="dropdown">
+          <a id="stats-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Stats
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?action=stat_hourly_site">hourly site stats</a></li>
+            <li><a href="?action=stat_daily_site">daily site stats</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="?action=list_health">health metrics</a></li>
+          </ul>
+        </li>
+        <li id="config-menu" class="dropdown">
+          <a id="config-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Configuration
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?action=list_wlanconf">wireless configuration</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="?action=list_settings">list site settings</a></li>
+          </ul>
+        </li>
+        <li id="msg-menu" class="dropdown">
+          <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Messages
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?action=list_alarms">list alarms</a></li>
+            <li><a href="?action=list_events">list events</a></li>
+          </ul>
+        </li>
+        <li id="theme-menu" class="dropdown">
+          <a id="theme-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-cog"></i>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="?theme=default">default bootstrap</a></li>
+            <li><a href="?theme=cerulean">cerulean</a></li>
+            <li><a href="?theme=cosmo">cosmo</a></li>
+            <li><a href="?theme=cyborg">cyborg</a></li>
+            <li><a href="?theme=darkly">darkly</a></li>
+            <li><a href="?theme=flatly">flatly</a></li>
+            <li><a href="?theme=journal">journal</a></li>
+            <li><a href="?theme=lumen">lumen</a></li>
+            <li><a href="?theme=paper">paper</a></li>
+            <li><a href="?theme=readable">readable</a></li>
+            <li><a href="?theme=sandstone">sandstone</a></li>
+            <li><a href="?theme=simplex">simplex</a></li>
+            <li><a href="?theme=slate">slate</a></li>
+            <li><a href="?theme=spacelab">spacelab</a></li>
+            <li><a href="?theme=superhero">superhero</a></li>
+            <li><a href="?theme=united">united</a></li>
+            <li><a href="?theme=yeti">yeti</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container-fluid -->
+</nav><!-- /navbar-example -->
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, output: <b><?php echo $outputformat ?></b>, # of objects: <b><?php echo $result ?></b></div>
+        <div class="panel-body">
+            <span id = "progressbar"></span>
+            <pre><?php
+            // switch depending on the selected $outputformat
+            switch ($outputformat) {
+                case 'json':
+                    echo json_encode($data, JSON_PRETTY_PRINT);
+                    break;
+                case 'phparray':
+                    print_r ($data);
+                    break;
+                default:
+                    echo json_encode($data, JSON_PRETTY_PRINT);
+                    break;
+            }
+            ?></pre>
+        </div>
     </div>
 </div>
+
 <!-- Latest compiled and minified JavaScript versions -->
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
