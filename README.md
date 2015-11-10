@@ -58,4 +58,4 @@ The use of this tool is **not secured in any way**! Make sure to prevent unautho
 
 ### Screenshot
 Here's a screenshot of the tool in action showing this site's health metrics:
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/11031627/1a74a712-86d6-11e5-966d-c9ff3de0e8c3.jpg "Sample screenshot")
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/11059979/8d0dbd5a-879d-11e5-9459-51749e471297.png "Sample screenshot")
