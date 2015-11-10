@@ -12,6 +12,7 @@ The Unifi API browser tool offers the following features:
 - browse through data collections exposed by the Unifi Controller API in an easy manner
 - switch between sites managed by the connected controller
 - switch between output formats (currently json and PHP array)
+- switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
 - very easy setup with minimal dependencies
 - timing details of API queries can help "benchmark" your controller
 - useful tool when developing applications making use of the API
