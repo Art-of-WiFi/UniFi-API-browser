@@ -1,5 +1,5 @@
 ## Unifi API browser
-This tool is for browsing data that is accessible through Ubiquiti's Unifi Controller API. Please keep the following in mind:
+This tool is for browsing data that is accessible through Ubiquiti's Unifi Controller API and is written in PHP and the  [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections are supported (yet)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
 
