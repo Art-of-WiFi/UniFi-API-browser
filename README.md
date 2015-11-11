@@ -68,6 +68,8 @@ git clone https://github.com/malle-pietje/Unifi-API-browser.git
 ### Security notice
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
 
-### Screenshot
+### Screenshots
 Here's a screenshot of the tool in action showing the site's health metrics using the default Bootstrap theme:
 ![alt tag](https://cloud.githubusercontent.com/assets/12016131/11059979/8d0dbd5a-879d-11e5-9459-51749e471297.png "Sample screenshot")
+and here with one of the Bootswatch themes selected:
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/11089891/e6ab528e-886d-11e5-93d9-8c274dbf15b7.JPG "Sample screenshot with theme selected")
