@@ -185,7 +185,7 @@ $remainperc = 100-$loginperc-$loadperc;
 
 // construct the HTML5 progress bar which will present the timings in a graphical manner
 $progressbarcontent = '\
-Total elapsed time: '.$timetotal.' seconds<br>\
+total elapsed time: '.$timetotal.' seconds<br>\
 <div class="progress">\
   <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="'.$loginperc.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$loginperc.'%;">\
     login time: '.$timeafterlogin.'\
@@ -224,7 +224,7 @@ Total elapsed time: '.$timetotal.' seconds<br>\
       <a class="navbar-brand" href="index.php">Unifi API browser</a>
     </div>
     <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav navbar-left">
         <li id="site-menu" class="dropdown">
           <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
             Select site
@@ -303,11 +303,14 @@ Total elapsed time: '.$timetotal.' seconds<br>\
             <li><a href="?action=list_events">list events</a></li>
           </ul>
         </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
         <li id="theme-menu" class="dropdown">
           <a id="theme-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-cog"></i>
+            <i class="fa fa-cog fa-lg"></i>
           </a>
           <ul class="dropdown-menu">
+            <li class="dropdown-header">Select a theme</li>
             <li><a href="?theme=default">default bootstrap</a></li>
             <li><a href="?theme=cerulean">cerulean</a></li>
             <li><a href="?theme=cosmo">cosmo</a></li>
@@ -331,7 +334,7 @@ Total elapsed time: '.$timetotal.' seconds<br>\
     </div><!-- /.nav-collapse -->
   </div><!-- /.container-fluid -->
 </nav><!-- /navbar-example -->
-<div class="container">
+<div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, output: <b><?php echo $outputformat ?></b>, # of objects: <b><?php echo $result ?></b></div>
         <div class="panel-body">
