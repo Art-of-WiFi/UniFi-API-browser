@@ -54,16 +54,16 @@ The phpapi that comes bundled with this tool is based on the work done by the fo
 
 ### Installation
 Installation of this tool is quite straightforward. The easiest way to do this is by using git clone which also allows for easy updates.
-- open up a terminal window on your server and cd to the root folder of you web server (on Ubuntu this is /var/www/html) and execute the following command from your command prompt:
+- open up a terminal window on your server and cd to the root folder of you web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```
 git clone https://github.com/malle-pietje/Unifi-API-browser.git
 ```
 - when git is done cloning, follow the steps below to configure the settings for access to your Unifi Controller's API.
 
 ### Configuration
-- credentials for access to the Unifi Controller API need to be configured in the file named "config.template.php" which should be copied/renamed to "config.php" before using the Unifi API browser tool
+- credentials for access to the Unifi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the Unifi API browser tool
 - please see the `config.template.php` file for further instructions
-- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: http://serverip/Unifi-API-browser/
+- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http://serverip/Unifi-API-browser/`
 
 ### Security notice
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
