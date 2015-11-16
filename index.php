@@ -36,7 +36,7 @@ $siteid = 'none';
 $sitename = 'no site selected';
 $selection = 'nothing selected';
 $outputformat = 'json';
-$theme = 'default';
+$theme = 'bootstrap';
 $data = '';
 $result = 0;
 
@@ -162,7 +162,7 @@ switch ($action) {
 }
 
 // create the url to the css file based on the selected theme (standard bootstrap or one of the bootswatch themes)
-if($theme === 'default') {
+if($theme === 'bootstrap') {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
 } else {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
@@ -239,8 +239,8 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" id="outputselection">
-            <li><a href="?outputformat=json">json</a></li>
-            <li><a href="?outputformat=phparray">PHP array</a></li>
+            <li id="json"><a href="?outputformat=json">json</a></li>
+            <li id="phparray"><a href="?outputformat=phparray">PHP array</a></li>
           </ul>
         </li>
         <li id="user-menu" class="dropdown">
@@ -249,13 +249,13 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="?action=list_clients">list online clients</a></li>
-            <li><a href="?action=list_guests">list guests</a></li>
-            <li><a href="?action=list_users">list users</a></li>
+            <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
+            <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
+            <li id="list_users"><a href="?action=list_users">list users</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="?action=stat_allusers">stat all users</a></li>
-            <li><a href="?action=stat_auths">stat authorisations</a></li>
-            <li><a href="?action=stat_sessions">stat sessions</a></li>
+            <li id="stat_allusers"><a href="?action=stat_allusers">stat all users</a></li>
+            <li id="stat_auths"><a href="?action=stat_auths">stat authorisations</a></li>
+            <li id="stat_sessions"><a href="?action=stat_sessions">stat sessions</a></li>
           </ul>
         </li>
         <li id="ap-menu" class="dropdown">
@@ -264,8 +264,8 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="?action=list_aps">list access points</a></li>
-            <li><a href="?action=list_rogueaps">list rogue access points</a></li>
+            <li id="list_aps"><a href="?action=list_aps">list access points</a></li>
+            <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
           </ul>
         </li>
         <li id="stats-menu" class="dropdown">
@@ -274,12 +274,12 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="?action=stat_hourly_site">hourly site stats</a></li>
-            <li><a href="?action=stat_daily_site">daily site stats</a></li>
+            <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
+            <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
+            <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="?action=list_health">health metrics</a></li>
+            <li id="list_health"><a href="?action=list_health">health metrics</a></li>
           </ul>
         </li>
         <li id="config-menu" class="dropdown">
@@ -288,9 +288,9 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="?action=list_wlanconf">wireless configuration</a></li>
+            <li id="list_wlanconf"><a href="?action=list_wlanconf">wireless configuration</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="?action=list_settings">list site settings</a></li>
+            <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
           </ul>
         </li>
         <li id="msg-menu" class="dropdown">
@@ -299,8 +299,8 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="?action=list_alarms">list alarms</a></li>
-            <li><a href="?action=list_events">list events</a></li>
+            <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
+            <li id="list_events"><a href="?action=list_events">list events</a></li>
           </ul>
         </li>
       </ul>
@@ -311,23 +311,23 @@ total elapsed time: '.$timetotal.' seconds<br>\
           </a>
           <ul class="dropdown-menu">
             <li class="dropdown-header">Select a theme</li>
-            <li><a href="?theme=default">default bootstrap</a></li>
-            <li><a href="?theme=cerulean">cerulean</a></li>
-            <li><a href="?theme=cosmo">cosmo</a></li>
-            <li><a href="?theme=cyborg">cyborg</a></li>
-            <li><a href="?theme=darkly">darkly</a></li>
-            <li><a href="?theme=flatly">flatly</a></li>
-            <li><a href="?theme=journal">journal</a></li>
-            <li><a href="?theme=lumen">lumen</a></li>
-            <li><a href="?theme=paper">paper</a></li>
-            <li><a href="?theme=readable">readable</a></li>
-            <li><a href="?theme=sandstone">sandstone</a></li>
-            <li><a href="?theme=simplex">simplex</a></li>
-            <li><a href="?theme=slate">slate</a></li>
-            <li><a href="?theme=spacelab">spacelab</a></li>
-            <li><a href="?theme=superhero">superhero</a></li>
-            <li><a href="?theme=united">united</a></li>
-            <li><a href="?theme=yeti">yeti</a></li>
+            <li id="bootstrap"><a href="?theme=bootstrap">default bootstrap</a></li>
+            <li id="cerulean"><a href="?theme=cerulean">cerulean</a></li>
+            <li id="cosmo"><a href="?theme=cosmo">cosmo</a></li>
+            <li id="cyborg"><a href="?theme=cyborg">cyborg</a></li>
+            <li id="darkly"><a href="?theme=darkly">darkly</a></li>
+            <li id="flatly"><a href="?theme=flatly">flatly</a></li>
+            <li id="journal"><a href="?theme=journal">journal</a></li>
+            <li id="lumen"><a href="?theme=lumen">lumen</a></li>
+            <li id="paper"><a href="?theme=paper">paper</a></li>
+            <li id="readable"><a href="?theme=readable">readable</a></li>
+            <li id="sandstone"><a href="?theme=sandstone">sandstone</a></li>
+            <li id="simplex"><a href="?theme=simplex">simplex</a></li>
+            <li id="slate"><a href="?theme=slate">slate</a></li>
+            <li id="spacelab"><a href="?theme=spacelab">spacelab</a></li>
+            <li id="superhero"><a href="?theme=superhero">superhero</a></li>
+            <li id="united"><a href="?theme=united">united</a></li>
+            <li id="yeti"><a href="?theme=yeti">yeti</a></li>
           </ul>
         </li>
       </ul>
@@ -371,10 +371,19 @@ total elapsed time: '.$timetotal.' seconds<br>\
     function populateSitesList(data) {
         var items = [];
         $.each(data, function (id, option) {
-            items.push('<li><a href="?siteid=' + option.name + '&sitename=' + option.desc + '">' + option.desc + '</li>');
+            items.push('<li id="' + option.name + '"><a href="?siteid=' + option.name + '&sitename=' + option.desc + '">' + option.desc + '</li>');
         });  
         $('#siteslist').html(items.join(''));
     }
+    
+    /*
+    highlight selected options in the pull down menus
+    for $action, $siteid, $theme and $outputformat:
+    */
+    $('#<?php echo $action ?>').addClass('active');
+    $('#<?php echo $siteid ?>').addClass('active');
+    $('#<?php echo $outputformat ?>').addClass('active');
+    $('#<?php echo $theme ?>').addClass('active');
 </script>
 </body>
 </html>
