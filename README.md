@@ -62,7 +62,7 @@ git clone https://github.com/malle-pietje/Unifi-API-browser.git
 
 ### Configuration
 - credentials for access to the Unifi Controller API need to be configured in the file named "config.template.php" which should be copied/renamed to "config.php" before using the Unifi API browser tool
-- please see the 'config.template.php' file for further instructions
+- please see the `config.template.php` file for further instructions
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: http://serverip/Unifi-API-browser/
 
 ### Security notice
