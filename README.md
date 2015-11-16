@@ -47,6 +47,11 @@ The phpapi that comes bundled with this tool is based on the work done by the fo
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
 
+### Requirements
+- a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
+- network access from this web server to the server and port on which the Unifi controller is running
+- clients using this tool should have internet access to be able to load the required css files because they are loaded from CDN's.
+
 ### Installation
 Installation of this tool is quite straightforward. The easiest way to do this is by using git clone which also allows for easy updates.
 - open up a terminal window on your server and cd to the root folder of you web server (on Ubuntu this is /var/www/html) and execute the following command from your command prompt:
@@ -59,11 +64,6 @@ git clone https://github.com/malle-pietje/Unifi-API-browser.git
 - credentials for access to the Unifi Controller API need to be configured in the file named "config.template.php" which should be copied/renamed to "config.php" before using the Unifi API browser tool
 - please see the above file for further instructions
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: http://serverip/Unifi-API-browser/
-
-### Requirements
-- a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
-- network access from this web server to the server and port on which the Unifi controller is running
-- clients using this tool should have internet access to be able to load the required css files because they are loaded from CDN's.
 
 ### Security notice
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!
