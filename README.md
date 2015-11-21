@@ -53,7 +53,7 @@ The phpapi that comes bundled with this tool is based on the work done by the fo
 - clients using this tool should have internet access to be able to load the required css files because they are loaded from CDN's.
 
 ### Installation
-Installation of this tool is quite straightforward. The easiest way to do this is by using git clone which also allows for easy updates.
+Installation of this tool is quite straightforward. The easiest way to do this is by using git clone which also allows for easy updates:
 - open up a terminal window on your server and cd to the root folder of you web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```
 git clone https://github.com/malle-pietje/Unifi-API-browser.git
