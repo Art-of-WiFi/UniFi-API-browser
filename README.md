@@ -58,7 +58,9 @@ Installation of this tool is quite straightforward. The easiest way to do this i
 ```
 git clone https://github.com/malle-pietje/Unifi-API-browser.git
 ```
-- when git is done cloning, follow the steps below to configure the settings for access to your Unifi Controller's API.
+- when git is done cloning, follow the configuration steps below to configure the settings for access to your Unifi Controller's API
+
+Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
 
 ### Configuration
 - credentials for access to the Unifi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the Unifi API browser tool
