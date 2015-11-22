@@ -110,6 +110,7 @@ class unifiapi {
             }
             if($code === 400) {
                 error_log('we have received an HTTP response status: 400. Probably a controller login failure');
+                return $code;
             }
          }
       }
@@ -293,7 +294,6 @@ class unifiapi {
       $return=array();
       if (!$this->is_loggedin) return false;
       $return=array();
-      //$end = is_null($end) ? ((time()-(time() % 3600))) : $end; // why did we need this floor calc?
       $end = is_null($end) ? time() : $end;
       $start = is_null($start) ? $end-604800 : $start;
       $json=json_encode(array('type'=> 'all', 'start' => $start, 'end' => $end));
@@ -321,7 +321,6 @@ class unifiapi {
       $return=array();
       if (!$this->is_loggedin) return false;
       $return=array();
-      //$end = is_null($end) ? ((time()-(time() % 3600))) : $end; // why did we need this floor calc?
       $end = is_null($end) ? time() : $end;
       $start = is_null($start) ? $end-604800 : $start;
       $json=json_encode(array('start' => $start, 'end' => $end));
@@ -547,6 +546,28 @@ class unifiapi {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $rogues) {
                   $return[]=$rogues;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+   
+   /*
+   list wlan_groups
+   returns a array of known wlan_groups
+   */
+   public function list_wlan_groups() {
+      $return=array();
+      if (!$this->is_loggedin) return $return;
+      $return=array();
+      $content=$this->exec_curl($this->baseurl."/api/s/".$this->site."/list/wlangroup");
+      $content_decoded=json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $wlan_group) {
+                  $return[]=$wlan_group;
                }
             }
          }

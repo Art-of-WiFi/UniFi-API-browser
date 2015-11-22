@@ -24,13 +24,14 @@ THE SOFTWARE.
 */
 
 /*
-in order to use PHP $_SESSION for temporary storage of variables
-session_start is required
+in order to use PHP $_SESSION for temporary storage of variables session_start() is required
 */
 session_start();
 $time_start = microtime(true);
 
-// define defaults
+/*
+define defaults
+*/
 $action = '';
 $siteid = 'none';
 $sitename = 'no site selected';
@@ -39,8 +40,11 @@ $outputformat = 'json';
 $theme = 'bootstrap';
 $data = '';
 $result = 0;
+$errormessage = '';
 
-// process the GET variables
+/*
+process the GET variables
+*/
 if(isset($_GET['action'])){
     $action = $_GET['action'];
     $_SESSION['action'] = $action;
@@ -67,6 +71,7 @@ if(isset($_GET['theme'])){
         $theme = $_SESSION['theme'];
     }
 }
+
 if(isset($_GET['siteid'])){
     $siteid = $_GET['siteid'];
     $_SESSION['siteid'] = $siteid;
@@ -78,20 +83,31 @@ if(isset($_GET['siteid'])){
         $sitename = $_SESSION['sitename'];
     }
 }
+
 /*
 load the unifi api connection class as well as the settings files
 and log in to the controller to load the sites data
+- if an error occurs with the login process an alert is displayed on the page
+- if the config.php file is unreadable or does not exist, an alert is displayed on the page
 */
 require('phpapi/class.unifi.php');
-require('config.php');
+if(!is_readable('config.php')) {
+    $errormessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
+}
+include('config.php');
 $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-$unifidata->login();
-
+$loginresults = $unifidata->login();
+if($loginresults === 400) {
+    error_log($sites);
+    $errormessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
+}
 $sites = $unifidata->list_sites();
 
 $time_1 = microtime(true);
 
-// select the required call to the Unifi Controller API based on the action selected
+/*
+select the required call to the Unifi Controller API based on the action selected
+*/
 switch ($action) {
     case 'list_clients':
         $selection = 'list online clients';
@@ -124,6 +140,10 @@ switch ($action) {
     case 'list_aps':
         $selection = 'list access points';
         $data = $unifidata->list_aps();
+        break;
+    case 'list_wlan_groups':
+        $selection = 'list wlan groups';
+        $data = $unifidata->list_wlan_groups();
         break;
     case 'stat_sessions':
         $selection = 'stat sessions';
@@ -161,7 +181,9 @@ switch ($action) {
         break;
 }
 
-// create the url to the css file based on the selected theme (standard bootstrap or one of the bootswatch themes)
+/*
+create the url to the css file based on the selected theme (standard bootstrap or one of the bootswatch themes)
+*/
 if($theme === 'bootstrap') {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
 } else {
@@ -176,14 +198,18 @@ if($action!=''){
 $time_2 = microtime(true);
 $timeafterload = $time_2 - $time_start;
 
-// calculate all the timings/percentages
+/*
+calculate all the timings/percentages
+*/
 $time_end = microtime(true);
 $timetotal = $time_end - $time_start;
 $loginperc = ($timeafterlogin/$timetotal)*100;
 $loadperc = (($timeafterload - $timeafterlogin)/$timetotal)*100;
 $remainperc = 100-$loginperc-$loadperc;
 
-// construct the HTML5 progress bar which will present the timings in a graphical manner
+/*
+construct the HTML5 progress bar which will present the timings in a graphical manner
+*/
 $progressbarcontent = '\
 total elapsed time: '.$timetotal.' seconds<br>\
 <div class="progress">\
@@ -202,8 +228,9 @@ total elapsed time: '.$timetotal.' seconds<br>\
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Unifi API browser</title>
-    <!-- Latest compiled and minified Bootstrap and Font-awesome CSS -->
+    <!-- Latest compiled and minified Bootstrap and Font-awesome CSS loaded from CDN -->
     <link rel="stylesheet" href="<?php echo $cssurl ?>">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <style>
@@ -245,7 +272,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
         </li>
         <li id="user-menu" class="dropdown">
           <a id="user-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            Users
+            Clients
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
@@ -265,6 +292,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
           </a>
           <ul class="dropdown-menu">
             <li id="list_aps"><a href="?action=list_aps">list access points</a></li>
+            <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
           </ul>
         </li>
@@ -335,12 +363,15 @@ total elapsed time: '.$timetotal.' seconds<br>\
   </div><!-- /.container-fluid -->
 </nav><!-- /navbar-example -->
 <div class="container-fluid">
+    <div id="alertPlaceholder"><?php echo $errormessage ?></div>
     <div class="panel panel-default">
         <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, output: <b><?php echo $outputformat ?></b>, # of objects: <b><?php echo $result ?></b></div>
         <div class="panel-body">
             <span id = "progressbar"></span>
             <pre><?php
-            // switch depending on the selected $outputformat
+            /*
+            switch depending on the selected $outputformat
+            */
             switch ($outputformat) {
                 case 'json':
                     echo json_encode($data, JSON_PRETTY_PRINT);
@@ -356,16 +387,19 @@ total elapsed time: '.$timetotal.' seconds<br>\
         </div>
     </div>
 </div>
-
 <!-- Latest compiled and minified JavaScript versions -->
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script>
-    // push the progress bar constructed earlier to the div at the top of the widget
+    /*
+    push the progress bar constructed earlier to the div at the top of the widget
+    */
     var progressbarcontent = '<?php echo $progressbarcontent?>';
     $('#progressbar').html(progressbarcontent);
     
-    // populate the sites pull-down list with active site names with corresponding urls
+    /*
+    populate the sites pull-down list with active site names with corresponding urls
+    */
     var sites = <?php echo json_encode($sites) ?>;
     populateSitesList(sites);
     function populateSitesList(data) {
