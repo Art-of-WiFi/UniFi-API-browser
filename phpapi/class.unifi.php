@@ -544,8 +544,8 @@ class unifiapi {
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == "ok") {
             if (is_array($content_decoded->data)) {
-               foreach ($content_decoded->data as $rogues) {
-                  $return[]=$rogues;
+               foreach ($content_decoded->data as $sites) {
+                  $return[]=$sites;
                }
             }
          }
@@ -574,7 +574,29 @@ class unifiapi {
       }
       return $return;
    }
-
+   
+   /*
+   stat sysinfo
+   returns a array of known sysinfo data
+   */
+   public function stat_sysinfo() {
+      $return=array();
+      if (!$this->is_loggedin) return $return;
+      $return=array();
+      $content=$this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/sysinfo");
+      $content_decoded=json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $sysinfo) {
+                  $return[]=$sysinfo;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+   
    /*
    list site settings
    returns a array of the site configuration settings

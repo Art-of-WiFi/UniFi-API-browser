@@ -129,6 +129,10 @@ switch ($action) {
         $selection = 'hourly site stats';
         $data = $unifidata->stat_hourly_site();
         break;
+    case 'stat_sysinfo':
+        $selection = 'sysinfo';
+        $data = $unifidata->stat_sysinfo();
+        break;
     case 'stat_hourly_aps':
         $selection = 'hourly ap stats';
         $data = $unifidata->stat_hourly_aps();
@@ -170,7 +174,7 @@ switch ($action) {
         $data = $unifidata->list_wlanconf();
         break;
     case 'list_health':
-        $selection = 'health metrics';
+        $selection = 'site health metrics';
         $data = $unifidata->list_health();
         break;
     case 'list_settings':
@@ -307,7 +311,9 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <li role="separator" class="divider"></li>
             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
             <li role="separator" class="divider"></li>
-            <li id="list_health"><a href="?action=list_health">health metrics</a></li>
+            <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
+            <li role="separator" class="divider"></li>
+            <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
           </ul>
         </li>
         <li id="config-menu" class="dropdown">
