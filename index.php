@@ -271,7 +271,10 @@ total elapsed time: '.$timetotal.' seconds<br>\
           </a>
           <ul class="dropdown-menu" id="outputselection">
             <li id="json"><a href="?outputformat=json">json</a></li>
-            <li id="phparray"><a href="?outputformat=phparray">PHP array</a></li>
+            <li role="separator" class="divider"></li>
+            <li id="phparray"><a href="?outputformat=phparray">PHP print_r</a></li>
+            <li id="vardump"><a href="?outputformat=vardump">PHP var_dump</a></li>
+            <li id="varexport"><a href="?outputformat=varexport">PHP var_export</a></li>
           </ul>
         </li>
         <li id="user-menu" class="dropdown">
@@ -384,6 +387,12 @@ total elapsed time: '.$timetotal.' seconds<br>\
                     break;
                 case 'phparray':
                     print_r ($data);
+                    break;
+                case 'vardump':
+                    var_dump ($data);
+                    break;
+                case 'varexport':
+                    var_export ($data);
                     break;
                 default:
                     echo json_encode($data, JSON_PRETTY_PRINT);
