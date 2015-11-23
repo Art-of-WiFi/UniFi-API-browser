@@ -12,7 +12,7 @@ If you'd like to buy me a beer, please use the donate button below. All donation
 The Unifi API browser tool offers the following features:
 - browse through data collections exposed by the Unifi Controller API in an easy manner
 - switch between sites managed by the connected controller
-- switch between output formats (currently `json` and `PHP array`)
+- switch between output formats (currently `json`, `PHP array`, `PHP var_dump` and `PHP var_export`)
 - switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
 - very easy setup with minimal dependencies
 - timing details of API queries can help "benchmark" your controller
@@ -20,7 +20,7 @@ The Unifi API browser tool offers the following features:
 - the API exposes more data than is visible through the Controller's web interface which can be useful for troubleshooting purposes
 
 ### Data collections currently implemented
-- Users/clients
+- Clients/users
   - list online clients
   - list guests
   - list users
@@ -29,15 +29,17 @@ The Unifi API browser tool offers the following features:
   - stat sessions
 - Access points
   - list access points
+  - list wlan groups
   - list rogue access points
 - Stats
   - hourly site stats
   - hourly access point stats
   - daily site stats
+  - health metrics
+  - sysinfo
 - Configuration
   - wlan config
   - list site settings
-  - health metrics
 - Messages
   - list events
   - list alarms
