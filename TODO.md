@@ -1,6 +1,6 @@
 ## TODO:
 
-1. Make the output format selectable like with the siteid, so that after selection we can switch between the two lines below for different output presentation. Possible options are ~~PHP array/json~~/table:
+1. Make the output format selectable like with the siteid, so that after selection we can switch between the two lines below for different output presentation. Possible options to add are ~~PHP array/json~~/table:
     - ~~print_r ($data);~~
     - ~~echo json_encode($data, JSON_PRETTY_PRINT);~~
     - DataTables for table output and more
