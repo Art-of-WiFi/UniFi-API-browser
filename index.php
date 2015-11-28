@@ -33,14 +33,14 @@ $time_start = microtime(true);
 define defaults
 */
 $action = '';
-$siteid = 'none';
-$sitename = 'no site selected';
-$selection = 'nothing selected';
+$siteid = '';
+$sitename = '';
+$selection = '';
 $outputformat = 'json';
 $theme = 'bootstrap';
 $data = '';
 $result = 0;
-$errormessage = '';
+$alertmessage = '';
 
 /*
 process the GET variables
@@ -85,24 +85,44 @@ if(isset($_GET['siteid'])){
 }
 
 /*
+display info message when no site is selected or no data collection is selected
+placed here so they can be overwritten by more "severe" error messages later down
+*/
+if($action === '') {
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection from one of the <b>menus</b> above.</div>';
+}
+if($siteid === '') {
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the <b>Select site menu</b> above.</div>';
+}
+
+/*
 load the unifi api connection class as well as the settings files
-and log in to the controller to load the sites data
+and log in to the controller to load the sites data (if not already stored in $_SESSION)
 - if an error occurs with the login process an alert is displayed on the page
 - if the config.php file is unreadable or does not exist, an alert is displayed on the page
 */
 require('phpapi/class.unifi.php');
 if(!is_readable('config.php')) {
-    $errormessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
+    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
 }
 include('config.php');
-$unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-$loginresults = $unifidata->login();
-if($loginresults === 400) {
-    error_log($sites);
-    $errormessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
-}
-$sites = $unifidata->list_sites();
 
+if(!isset($_GET['sites'])) {
+    $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+    $loginresults = $unifidata->login();
+    if($loginresults === 400) {
+        error_log($sites);
+        $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
+    }
+    $sites = $unifidata->list_sites();
+    $_SESSION['sites'] = $sites;
+} else {
+$sites = $_SESSION['sites'];
+}
+
+/*
+starting timing of session here
+*/
 $time_1 = microtime(true);
 
 /*
@@ -181,12 +201,16 @@ switch ($action) {
         $selection = 'list site settings';
         $data = $unifidata->list_settings();
         break;
+    case 'list_sites':
+        $selection = 'details of available sites';
+        $data = $sites;
+        break;
     default:
         break;
 }
 
 /*
-create the url to the css file based on the selected theme (standard bootstrap or one of the bootswatch themes)
+create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
 */
 if($theme === 'bootstrap') {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
@@ -262,7 +286,12 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" id="siteslist">
-          </ul>
+            <?php
+            foreach($sites as $site) {
+              echo '<li id="' . $site->name . '"><a href="?siteid=' . $site->name . '&sitename=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
+            }
+            ?>
+           </ul>
         </li>
         <li id="output-menu" class="dropdown">
           <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -328,6 +357,8 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <li id="list_wlanconf"><a href="?action=list_wlanconf">wireless configuration</a></li>
             <li role="separator" class="divider"></li>
             <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
+            <li role="separator" class="divider"></li>
+            <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
           </ul>
         </li>
         <li id="msg-menu" class="dropdown">
@@ -372,7 +403,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
   </div><!-- /.container-fluid -->
 </nav><!-- /navbar-example -->
 <div class="container-fluid">
-    <div id="alertPlaceholder"><?php echo $errormessage ?></div>
+    <div id="alertPlaceholder"><?php echo $alertmessage ?></div>
     <div class="panel panel-default">
         <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, output: <b><?php echo $outputformat ?></b>, # of objects: <b><?php echo $result ?></b></div>
         <div class="panel-body">
@@ -411,19 +442,6 @@ total elapsed time: '.$timetotal.' seconds<br>\
     */
     var progressbarcontent = '<?php echo $progressbarcontent?>';
     $('#progressbar').html(progressbarcontent);
-    
-    /*
-    populate the sites pull-down list with active site names with corresponding urls
-    */
-    var sites = <?php echo json_encode($sites) ?>;
-    populateSitesList(sites);
-    function populateSitesList(data) {
-        var items = [];
-        $.each(data, function (id, option) {
-            items.push('<li id="' + option.name + '"><a href="?siteid=' + option.name + '&sitename=' + option.desc + '">' + option.desc + '</li>');
-        });  
-        $('#siteslist').html(items.join(''));
-    }
     
     /*
     highlight selected options in the pull down menus
