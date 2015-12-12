@@ -474,36 +474,36 @@ $remainperc = 100-$loginperc-$loadperc;
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-3 col-md-offset-2">Controller:</div>
+          <div class="col-sm-3 col-sm-offset-2">Controller:</div>
         </div>
         <div class="row">
-          <div class="col-md-3 col-md-offset-2">user</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo $controlleruser ?></span></div>
+          <div class="col-sm-3 col-sm-offset-2">user</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo $controlleruser ?></span></div>
         </div>
         <div class="row">
-          <div class="col-md-3 col-md-offset-2">url</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo $controllerurl ?></span></div>
+          <div class="col-sm-3 col-sm-offset-2">url</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo $controllerurl ?></span></div>
         </div>
         <div class="row">
-          <div class="col-md-3 col-md-offset-2">version detected</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo $_SESSION['detected_controller_version'] ?></span></div>
-        </div>
-        <hr>
-        <div class="row">
-          <div class="col-md-3 col-md-offset-2">PHP version</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo (phpversion()) ?></span></div>
-        </div>
-        <div class="row">
-          <div class="col-md-3 col-md-offset-2">cURL version</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo $curl_version ?></span></div>
-        </div>
-        <div class="row">
-          <div class="col-md-3 col-md-offset-2">OS</div>
-          <div class="col-md-5"><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></div>
+          <div class="col-sm-3 col-sm-offset-2">version detected</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo $_SESSION['detected_controller_version'] ?></span></div>
         </div>
         <hr>
         <div class="row">
-          <div class="col-md-6 col-md-offset-2"><a href="https://github.com/malle-pietje/Unifi-API-browser" target="_blank">Unifi API browser on Github</a></div>
+          <div class="col-sm-3 col-sm-offset-2">PHP version</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo (phpversion()) ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-sm-3 col-sm-offset-2">cURL version</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo $curl_version ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-sm-3 col-sm-offset-2">OS</div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-6 col-sm-offset-2"><a href="https://github.com/malle-pietje/Unifi-API-browser" target="_blank">Unifi API browser on Github</a></div>
         </div>
       </div>
       <div class="modal-footer">
