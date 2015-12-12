@@ -12,8 +12,9 @@ If you'd like to buy me a beer, please use the donate button below. All donation
 The Unifi API browser tool offers the following features:
 - browse through data collections exposed by the Unifi Controller API in an easy manner
 - switch between sites managed by the connected controller
-- switch between output formats (currently `json`, `PHP array`, `PHP var_dump` and `PHP var_export`)
+- switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export` and 'json highlighted')
 - switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
+- an "About" modal which shows version information for PHP, cURL and the Unifi Controller
 - very easy setup with minimal dependencies
 - timing details of API queries can help "benchmark" your controller
 - useful tool when developing applications making use of the API
@@ -48,6 +49,9 @@ The Unifi API browser tool offers the following features:
 The phpapi that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
+
+Other included libraries:
+- highlight.js: https://highlightjs.org/
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)

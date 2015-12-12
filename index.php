@@ -30,7 +30,7 @@ session_start();
 $time_start = microtime(true);
 
 /*
-define defaults
+assign variables required later on  together with their default values
 */
 $action = '';
 $siteid = '';
@@ -39,8 +39,14 @@ $selection = '';
 $outputformat = 'json';
 $theme = 'bootstrap';
 $data = '';
-$result = 0;
+$objectscount = '';
 $alertmessage = '';
+
+/*
+collect data for info modal
+*/
+$curl_info = curl_version();
+$curl_version = $curl_info['version'];
 
 /*
 process the GET variables
@@ -121,6 +127,21 @@ $sites = $_SESSION['sites'];
 }
 
 /*
+get the version of the controller
+*/
+if(!isset($_SESSION['detected_controller_version'])) {
+    error_log('we need to find the version');
+    $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+    $loginresults = $unifidata->login();
+    if($loginresults === 400) {
+        error_log($sites);
+        $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
+    }
+    $site_info = $unifidata->stat_sysinfo();
+    $_SESSION['detected_controller_version'] = $site_info[0]->version;
+}
+
+/*
 starting timing of session here
 */
 $time_1 = microtime(true);
@@ -186,7 +207,7 @@ switch ($action) {
         $data = $unifidata->list_events();
         break;
     case 'list_alarms':
-        $selection = 'list alarms';
+        $selection = 'list alerts';
         $data = $unifidata->list_alarms();
         break;
     case 'list_wlanconf':
@@ -209,6 +230,35 @@ switch ($action) {
         break;
 }
 
+function print_output($outputformat, $data) {
+    /*
+    function to print the output
+    switch depending on the selected $outputformat
+    */
+    switch ($outputformat) {
+        case 'json':
+            echo json_encode($data, JSON_PRETTY_PRINT);
+            break;
+        case 'json_color':
+            echo '<code class="json">';
+            echo json_encode($data, JSON_PRETTY_PRINT);
+            echo '</code>';
+            break;
+        case 'php_array':
+            print_r ($data);
+            break;
+        case 'php_var_dump':
+            var_dump ($data);
+            break;
+        case 'php_var_export':
+            var_export ($data);
+            break;
+        default:
+            echo json_encode($data, JSON_PRETTY_PRINT);
+            break;
+    }
+}
+
 /*
 create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
 */
@@ -216,11 +266,13 @@ if($theme === 'bootstrap') {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
 } else {
     $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
-}  
-
+}
+/*
+execute timings
+*/
 $timeafterlogin = $time_1 - $time_start;
 if($action!=''){
-    $result = count($data);
+    $objectscount = count($data);
 }
 
 $time_2 = microtime(true);
@@ -234,24 +286,6 @@ $timetotal = $time_end - $time_start;
 $loginperc = ($timeafterlogin/$timetotal)*100;
 $loadperc = (($timeafterload - $timeafterlogin)/$timetotal)*100;
 $remainperc = 100-$loginperc-$loadperc;
-
-/*
-construct the HTML5 progress bar which will present the timings in a graphical manner
-*/
-$progressbarcontent = '\
-total elapsed time: '.$timetotal.' seconds<br>\
-<div class="progress">\
-  <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="'.$loginperc.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$loginperc.'%;">\
-    login time: '.$timeafterlogin.'\
-  </div>\
-  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'.$loadperc.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$loadperc.'%;">\
-    load time: '.($timeafterload - $timeafterlogin).'\
-  </div>\
-  <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="'.$remainperc.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$remainperc.'%;">\
-    PHP\
-  </div>\
-</div>\
-';
 ?>
 <!DOCTYPE html>
 <html>
@@ -261,9 +295,9 @@ total elapsed time: '.$timetotal.' seconds<br>\
     <!-- Latest compiled and minified Bootstrap and Font-awesome CSS loaded from CDN -->
     <link rel="stylesheet" href="<?php echo $cssurl ?>">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
     <style>
     body {
-      min-height: 2000px;
       padding-top: 70px;
     }
     </style>
@@ -295,15 +329,19 @@ total elapsed time: '.$timetotal.' seconds<br>\
         </li>
         <li id="output-menu" class="dropdown">
           <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            Output format
+            Output
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" id="outputselection">
-            <li id="json"><a href="?outputformat=json">json</a></li>
+            <li class="dropdown-header">Select an output format</li>
+            <li id="json"><a href="?outputformat=json">json (default)</a></li>
             <li role="separator" class="divider"></li>
-            <li id="phparray"><a href="?outputformat=phparray">PHP print_r</a></li>
-            <li id="vardump"><a href="?outputformat=vardump">PHP var_dump</a></li>
-            <li id="varexport"><a href="?outputformat=varexport">PHP var_export</a></li>
+            <li id="php_array"><a href="?outputformat=php_array">PHP array</a></li>
+            <li id="php_var_dump"><a href="?outputformat=php_var_dump">PHP var_dump</a></li>
+            <li id="php_var_export"><a href="?outputformat=php_var_export">PHP var_export</a></li>
+            <li role="separator" class="divider"></li>
+            <li class="dropdown-header">Nice but slow with large collections</li>
+            <li id="json_color"><a href="?outputformat=json_color">json highlighted</a></li>
           </ul>
         </li>
         <li id="user-menu" class="dropdown">
@@ -323,7 +361,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
         </li>
         <li id="ap-menu" class="dropdown">
           <a id="ap-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            APs
+            Devices
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
@@ -356,7 +394,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
           <ul class="dropdown-menu">
             <li id="list_wlanconf"><a href="?action=list_wlanconf">wireless configuration</a></li>
             <li role="separator" class="divider"></li>
-            <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
+            <li id="list_settings"><a href="?action=list_settings">site settings</a></li>
             <li role="separator" class="divider"></li>
             <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
           </ul>
@@ -367,7 +405,7 @@ total elapsed time: '.$timetotal.' seconds<br>\
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
+            <li id="list_alarms"><a href="?action=list_alarms">list alerts</a></li>
             <li id="list_events"><a href="?action=list_events">list events</a></li>
           </ul>
         </li>
@@ -379,23 +417,25 @@ total elapsed time: '.$timetotal.' seconds<br>\
           </a>
           <ul class="dropdown-menu">
             <li class="dropdown-header">Select a theme</li>
-            <li id="bootstrap"><a href="?theme=bootstrap">default bootstrap</a></li>
-            <li id="cerulean"><a href="?theme=cerulean">cerulean</a></li>
-            <li id="cosmo"><a href="?theme=cosmo">cosmo</a></li>
-            <li id="cyborg"><a href="?theme=cyborg">cyborg</a></li>
-            <li id="darkly"><a href="?theme=darkly">darkly</a></li>
-            <li id="flatly"><a href="?theme=flatly">flatly</a></li>
-            <li id="journal"><a href="?theme=journal">journal</a></li>
-            <li id="lumen"><a href="?theme=lumen">lumen</a></li>
-            <li id="paper"><a href="?theme=paper">paper</a></li>
-            <li id="readable"><a href="?theme=readable">readable</a></li>
-            <li id="sandstone"><a href="?theme=sandstone">sandstone</a></li>
-            <li id="simplex"><a href="?theme=simplex">simplex</a></li>
-            <li id="slate"><a href="?theme=slate">slate</a></li>
-            <li id="spacelab"><a href="?theme=spacelab">spacelab</a></li>
-            <li id="superhero"><a href="?theme=superhero">superhero</a></li>
-            <li id="united"><a href="?theme=united">united</a></li>
-            <li id="yeti"><a href="?theme=yeti">yeti</a></li>
+            <li id="bootstrap"><a href="?theme=bootstrap">default Bootstrap</a></li>
+            <li id="cerulean"><a href="?theme=cerulean">Cerulean</a></li>
+            <li id="cosmo"><a href="?theme=cosmo">Cosmo</a></li>
+            <li id="cyborg"><a href="?theme=cyborg">Cyborg</a></li>
+            <li id="darkly"><a href="?theme=darkly">Darkly</a></li>
+            <li id="flatly"><a href="?theme=flatly">Flatly</a></li>
+            <li id="journal"><a href="?theme=journal">Journal</a></li>
+            <li id="lumen"><a href="?theme=lumen">Lumen</a></li>
+            <li id="paper"><a href="?theme=paper">Paper</a></li>
+            <li id="readable"><a href="?theme=readable">Readable</a></li>
+            <li id="sandstone"><a href="?theme=sandstone">Sandstone</a></li>
+            <li id="simplex"><a href="?theme=simplex">Simplex</a></li>
+            <li id="slate"><a href="?theme=slate">Slate</a></li>
+            <li id="spacelab"><a href="?theme=spacelab">Spacelab</a></li>
+            <li id="superhero"><a href="?theme=superhero">Superhero</a></li>
+            <li id="united"><a href="?theme=united">United</a></li>
+            <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
+            <li role="separator" class="divider"></li>
+            <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About</a></li>
           </ul>
         </li>
       </ul>
@@ -405,44 +445,84 @@ total elapsed time: '.$timetotal.' seconds<br>\
 <div class="container-fluid">
     <div id="alertPlaceholder"><?php echo $alertmessage ?></div>
     <div class="panel panel-default">
-        <div class="panel-heading">site id: <b><?php echo $siteid ?></b>, site name: <b><?php echo $sitename ?></b>, query: <b><?php echo $selection ?></b>, output: <b><?php echo $outputformat ?></b>, # of objects: <b><?php echo $result ?></b></div>
+        <div class="panel-heading">site id: <span class="label label-primary"><?php echo $siteid ?></span> site name: <span class="label label-primary"><?php echo $sitename ?></span> collection: <span class="label label-primary"><?php echo $selection ?></span> output: <span class="label label-primary"><?php echo $outputformat ?></span> # of objects: <span class="badge"><?php echo $objectscount ?></span></div>
         <div class="panel-body">
-            <span id = "progressbar"></span>
-            <pre><?php
-            /*
-            switch depending on the selected $outputformat
-            */
-            switch ($outputformat) {
-                case 'json':
-                    echo json_encode($data, JSON_PRETTY_PRINT);
-                    break;
-                case 'phparray':
-                    print_r ($data);
-                    break;
-                case 'vardump':
-                    var_dump ($data);
-                    break;
-                case 'varexport':
-                    var_export ($data);
-                    break;
-                default:
-                    echo json_encode($data, JSON_PRETTY_PRINT);
-                    break;
-            }
-            ?></pre>
+            <!-- present the timing results using an HTML5 progress bar -->
+            total elapsed time: <?php echo $timetotal ?> seconds<br>
+            <div class="progress">
+              <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loginperc ?>%;">
+                API login time: <?php echo $timeafterlogin ?>
+              </div>
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;">
+                API load time: <?php echo ($timeafterload - $timeafterlogin) ?>
+              </div>
+              <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remainperc ?>%;">
+                PHP time:
+              </div>
+            </div>
+            <pre><?php print_output($outputformat, $data) ?></pre>
         </div>
     </div>
 </div>
-<!-- Latest compiled and minified JavaScript versions -->
+<!-- Modal -->
+<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"></i> About</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">Controller:</div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">user</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo $controlleruser ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">url</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo $controllerurl ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">version detected</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo $_SESSION['detected_controller_version'] ?></span></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">PHP version</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo (phpversion()) ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">cURL version</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo $curl_version ?></span></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">OS</div>
+          <div class="col-md-5"><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-6 col-md-offset-2"><a href="https://github.com/malle-pietje/Unifi-API-browser" target="_blank">Unifi API browser on Github</a></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Latest compiled and minified JavaScript versions, loaded from CDN's -->
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js"></script>
 <script>
     /*
-    push the progress bar constructed earlier to the div at the top of the widget
+    initialise the Highlighting.js library
     */
-    var progressbarcontent = '<?php echo $progressbarcontent?>';
-    $('#progressbar').html(progressbarcontent);
-    
+    hljs.initHighlightingOnLoad();
+</script>
+<script>
     /*
     highlight selected options in the pull down menus
     for $action, $siteid, $theme and $outputformat:
