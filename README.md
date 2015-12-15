@@ -80,4 +80,5 @@ The use of this tool is **not secured in any way**! Make sure to prevent unautho
 Here's a screenshot of the tool in action showing the site's health metrics using the default Bootstrap theme:
 ![alt tag](https://cloud.githubusercontent.com/assets/12016131/11180432/0b24f5c0-8c5b-11e5-939e-6bfeb4f98cfb.JPG "Sample screenshot")
 and here with one of the Bootswatch themes selected:
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/11180362/80deccba-8c5a-11e5-9c83-9dacc572bc52.JPG "Sample screenshot with theme selected")
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/11180362/80deccba-8c5a-11e5-9c83-9dacc572bc52.JPG "Sample screenshot with theme selected")this is the "About" modal:
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/11809230/9a9de5a0-a325-11e5-89a4-5d4212f33f5f.JPG "Screenshot of the "About" modal")
