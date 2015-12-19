@@ -103,23 +103,27 @@ if($siteid === '') {
 
 /*
 load the unifi api connection class as well as the settings files
-and log in to the controller to load the sites data (if not already stored in $_SESSION)
-- if an error occurs with the login process an alert is displayed on the page
+and log in to the controller
 - if the config.php file is unreadable or does not exist, an alert is displayed on the page
+- if an error occurs with the login process an alert is displayed on the page
 */
 require('phpapi/class.unifi.php');
 if(!is_readable('config.php')) {
     $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
 }
+
 include('config.php');
 
-if(!isset($_GET['sites'])) {
-    $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-    $loginresults = $unifidata->login();
-    if($loginresults === 400) {
-        error_log($sites);
-        $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
-    }
+$unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+$loginresults = $unifidata->login();
+if($loginresults === 400) {
+    $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
+}
+
+/*
+get the list of sites managed by the controller (if not already stored in $_SESSION)
+*/
+if(!isset($_SESSION['sites'])) {
     $sites = $unifidata->list_sites();
     $_SESSION['sites'] = $sites;
 } else {
@@ -127,16 +131,9 @@ $sites = $_SESSION['sites'];
 }
 
 /*
-get the version of the controller
+get the version of the controller (if not already stored in $_SESSION)
 */
 if(!isset($_SESSION['detected_controller_version'])) {
-    error_log('we need to find the version');
-    $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-    $loginresults = $unifidata->login();
-    if($loginresults === 400) {
-        error_log($sites);
-        $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
-    }
     $site_info = $unifidata->stat_sysinfo();
     $_SESSION['detected_controller_version'] = $site_info[0]->version;
 }
@@ -182,8 +179,8 @@ switch ($action) {
         $selection = 'daily site stats';
         $data = $unifidata->stat_daily_site();
         break;
-    case 'list_aps':
-        $selection = 'list access points';
+    case 'list_devices':
+        $selection = 'list devices';
         $data = $unifidata->list_aps();
         break;
     case 'list_wlan_groups':
@@ -365,7 +362,7 @@ $remainperc = 100-$loginperc-$loadperc;
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li id="list_aps"><a href="?action=list_aps">list access points</a></li>
+            <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
           </ul>
@@ -445,19 +442,30 @@ $remainperc = 100-$loginperc-$loadperc;
 <div class="container-fluid">
     <div id="alertPlaceholder"><?php echo $alertmessage ?></div>
     <div class="panel panel-default">
-        <div class="panel-heading">site id: <span class="label label-primary"><?php echo $siteid ?></span> site name: <span class="label label-primary"><?php echo $sitename ?></span> collection: <span class="label label-primary"><?php echo $selection ?></span> output: <span class="label label-primary"><?php echo $outputformat ?></span> # of objects: <span class="badge"><?php echo $objectscount ?></span></div>
+        <div class="panel-heading">
+            <?php if($siteid) { ?>
+                site id: <span class="label label-primary"><?php echo $siteid ?></span>
+                site name: <span class="label label-primary"><?php echo $sitename ?></span>
+            <?php } ?>
+            <?php if($selection) { ?>
+                collection: <span class="label label-primary"><?php echo $selection ?></span>
+            <?php } ?>
+            output: <span class="label label-primary"><?php echo $outputformat ?></span>
+            <?php if($objectscount) { ?>
+                # of objects: <span class="badge"><?php echo $objectscount ?></span></div>
+            <?php } ?>
         <div class="panel-body">
             <!-- present the timing results using an HTML5 progress bar -->
             total elapsed time: <?php echo $timetotal ?> seconds<br>
             <div class="progress">
-              <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loginperc ?>%;">
-                API login time: <?php echo $timeafterlogin ?>
+              <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loginperc ?>%;" data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo $timeafterlogin ?> seconds">
+                API login time
               </div>
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;">
-                API load time: <?php echo ($timeafterload - $timeafterlogin) ?>
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;"  data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo ($timeafterload - $timeafterlogin) ?> seconds">
+                API load time
               </div>
               <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remainperc ?>%;">
-                PHP time:
+                PHP time
               </div>
             </div>
             <pre><?php print_output($outputformat, $data) ?></pre>
@@ -531,6 +539,10 @@ $remainperc = 100-$loginperc-$loadperc;
     $('#<?php echo $siteid ?>').addClass('active');
     $('#<?php echo $outputformat ?>').addClass('active');
     $('#<?php echo $theme ?>').addClass('active');
+    
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
 </script>
 </body>
 </html>
