@@ -26,6 +26,6 @@ THE SOFTWARE.
 $controlleruser     = ''; // the user name for access to the Unifi Controller
 $controllerpassword = ''; // the password for access to the Unifi Controller
 $controllerurl      = ''; // full url to the Unifi Controller, eg. 'https://22.22.11.11:8443'
-$controllerversion  = ''; // the version of the Controller software, eg. '4.6.6', this value is not yet used
+$controllerversion  = ''; // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
 
 ?>
