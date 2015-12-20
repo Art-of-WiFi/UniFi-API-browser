@@ -24,32 +24,41 @@ THE SOFTWARE.
 */
 
 /*
-in order to use PHP $_SESSION for temporary storage of variables session_start() is required
+to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
 */
 session_start();
+
+/*
+starting timing of the session here
+*/
 $time_start = microtime(true);
 
 /*
-assign variables required later on  together with their default values
+assign variables required later on together with their default values
 */
-$action = '';
-$siteid = '';
-$sitename = '';
-$selection = '';
-$outputformat = 'json';
-$theme = 'bootstrap';
-$data = '';
-$objectscount = '';
-$alertmessage = '';
+$action         = '';
+$siteid         = '';
+$sitename       = '';
+$selection      = '';
+$outputformat   = 'json';
+$theme          = 'bootstrap';
+$data           = '';
+$objectscount   = '';
+$alertmessage   = '';
 
 /*
-collect data for info modal
+collect cURL version details for the info modal
 */
-$curl_info = curl_version();
-$curl_version = $curl_info['version'];
+$curl_info      = curl_version();
+$curl_version   = $curl_info['version'];
 
 /*
-process the GET variables
+process the GET variables and store them in the $_SESSION array,
+if a GET variable is not set, get the value from $_SESSION (if available)
+- action
+- outputformat
+- theme
+- siteid
 */
 if(isset($_GET['action'])){
     $action = $_GET['action'];
@@ -109,7 +118,8 @@ and log in to the controller
 */
 require('phpapi/class.unifi.php');
 if(!is_readable('config.php')) {
-    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
+    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
+                    . '<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
 }
 
 include('config.php');
@@ -117,7 +127,8 @@ include('config.php');
 $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
 $loginresults = $unifidata->login();
 if($loginresults === 400) {
-    $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
+    $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
+                    . '<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
 }
 
 /*
@@ -139,94 +150,129 @@ if(!isset($_SESSION['detected_controller_version'])) {
 }
 
 /*
-starting timing of session here
+execute timing of controller login
 */
 $time_1 = microtime(true);
+$timeafterlogin = $time_1 - $time_start;
 
 /*
-select the required call to the Unifi Controller API based on the action selected
+select the required call to the Unifi Controller API based on the selected action
 */
 switch ($action) {
     case 'list_clients':
-        $selection = 'list online clients';
-        $data = $unifidata->list_clients();
+        $selection  = 'list online clients';
+        $data       = $unifidata->list_clients();
         break;
     case 'stat_allusers':
-        $selection = 'stat all users';
-        $data = $unifidata->stat_allusers();
+        $selection  = 'stat all users';
+        $data       = $unifidata->stat_allusers();
         break;
     case 'stat_auths':
-        $selection = 'stat active authorisations';
-        $data = $unifidata->stat_auths();
+        $selection  = 'stat active authorisations';
+        $data       = $unifidata->stat_auths();
         break;
     case 'list_guests':
-        $selection = 'list guests';
-        $data = $unifidata->list_guests();
+        $selection  = 'list guests';
+        $data       = $unifidata->list_guests();
         break;
     case 'stat_hourly_site':
-        $selection = 'hourly site stats';
-        $data = $unifidata->stat_hourly_site();
+        $selection  = 'hourly site stats';
+        $data       = $unifidata->stat_hourly_site();
         break;
     case 'stat_sysinfo':
-        $selection = 'sysinfo';
-        $data = $unifidata->stat_sysinfo();
+        $selection  = 'sysinfo';
+        $data       = $unifidata->stat_sysinfo();
         break;
     case 'stat_hourly_aps':
-        $selection = 'hourly ap stats';
-        $data = $unifidata->stat_hourly_aps();
+        $selection  = 'hourly ap stats';
+        $data       = $unifidata->stat_hourly_aps();
         break;
     case 'stat_daily_site':
-        $selection = 'daily site stats';
-        $data = $unifidata->stat_daily_site();
+        $selection  = 'daily site stats';
+        $data       = $unifidata->stat_daily_site();
         break;
     case 'list_devices':
-        $selection = 'list devices';
-        $data = $unifidata->list_aps();
+        $selection  = 'list devices';
+        $data       = $unifidata->list_aps();
         break;
     case 'list_wlan_groups':
-        $selection = 'list wlan groups';
-        $data = $unifidata->list_wlan_groups();
+        $selection  = 'list wlan groups';
+        $data       = $unifidata->list_wlan_groups();
         break;
     case 'stat_sessions':
-        $selection = 'stat sessions';
-        $data = $unifidata->stat_sessions();
+        $selection  = 'stat sessions';
+        $data       = $unifidata->stat_sessions();
         break;
     case 'list_users':
-        $selection = 'list users';
-        $data = $unifidata->list_users();
+        $selection  = 'list users';
+        $data       = $unifidata->list_users();
         break;
     case 'list_rogueaps':
-        $selection = 'list rogue access points';
-        $data = $unifidata->list_rogueaps();
+        $selection  = 'list rogue access points';
+        $data       = $unifidata->list_rogueaps();
         break;
     case 'list_events':
-        $selection = 'list events';
-        $data = $unifidata->list_events();
+        $selection  = 'list events';
+        $data       = $unifidata->list_events();
         break;
     case 'list_alarms':
-        $selection = 'list alerts';
-        $data = $unifidata->list_alarms();
+        $selection  = 'list alerts';
+        $data       = $unifidata->list_alarms();
         break;
     case 'list_wlanconf':
-        $selection = 'wlan config';
-        $data = $unifidata->list_wlanconf();
+        $selection  = 'wlan config';
+        $data       = $unifidata->list_wlanconf();
         break;
     case 'list_health':
-        $selection = 'site health metrics';
-        $data = $unifidata->list_health();
+        $selection  = 'site health metrics';
+        $data       = $unifidata->list_health();
         break;
     case 'list_settings':
-        $selection = 'list site settings';
-        $data = $unifidata->list_settings();
+        $selection  = 'list site settings';
+        $data       = $unifidata->list_settings();
         break;
     case 'list_sites':
-        $selection = 'details of available sites';
-        $data = $sites;
+        $selection  = 'details of available sites';
+        $data       = $sites;
         break;
     default:
         break;
 }
 
+/*
+count the number of objects collected from the controller
+*/
+if($action!=''){
+    $objectscount = count($data);
+}
+
+/*
+create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
+*/
+if($theme === 'bootstrap') {
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
+} else {
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
+}
+
+/*
+execute timing of data collection from controller
+*/
+$time_2         = microtime(true);
+$timeafterload  = $time_2 - $time_start;
+
+/*
+calculate all the timings/percentages
+*/
+$time_end   = microtime(true);
+$timetotal  = $time_end - $time_start;
+$loginperc  = ($timeafterlogin/$timetotal)*100;
+$loadperc   = (($timeafterload - $timeafterlogin)/$timetotal)*100;
+$remainperc = 100-$loginperc-$loadperc;
+
+/*
+shared functions
+*/
 function print_output($outputformat, $data) {
     /*
     function to print the output
@@ -255,34 +301,6 @@ function print_output($outputformat, $data) {
             break;
     }
 }
-
-/*
-create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
-*/
-if($theme === 'bootstrap') {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
-} else {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
-}
-/*
-execute timings
-*/
-$timeafterlogin = $time_1 - $time_start;
-if($action!=''){
-    $objectscount = count($data);
-}
-
-$time_2 = microtime(true);
-$timeafterload = $time_2 - $time_start;
-
-/*
-calculate all the timings/percentages
-*/
-$time_end = microtime(true);
-$timetotal = $time_end - $time_start;
-$loginperc = ($timeafterlogin/$timetotal)*100;
-$loadperc = (($timeafterload - $timeafterlogin)/$timetotal)*100;
-$remainperc = 100-$loginperc-$loadperc;
 ?>
 <!DOCTYPE html>
 <html>
@@ -458,14 +476,17 @@ $remainperc = 100-$loginperc-$loadperc;
             <!-- present the timing results using an HTML5 progress bar -->
             total elapsed time: <?php echo $timetotal ?> seconds<br>
             <div class="progress">
-              <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loginperc ?>%;" data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo $timeafterlogin ?> seconds">
+              <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>" aria-valuemin="0" aria-valuemax="100"
+              style="width: <?php echo $loginperc ?>%;" data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo $timeafterlogin ?> seconds">
                 API login time
               </div>
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;"  data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo ($timeafterload - $timeafterlogin) ?> seconds">
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>" aria-valuemin="0" aria-valuemax="100"
+              style="width: <?php echo $loadperc ?>%;" data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo ($timeafterload - $timeafterlogin) ?> seconds">
                 API load time
               </div>
-              <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remainperc ?>%;">
-                PHP time
+              <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>" aria-valuemin="0" aria-valuemax="100"
+              style="width: <?php echo $remainperc ?>%;" data-toggle="tooltip" data-placement="bottom" data-original-title="PHP overhead: <?php echo $remainperc ?> seconds">
+                PHP overhead
               </div>
             </div>
             <pre><?php print_output($outputformat, $data) ?></pre>
@@ -539,7 +560,7 @@ $remainperc = 100-$loginperc-$loadperc;
     $('#<?php echo $siteid ?>').addClass('active');
     $('#<?php echo $outputformat ?>').addClass('active');
     $('#<?php echo $theme ?>').addClass('active');
-    
+
     $(function () {
       $('[data-toggle="tooltip"]').tooltip()
     })

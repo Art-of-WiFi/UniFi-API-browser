@@ -1,7 +1,7 @@
 ## Unifi API browser
-This tool is for browsing data that is accessible through Ubiquiti's Unifi Controller API, and is written in PHP, javascript and the  [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
+This tool is for browsing data that is accessible through Ubiquiti's Unifi Controller API, and is written in PHP, javascript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections are supported (yet), see the list below of currently supported data collections
-- this tool currently only supports versions 4.x.x of the Unifi Controller software
+- currently only supports versions 4.x.x of the Unifi Controller software
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
 
 If you'd like to buy me a beer, please use the donate button below. All donations go to the project maintainer (primarily for the procurement of liquid refreshments) :satisfied:
@@ -10,15 +10,15 @@ If you'd like to buy me a beer, please use the donate button below. All donation
 
 ### Features
 The Unifi API browser tool offers the following features:
-- browse through data collections exposed by the Unifi Controller API in an easy manner
+- browse data collections exposed by the Unifi Controller API in an easy manner
 - switch between sites managed by the connected controller
-- switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export` and 'json highlighted')
+- switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export` and `json highlighted` have been implemented)
 - switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the Unifi Controller
 - very easy setup with minimal dependencies
 - timing details of API queries can help "benchmark" your controller
-- useful tool when developing applications making use of the API
-- the API exposes more data than is visible through the Controller's web interface which can be useful for troubleshooting purposes
+- useful tool when developing applications that make use of the API
+- the API exposes more data than is visible through the Controller's web interface which makes the tool useful for troubleshooting purposes
 
 ### Data collections currently implemented
 - Clients/users
@@ -28,8 +28,8 @@ The Unifi API browser tool offers the following features:
   - stat all users
   - stat authorisations
   - stat sessions
-- Access points
-  - list access points
+- Devices
+  - list devices (access points, USGs and switches)
   - list wlan groups
   - list rogue access points
 - Stats
@@ -46,7 +46,7 @@ The Unifi API browser tool offers the following features:
   - list alarms
 
 ### Credits
-The phpapi that comes bundled with this tool is based on the work done by the following developers:
+The PHP API client that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
 
@@ -55,11 +55,11 @@ Other included libraries:
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
-- network access from this web server to the server and port on which the Unifi controller is running
-- clients using this tool should have internet access to be able to load the required css files because they are loaded from CDN's.
+- network access from this web server to the server (and port) where the Unifi controller is running
+- clients using this tool should have internet access to be able to load the required css files because they are loaded from CDNs.
 
 ### Installation
-Installation of this tool is quite straightforward. The easiest way to do this is by using git clone which also allows for easy updates:
+Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
 - open up a terminal window on your server and cd to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```bash
 git clone https://github.com/malle-pietje/Unifi-API-browser.git
@@ -67,6 +67,9 @@ git clone https://github.com/malle-pietje/Unifi-API-browser.git
 - when git is done cloning, follow the configuration steps below to configure the settings for access to your Unifi Controller's API
 
 Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
+
+### Updates
+When you have installed the tool using the `git clone` command you can install updates by going into the directory where the tools has been installed, and by running the `git pull` command from there.
 
 ### Configuration
 - credentials for access to the Unifi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the Unifi API browser tool
