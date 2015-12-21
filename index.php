@@ -142,11 +142,12 @@ $sites = $_SESSION['sites'];
 }
 
 /*
-get the version of the controller (if not already stored in $_SESSION)
+get the version of the controller (if not already stored in $_SESSION or when empty)
 */
-if(!isset($_SESSION['detected_controller_version'])) {
+if(!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
     $site_info = $unifidata->stat_sysinfo();
-    $_SESSION['detected_controller_version'] = $site_info[0]->version;
+    $detected_controller_version = $site_info[0]->version;
+    $_SESSION['detected_controller_version'] = $detected_controller_version;
 }
 
 /*
@@ -515,7 +516,7 @@ function print_output($outputformat, $data) {
         </div>
         <div class="row">
           <div class="col-sm-3 col-sm-offset-2">version detected</div>
-          <div class="col-sm-5"><span class="label label-primary"><?php echo $_SESSION['detected_controller_version'] ?></span></div>
+          <div class="col-sm-5"><span class="label label-primary"><?php echo $detected_controller_version ?></span></div>
         </div>
         <hr>
         <div class="row">
