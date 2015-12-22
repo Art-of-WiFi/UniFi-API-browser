@@ -138,7 +138,7 @@ if(!isset($_SESSION['sites'])) {
     $sites = $unifidata->list_sites();
     $_SESSION['sites'] = $sites;
 } else {
-$sites = $_SESSION['sites'];
+    $sites = $_SESSION['sites'];
 }
 
 /*
@@ -148,6 +148,8 @@ if(!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_contr
     $site_info = $unifidata->stat_sysinfo();
     $detected_controller_version = $site_info[0]->version;
     $_SESSION['detected_controller_version'] = $detected_controller_version;
+} else {
+    $detected_controller_version = $_SESSION['detected_controller_version'];
 }
 
 /*
