@@ -139,8 +139,10 @@ load the Unifi API connection class and log in to the controller
 - if an error occurs during the login process, an alert is displayed on the page
 */
 require('phpapi/class.unifi.php');
-$unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-$loginresults = $unifidata->login();
+
+$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+$loginresults   = $unifidata->login();
+
 if($loginresults === 400) {
     $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
                     . '<br>This is probably caused by a Unifi controller login failure, please check your credentials in config.php</div>';
@@ -150,7 +152,7 @@ if($loginresults === 400) {
 get the list of sites managed by the controller (if not already stored in $_SESSION)
 */
 if(!isset($_SESSION['sites'])) {
-    $sites = $unifidata->list_sites();
+    $sites  = $unifidata->list_sites();
     $_SESSION['sites'] = $sites;
 } else {
     $sites = $_SESSION['sites'];
@@ -160,9 +162,9 @@ if(!isset($_SESSION['sites'])) {
 get the version of the controller (if not already stored in $_SESSION or when empty)
 */
 if(!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
-    $site_info = $unifidata->stat_sysinfo();
-    $detected_controller_version = $site_info[0]->version;
-    $_SESSION['detected_controller_version'] = $detected_controller_version;
+    $site_info                                  = $unifidata->stat_sysinfo();
+    $detected_controller_version                = $site_info[0]->version;
+    $_SESSION['detected_controller_version']    = $detected_controller_version;
 } else {
     $detected_controller_version = $_SESSION['detected_controller_version'];
 }
@@ -170,7 +172,7 @@ if(!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_contr
 /*
 execute timing of controller login
 */
-$time_1 = microtime(true);
+$time_1         = microtime(true);
 $timeafterlogin = $time_1 - $time_start;
 
 /*
@@ -319,6 +321,11 @@ function print_output($outputformat, $data) {
             break;
     }
 }
+
+/*
+log off from the Unifi controller API
+*/
+$logoutresults = $unifidata->logout();
 ?>
 <!DOCTYPE html>
 <html>
