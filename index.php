@@ -34,7 +34,7 @@ starting timing of the session here
 $time_start = microtime(true);
 
 /*
-assign variables required later on together with their default values
+assign variables which are required later on together with their default values
 */
 $action         = '';
 $siteid         = '';
@@ -45,6 +45,30 @@ $theme          = 'bootstrap';
 $data           = '';
 $objectscount   = '';
 $alertmessage   = '';
+$cookietimeout  = '1800';
+
+/*
+load the settings file
+- if the config.php file is unreadable or does not exist, an alert is displayed on the page
+*/
+if(!is_readable('config.php')) {
+    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
+                    . '<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
+}
+
+include('config.php');
+
+/*
+determine whether we have reached the cookie timeout, if so, refresh the PHP session
+*/
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $cookietimeout)) {
+    /*
+    last activity was longer than "$cookietimeout" seconds ago
+    */
+    session_unset();
+    session_destroy();
+}
+$_SESSION['last_activity'] = time(); // update last activity time stamp
 
 /*
 collect cURL version details for the info modal
@@ -111,19 +135,10 @@ if($siteid === '') {
 }
 
 /*
-load the unifi api connection class as well as the settings files
-and log in to the controller
-- if the config.php file is unreadable or does not exist, an alert is displayed on the page
-- if an error occurs with the login process an alert is displayed on the page
+load the Unifi API connection class and log in to the controller
+- if an error occurs during the login process, an alert is displayed on the page
 */
 require('phpapi/class.unifi.php');
-if(!is_readable('config.php')) {
-    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
-                    . '<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify the contents as required.</div>';
-}
-
-include('config.php');
-
 $unifidata = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
 $loginresults = $unifidata->login();
 if($loginresults === 400) {
