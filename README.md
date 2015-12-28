@@ -1,5 +1,5 @@
 ## Unifi API browser
-This tool is for browsing data that is accessible through Ubiquiti's Unifi Controller API, and is written in PHP, javascript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
+This tool is for browsing data that is exposed through Ubiquiti's Unifi Controller API, written in PHP, javascript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections are supported (yet), see the list below of currently supported data collections
 - currently only supports versions 4.x.x of the Unifi Controller software
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
@@ -41,6 +41,10 @@ The Unifi API browser tool offers the following features:
 - Configuration
   - wlan config
   - list site settings
+  - list VoIP extension
+  - list port configurations
+  - list port forwarding rules
+  - dynamic DNS configuration
 - Messages
   - list events
   - list alarms
@@ -49,9 +53,14 @@ The Unifi API browser tool offers the following features:
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
+and the API as published by Ubiquiti:
+- https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
 Other included libraries:
-- highlight.js: https://highlightjs.org/
+- Bootstrap (version 3.3.5) http://getbootstrap.com/
+- Font-awesome (version 4.4.0) https://fortawesome.github.io/Font-Awesome/
+- jQuery (version 2.1.4) https://jquery.com/
+- Highlight.js (version 9.0.0) https://highlightjs.org/
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
