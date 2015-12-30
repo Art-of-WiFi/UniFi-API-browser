@@ -37,10 +37,11 @@ The Unifi API browser tool offers the following features:
   - hourly access point stats
   - daily site stats
   - health metrics
-  - sysinfo
 - Configuration
-  - wlan config
+  - list sites on this controller
   - list site settings
+  - sysinfo
+  - wlan config
   - list VoIP extension
   - list port configurations
   - list port forwarding rules
