@@ -7,7 +7,9 @@ Unifi PHP API
     fbagnol: https://github.com/fbagnol/class.unifi.php
   and the api as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
-    
+
+NOTE: this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
+      trying to use it with a pre-4.x version controller.
 ------------------------------------------------------------------------------------
 
 The MIT License (MIT)
@@ -44,7 +46,7 @@ class unifiapi {
    private $cookies     = "/tmp/unify";
    public $debug        = false;
 
-   function __construct($user = "",$password = "",$baseurl = "",$site = "",$controller = "") {
+   function __construct($user = "", $password = "", $baseurl = "", $site = "", $controller = "") {
       if (!empty($user)) $this->user                = $user;
       if (!empty($password)) $this->password        = $password;
       if (!empty($baseurl)) $this->baseurl          = $baseurl;
@@ -67,23 +69,22 @@ class unifiapi {
    Login to Unifi Controller
    */
    public function login() {
-      $this->cookies    = "";
-      $ch               = $this->get_curl_obj();
+      $this->cookies  = "";
+      $ch             = $this->get_curl_obj();
+      
       curl_setopt($ch, CURLOPT_HEADER, 1);
-      if ($this->controller >= 4) {
-         //Controller 4
-         curl_setopt($ch, CURLOPT_REFERER, $this->baseurl."/login");
-         curl_setopt($ch, CURLOPT_URL, $this->baseurl."/api/login");
-         curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode(array("username" => $this->user, "password" => $this->password)).":");
-      } else {
-         //Controller 3
-         curl_setopt($ch, CURLOPT_URL, $this->baseurl."/login");
-         curl_setopt($ch, CURLOPT_POSTFIELDS,"login=login&username=".$this->user."&password=".$this->password);
-      }
+      curl_setopt($ch, CURLOPT_REFERER, $this->baseurl."/login");
+      curl_setopt($ch, CURLOPT_URL, $this->baseurl."/api/login");
+      curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode(array("username" => $this->user, "password" => $this->password)).":");
+      
       if ($this->debug === true) {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
       }
-      $content=curl_exec($ch);
+      
+      if(($content = curl_exec($ch)) === false) {
+         error_log('curl error: ' . curl_error($ch));
+      } 
+      
       if ($this->debug === true) {
          print "<pre>";
          print "\n\n-----LOGIN-------------------\n\n";
@@ -93,12 +94,11 @@ class unifiapi {
          print "\n\n-----------------------------\n\n";
          print "</pre>";
       }
+      
       $header_size  = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
       $body         = trim(substr($content, $header_size));
-      $code         = curl_getinfo($ch,CURLINFO_HTTP_CODE);
-      if (curl_exec($ch) === false) {
-         error_log('curl error: ' . curl_error($ch));
-      }
+      $code         = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      
       curl_close ($ch);
       preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
       if (isset($results[1])) {
@@ -123,10 +123,10 @@ class unifiapi {
    */
    public function logout() {
       if (!$this->is_loggedin) return false;
-      $return               = false;
-      $content              = $this->exec_curl($this->baseurl."/logout");
-      $this->is_loggedin    = false;
-      $this->cookies        = "";
+      $return             = false;
+      $content            = $this->exec_curl($this->baseurl."/logout");
+      $this->is_loggedin  = false;
+      $this->cookies      = "";
       return $return;
       }
 
@@ -993,14 +993,19 @@ class unifiapi {
    }
 
    private function exec_curl($url, $data = "") {
-      $ch=$this->get_curl_obj();
+      $ch = $this->get_curl_obj();
       curl_setopt($ch, CURLOPT_URL, $url);
+      
       if (trim($data) != "") {
-         curl_setopt($ch, CURLOPT_POSTFIELDS,$data);
+         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       } else {
          curl_setopt($ch, CURLOPT_POST, FALSE);
       }
-      $content = curl_exec($ch);
+      
+      if(($content = curl_exec($ch)) === false) {
+         error_log('curl error: ' . curl_error($ch));
+      }
+      
       if ($this->debug === true) {
          print "<pre>";
          print "\n\n-----cURL INFO---------------\n\n";
@@ -1013,9 +1018,6 @@ class unifiapi {
          print "\n\n-----------------------------\n\n";
          print "</pre>";
       }
-      if (curl_exec($ch) === false) {
-         error_log('curl error: ' . curl_error($ch));
-      }   
       curl_close ($ch);
       return $content;
    }
@@ -1025,10 +1027,12 @@ class unifiapi {
       curl_setopt($ch, CURLOPT_POST, TRUE);
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
       curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-      curl_setopt($ch , CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+      
       if ($this->debug === true) {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
       }
+      
       if ($this->cookies != "") {
          curl_setopt($ch, CURLOPT_COOKIE,  $this->cookies);
       }
