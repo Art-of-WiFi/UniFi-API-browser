@@ -165,13 +165,18 @@ if (!isset($_SESSION['sites']) || $_SESSION['sites'] === '') {
 
 /*
 get the version of the controller (if not already stored in $_SESSION or when empty)
+only get the version once a site has been selected
 */
-if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
-    $site_info = $unifidata->stat_sysinfo();
-    $detected_controller_version = $site_info[0]->version;
-    $_SESSION['detected_controller_version'] = $detected_controller_version;
+if($siteid != '') {
+    if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
+        $site_info = $unifidata->stat_sysinfo();
+        $detected_controller_version = $site_info[0]->version;
+        $_SESSION['detected_controller_version'] = $detected_controller_version;
+    } else {
+        $detected_controller_version = $_SESSION['detected_controller_version'];
+    }
 } else {
-    $detected_controller_version = $_SESSION['detected_controller_version'];
+    $detected_controller_version = 'undetected';
 }
 
 /*
@@ -448,8 +453,6 @@ $logoutresults = $unifidata->logout();
               <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
               <li role="separator" class="divider"></li>
               <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
-              <li role="separator" class="divider"></li>
-              <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
             </ul>
           </li>
           <li id="config-menu" class="dropdown">
@@ -459,6 +462,7 @@ $logoutresults = $unifidata->logout();
             </a>
             <ul class="dropdown-menu">
               <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
+              <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
               <li role="separator" class="divider"></li>
               <li id="list_settings"><a href="?action=list_settings">site settings</a></li>
               <li role="separator" class="divider"></li>
