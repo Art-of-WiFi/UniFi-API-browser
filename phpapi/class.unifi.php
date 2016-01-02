@@ -37,13 +37,16 @@ THE SOFTWARE.
 */
 class unifiapi {
 
+   /*
+   do we actually need this section?
    public $user         = "";
    public $password     = "";
    public $site         = "";
    public $baseurl      = "https://127.0.0.1:8443";
    public $controller   = "4.8.6";
+   */
    public $is_loggedin  = false;
-   private $cookies     = "/tmp/unify";
+   private $cookies     = "/tmp/unify_browser";
    public $debug        = false;
 
    function __construct($user = "", $password = "", $baseurl = "", $site = "", $controller = "") {
@@ -52,11 +55,6 @@ class unifiapi {
       if (!empty($baseurl)) $this->baseurl          = $baseurl;
       if (!empty($site)) $this->site                = $site;
       if (!empty($controller)) $this->controller    = $controller;
-      if (strpos($controller,".")) {
-         $con_ver       = explode(".",$controller);
-         $controller    = $con_ver[0];
-      }
-      $this->controller = $controller;
    }
 
    function __destruct() {
@@ -71,20 +69,20 @@ class unifiapi {
    public function login() {
       $this->cookies  = "";
       $ch             = $this->get_curl_obj();
-      
+
       curl_setopt($ch, CURLOPT_HEADER, 1);
       curl_setopt($ch, CURLOPT_REFERER, $this->baseurl."/login");
       curl_setopt($ch, CURLOPT_URL, $this->baseurl."/api/login");
-      curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode(array("username" => $this->user, "password" => $this->password)).":");
-      
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("username" => $this->user, "password" => $this->password)));
+
       if ($this->debug === true) {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
       }
-      
+
       if(($content = curl_exec($ch)) === false) {
          error_log('curl error: ' . curl_error($ch));
-      } 
-      
+      }
+
       if ($this->debug === true) {
          print "<pre>";
          print "\n\n-----LOGIN-------------------\n\n";
@@ -94,11 +92,11 @@ class unifiapi {
          print "\n\n-----------------------------\n\n";
          print "</pre>";
       }
-      
+
       $header_size  = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
       $body         = trim(substr($content, $header_size));
       $code         = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-      
+
       curl_close ($ch);
       preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
       if (isset($results[1])) {
@@ -123,12 +121,11 @@ class unifiapi {
    */
    public function logout() {
       if (!$this->is_loggedin) return false;
-      $return             = false;
       $content            = $this->exec_curl($this->baseurl."/logout");
       $this->is_loggedin  = false;
       $this->cookies      = "";
-      return $return;
-      }
+      return true;
+   }
 
    /*
    Authorize a MAC address
@@ -360,7 +357,7 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    get details of all clients ever connected to the site
    json parameters {type: "all", conn: "all", within: "24"}
@@ -389,7 +386,7 @@ class unifiapi {
 
    /*
    list guests
-   returns a array of guest objects
+   returns an array of guest objects
    */
    public function list_guests() {
       if (!$this->is_loggedin) return false;
@@ -411,7 +408,7 @@ class unifiapi {
 
    /*
    list clients
-   returns a array of client objects
+   returns an array of client objects
    */
    public function list_clients() {
       if (!$this->is_loggedin) return false;
@@ -433,7 +430,7 @@ class unifiapi {
 
    /*
    list health metrics
-   returns a array of health metric objects
+   returns an array of health metric objects
    */
    public function list_health() {
       if (!$this->is_loggedin) return false;
@@ -455,7 +452,7 @@ class unifiapi {
 
    /*
    list users
-   returns a array of known user objects
+   returns an array of known user objects
    */
    public function list_users() {
       if (!$this->is_loggedin) return false;
@@ -477,7 +474,7 @@ class unifiapi {
 
    /*
    list access points
-   returns a array of known access point objects
+   returns an array of known access point objects
    */
    public function list_aps() {
       if (!$this->is_loggedin) return false;
@@ -499,7 +496,7 @@ class unifiapi {
 
    /*
    list rogue access points
-   returns a array of known roque access point objects
+   returns an array of known roque access point objects
    json parameter <within> {within: "<hoursback eg 24>"} is optional
    */
    public function list_rogueaps() {
@@ -540,10 +537,10 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    list wlan_groups
-   returns a array of known wlan_groups
+   returns an array of known wlan_groups
    */
    public function list_wlan_groups() {
       if (!$this->is_loggedin) return false;
@@ -561,10 +558,10 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    stat sysinfo
-   returns a array of known sysinfo data
+   returns an array of known sysinfo data
    */
    public function stat_sysinfo() {
       if (!$this->is_loggedin) return false;
@@ -582,10 +579,115 @@ class unifiapi {
       }
       return $return;
    }
-   
+
+   /*
+   list self
+   returns an array of information about the logged in user
+   */
+   public function list_self() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/self");
+      $content_decoded  = json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $selfinfo) {
+                  $return[]= $selfinfo;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   list networkconf
+   returns an array of network configuration data
+   */
+   public function list_networkconf() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/networkconf");
+      $content_decoded  = json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $networkconf) {
+                  $return[]= $networkconf;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   stat vouchers
+   returns an array of hotspot vouchers
+   */
+   public function stat_voucher() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/voucher");
+      $content_decoded  = json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $voucher) {
+                  $return[]= $voucher;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   stat payment
+   returns an array of hotspot payments
+   */
+   public function stat_payment() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/payment");
+      $content_decoded  = json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $payment) {
+                  $return[]= $payment;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   list hotspotop
+   returns an array of hotspot operators
+   */
+   public function list_hotspotop() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/hotspotop");
+      $content_decoded  = json_decode($content);
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == "ok") {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $hotspotop) {
+                  $return[]= $hotspotop;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
    /*
    list port forwarding settings
-   returns a array of the site port forwarding settings
+   returns an array of port forwarding settings
    */
    public function list_portforwarding() {
       if (!$this->is_loggedin) return false;
@@ -603,10 +705,10 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    list dynamic dns settings
-   returns a array of the site port dynamic dns settings
+   returns an array of dynamic dns settings
    */
    public function list_dynamicdns() {
       if (!$this->is_loggedin) return false;
@@ -624,10 +726,10 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    list port configuration
-   returns a array of the site port configuration
+   returns an array of port configurations
    */
    public function list_portconf() {
       if (!$this->is_loggedin) return false;
@@ -645,10 +747,10 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
    list VoIP extensions
-   returns a array of the site VoIP extensions
+   returns an array of VoIP extensions
    */
    public function list_extension() {
       if (!$this->is_loggedin) return false;
@@ -666,10 +768,10 @@ class unifiapi {
       }
       return $return;
    }
-      
+
    /*
    list site settings
-   returns a array of the site configuration settings
+   returns an array of site configuration settings
    */
    public function list_settings() {
       if (!$this->is_loggedin) return false;
@@ -864,10 +966,10 @@ class unifiapi {
       }
       return $return;
    }
-    
+
    /*
    list events
-   returns a array of known events
+   returns an array of known events
    */
    public function list_events() {
       if (!$this->is_loggedin) return false;
@@ -889,7 +991,7 @@ class unifiapi {
 
    /*
    list wireless settings
-   returns a array of wireless networks and settings
+   returns an array of wireless networks and settings
    */
    public function list_wlanconf() {
       if (!$this->is_loggedin) return false;
@@ -912,7 +1014,7 @@ class unifiapi {
 
    /*
    list alarms
-   returns a array of known alarms
+   returns an array of known alarms
    */
    public function list_alarms() {
       if (!$this->is_loggedin) return false;
@@ -934,7 +1036,7 @@ class unifiapi {
 
    /*
    list vouchers
-   returns a array of voucher objects
+   returns an array of voucher objects
    */
    public function get_vouchers($create_time="") {
       if (!$this->is_loggedin) return false;
@@ -960,7 +1062,7 @@ class unifiapi {
    /*
    create voucher(s)
    parameter <minutes>,<number_of_vouchers_to_create>,<note>,<up>,<down>,<mb>
-   returns a array of vouchers codes (Note: without the "-" in the middle)
+   returns an array of vouchers codes (Note: without the "-" in the middle)
    */
    public function create_voucher($minutes,$number_of_vouchers_to_create=1,$note="",$up=0,$down=0,$Mbytes=0) {
       if (!$this->is_loggedin) return false;
@@ -995,17 +1097,17 @@ class unifiapi {
    private function exec_curl($url, $data = "") {
       $ch = $this->get_curl_obj();
       curl_setopt($ch, CURLOPT_URL, $url);
-      
+
       if (trim($data) != "") {
          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       } else {
          curl_setopt($ch, CURLOPT_POST, FALSE);
       }
-      
+
       if(($content = curl_exec($ch)) === false) {
          error_log('curl error: ' . curl_error($ch));
       }
-      
+
       if ($this->debug === true) {
          print "<pre>";
          print "\n\n-----cURL INFO---------------\n\n";
@@ -1028,13 +1130,14 @@ class unifiapi {
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
       curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-      
+
       if ($this->debug === true) {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
       }
-      
+
       if ($this->cookies != "") {
-         curl_setopt($ch, CURLOPT_COOKIE,  $this->cookies);
+         curl_setopt($ch, CURLOPT_COOKIESESSION, TRUE);
+         curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
       }
       return $ch;
    }

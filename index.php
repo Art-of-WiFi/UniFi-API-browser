@@ -46,6 +46,7 @@ $data           = '';
 $objectscount   = '';
 $alertmessage   = '';
 $cookietimeout  = '1800';
+$debug          = false;
 
 /*
 load the settings file
@@ -81,38 +82,12 @@ $curl_version   = $curl_info['version'];
 /*
 process the GET variables and store them in the $_SESSION array,
 if a GET variable is not set, get the value from $_SESSION (if available)
+- siteid
+Only process these after siteid is set:
 - action
 - outputformat
 - theme
-- siteid
 */
-if (isset($_GET['action'])) {
-    $action = $_GET['action'];
-    $_SESSION['action'] = $action;
-} else {
-    if (isset($_SESSION['action'])) {
-        $action = $_SESSION['action'];
-    }
-}
-
-if (isset($_GET['outputformat'])) {
-    $outputformat = $_GET['outputformat'];
-    $_SESSION['outputformat'] = $outputformat;
-} else {
-    if (isset($_SESSION['outputformat'])) {
-        $outputformat = $_SESSION['outputformat'];
-    }
-}
-
-if (isset($_GET['theme'])) {
-    $theme = $_GET['theme'];
-    $_SESSION['theme'] = $theme;
-} else {
-    if (isset($_SESSION['theme'])) {
-        $theme = $_SESSION['theme'];
-    }
-}
-
 if (isset($_GET['siteid'])) {
     $siteid = $_GET['siteid'];
     $_SESSION['siteid'] = $siteid;
@@ -122,6 +97,33 @@ if (isset($_GET['siteid'])) {
     if (isset($_SESSION['siteid'])) {
         $siteid = $_SESSION['siteid'];
         $sitename = $_SESSION['sitename'];
+        
+        if (isset($_GET['action'])) {
+            $action = $_GET['action'];
+            $_SESSION['action'] = $action;
+        } else {
+            if (isset($_SESSION['action'])) {
+                $action = $_SESSION['action'];
+            }
+        }
+        
+        if (isset($_GET['outputformat'])) {
+            $outputformat = $_GET['outputformat'];
+            $_SESSION['outputformat'] = $outputformat;
+        } else {
+            if (isset($_SESSION['outputformat'])) {
+                $outputformat = $_SESSION['outputformat'];
+            }
+        }
+        
+        if (isset($_GET['theme'])) {
+            $theme = $_GET['theme'];
+            $_SESSION['theme'] = $theme;
+        } else {
+            if (isset($_SESSION['theme'])) {
+                $theme = $_SESSION['theme'];
+            }
+        }
     }
 }
 
@@ -130,12 +132,10 @@ display info message when no site is selected or no data collection is selected
 placed here so they can be overwritten by more "severe" error messages later down
 */
 if ($action === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection from one of the <b>menus</b>'
-                    . ' above.</div>';
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection.</div>';
 }
 if ($siteid === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the <b>Select site menu</b> above.'
-                    . '</div>';
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the menu above.</div>';
 }
 
 /*
@@ -144,8 +144,9 @@ load the Unifi API connection class and log in to the controller
 */
 require('phpapi/class.unifi.php');
 
-$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
-$loginresults   = $unifidata->login();
+$unifidata        = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+$unifidata->debug = $debug;
+$loginresults     = $unifidata->login();
 
 if($loginresults === 400) {
     $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
@@ -250,7 +251,7 @@ switch ($action) {
         $data       = $unifidata->list_alarms();
         break;
     case 'list_wlanconf':
-        $selection  = 'wlan config';
+        $selection  = 'list wlan config';
         $data       = $unifidata->list_wlanconf();
         break;
     case 'list_health':
@@ -273,6 +274,10 @@ switch ($action) {
         $selection  = 'list port configuration';
         $data       = $unifidata->list_portconf();
         break;
+    case 'list_networkconf':
+        $selection  = 'list network configuration';
+        $data       = $unifidata->list_networkconf();
+        break;
     case 'list_dynamicdns':
         $selection  = 'dynamic dns configuration';
         $data       = $unifidata->list_dynamicdns();
@@ -280,6 +285,22 @@ switch ($action) {
     case 'list_portforwarding':
         $selection  = 'list port forwarding rules';
         $data       = $unifidata->list_portforwarding();
+        break;
+    case 'stat_voucher':
+        $selection  = 'list hotspot vouchers';
+        $data       = $unifidata->stat_voucher();
+        break;
+    case 'stat_payment':
+        $selection  = 'list hotspot payments';
+        $data       = $unifidata->stat_payment();
+        break;
+    case 'list_hotspotop':
+        $selection  = 'list hotspot operators';
+        $data       = $unifidata->list_hotspotop();
+        break;
+    case 'list_self':
+        $selection  = 'self';
+        $data       = $unifidata->list_self();
         break;
     default:
         break;
@@ -363,7 +384,7 @@ $logoutresults = $unifidata->logout();
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <!-- Latest compiled and minified Bootstrap, Font-awesome and Highlight CSS loaded from CDN -->
   <link rel="stylesheet" href="<?php echo $cssurl ?>">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
   <style>
   body {
@@ -385,10 +406,11 @@ $logoutresults = $unifidata->logout();
       <ul class="nav navbar-nav navbar-left">
         <li id="site-menu" class="dropdown">
           <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            Select site
+            Sites
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" id="siteslist">
+            <li class="dropdown-header">Select a site</li>
             <?php
             foreach ($sites as $site) {
               echo '<li id="' . $site->name . '"><a href="?siteid=' . $site->name . '&sitename=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
@@ -455,6 +477,18 @@ $logoutresults = $unifidata->logout();
               <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
             </ul>
           </li>
+          <li id="hotspot-menu" class="dropdown">
+            <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              Hotspot
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
+              <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
+              <li role="separator" class="divider"></li>
+              <li id="list_hotspotop"><a href="?action=list_hotspotop">list hotspot operators</a></li>
+            </ul>
+          </li>
           <li id="config-menu" class="dropdown">
             <a id="config-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
               Configuration
@@ -463,13 +497,15 @@ $logoutresults = $unifidata->logout();
             <ul class="dropdown-menu">
               <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
               <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
+              <li id="list_self"><a href="?action=list_self">self</a></li>
               <li role="separator" class="divider"></li>
-              <li id="list_settings"><a href="?action=list_settings">site settings</a></li>
+              <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
               <li role="separator" class="divider"></li>
-              <li id="list_wlanconf"><a href="?action=list_wlanconf">wireless configuration</a></li>
+              <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
               <li role="separator" class="divider"></li>
               <li id="list_extension"><a href="?action=list_extension">list VoIP extensions</a></li>
               <li role="separator" class="divider"></li>
+              <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
               <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
               <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
               <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
@@ -534,8 +570,9 @@ $logoutresults = $unifidata->logout();
       <?php } ?>
       output: <span class="label label-primary"><?php echo $outputformat ?></span>
       <?php if ($objectscount) { ?>
-        # of objects: <span class="badge"><?php echo $objectscount ?></span></div>
+        # of objects: <span class="badge"><?php echo $objectscount ?></span>
       <?php } ?>
+    </div>
     <div class="panel-body">
       <!-- present the timing results using an HTML5 progress bar -->
       total elapsed time: <?php echo $timetotal ?> seconds<br>
@@ -576,12 +613,17 @@ $logoutresults = $unifidata->logout();
         </div>
         <hr>
         <dl class="dl-horizontal col-sm-offset-1">
-          <dt>Controller user</dt>
+          <dt>controller user</dt>
           <dd><span class="label label-primary"><?php echo $controlleruser ?></span></dd>
-          <dt>Controller url</dt>
+          <dt>controller url</dt>
           <dd><span class="label label-primary"><?php echo $controllerurl ?></span></dd>
           <dt>version detected</dt>
           <dd><span class="label label-primary"><?php echo $detected_controller_version ?></span></dd>
+        </dl>
+        <hr>
+        <dl class="dl-horizontal col-sm-offset-1">
+          <dt>cookie timeout setting</dt>
+          <dd><span class="label label-primary"><?php echo $cookietimeout ?> seconds</span></dd>
         </dl>
         <hr>
         <dl class="dl-horizontal col-sm-offset-1">
@@ -589,7 +631,7 @@ $logoutresults = $unifidata->logout();
           <dd><span class="label label-primary"><?php echo (phpversion()) ?></span></dd>
           <dt>cURL version</dt>
           <dd><span class="label label-primary"><?php echo $curl_version ?></span></dd>
-          <dt>Operating System</dt>
+          <dt>operating system</dt>
           <dd><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></dd>
         </dl>
         <hr>

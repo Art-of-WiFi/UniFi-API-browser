@@ -37,12 +37,18 @@ The Unifi API browser tool offers the following features:
   - hourly access point stats
   - daily site stats
   - health metrics
+- Hotspot
+  - stat vouchers
+  - stat payments
+  - list hotspot operators
 - Configuration
   - list sites on this controller
   - list site settings
   - sysinfo
+  - self
   - wlan config
   - list VoIP extension
+  - list network configuration
   - list port configurations
   - list port forwarding rules
   - dynamic DNS configuration
@@ -78,13 +84,13 @@ git clone https://github.com/malle-pietje/Unifi-API-browser.git
 
 Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
 
-### Updates
-When you have installed the tool using the `git clone` command you can install updates by going into the directory where the tools has been installed, and by running the `git pull` command from there.
-
 ### Configuration
 - credentials for access to the Unifi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the Unifi API browser tool
 - please see the `config.template.php` file for further instructions
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http://serverip/Unifi-API-browser/`
+
+### Updates
+If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
 
 ### Security notice
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the Unifi controller!

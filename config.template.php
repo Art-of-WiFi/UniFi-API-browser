@@ -29,4 +29,5 @@ $controllerurl      = ''; // full url to the Unifi Controller, eg. 'https://22.2
 $controllerversion  = ''; // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
 $cookietimeout      = '3600'; // time of inactivity in seconds, after which the PHP session cookie will be refreshed
                               // this means the site and data collection will need to be selected again
+$debug              = false; // set to true (without quotes) to enable debug output to the browser and PHP error log
 ?>
