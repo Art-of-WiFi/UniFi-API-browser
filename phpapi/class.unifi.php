@@ -37,14 +37,12 @@ THE SOFTWARE.
 */
 class unifiapi {
 
-   /*
-   do we actually need this section?
    public $user         = "";
    public $password     = "";
-   public $site         = "";
+   public $site         = "default";
    public $baseurl      = "https://127.0.0.1:8443";
    public $controller   = "4.8.6";
-   */
+   
    public $is_loggedin  = false;
    private $cookies     = "/tmp/unify_browser";
    public $debug        = false;
@@ -878,7 +876,7 @@ class unifiapi {
    parameter <ap_id> <apname>
    return true on success
    */
-   public function rename_ap_($ap_id, $apname) {
+   public function rename_ap($ap_id, $apname) {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('name' => $apname));
