@@ -19,6 +19,7 @@ The Unifi API browser tool offers the following features:
 - timing details of API queries can help "benchmark" your controller
 - useful tool when developing applications that make use of the API
 - the API exposes more data than is visible through the Controller's web interface which makes the tool useful for troubleshooting purposes
+- comes bundled with an extensive PHP API client for accessing the Unifi Controller API
 
 ### Data collections currently implemented
 - Clients/users
