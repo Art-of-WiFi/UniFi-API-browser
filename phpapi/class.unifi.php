@@ -37,17 +37,17 @@ THE SOFTWARE.
 */
 class unifiapi {
 
-   public $user         = "";
-   public $password     = "";
-   public $site         = "default";
-   public $baseurl      = "https://127.0.0.1:8443";
-   public $controller   = "4.8.6";
-   
+   public $user         = '';
+   public $password     = '';
+   public $site         = 'default';
+   public $baseurl      = 'https://127.0.0.1:8443';
+   public $controller   = '4.8.6';
+
    public $is_loggedin  = false;
-   private $cookies     = "/tmp/unify_browser";
+   private $cookies     = '/tmp/unify_browser';
    public $debug        = false;
 
-   function __construct($user = "", $password = "", $baseurl = "", $site = "", $controller = "") {
+   function __construct($user = '', $password = '', $baseurl = '', $site = '', $controller = '') {
       if (!empty($user)) $this->user                = $user;
       if (!empty($password)) $this->password        = $password;
       if (!empty($baseurl)) $this->baseurl          = $baseurl;
@@ -65,13 +65,13 @@ class unifiapi {
    Login to Unifi Controller
    */
    public function login() {
-      $this->cookies  = "";
+      $this->cookies  = '';
       $ch             = $this->get_curl_obj();
 
       curl_setopt($ch, CURLOPT_HEADER, 1);
-      curl_setopt($ch, CURLOPT_REFERER, $this->baseurl."/login");
-      curl_setopt($ch, CURLOPT_URL, $this->baseurl."/api/login");
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("username" => $this->user, "password" => $this->password)));
+      curl_setopt($ch, CURLOPT_REFERER, $this->baseurl.'/login');
+      curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array('username' => $this->user, 'password' => $this->password)));
 
       if ($this->debug === true) {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
@@ -82,13 +82,13 @@ class unifiapi {
       }
 
       if ($this->debug === true) {
-         print "<pre>";
-         print "\n\n-----LOGIN-------------------\n\n";
+         print '<pre>';
+         print '\n\n-----LOGIN-------------------\n\n';
          print_r (curl_getinfo($ch));
-         print "\n\n-----RESPONSE----------------\n\n";
+         print '\n\n-----RESPONSE----------------\n\n';
          print $content;
-         print "\n\n-----------------------------\n\n";
-         print "</pre>";
+         print '\n\n-----------------------------\n\n';
+         print '</pre>';
       }
 
       $header_size  = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -101,7 +101,7 @@ class unifiapi {
          $this->cookies = implode(';', $results[1]);
          if (!empty($body)) {
             if (($code >= 200) && ($code < 400)) {
-               if (strpos($this->cookies,"unifises") !== FALSE) {
+               if (strpos($this->cookies,'unifises') !== FALSE) {
                   $this->is_loggedin = true;
                }
             }
@@ -119,9 +119,9 @@ class unifiapi {
    */
    public function logout() {
       if (!$this->is_loggedin) return false;
-      $content            = $this->exec_curl($this->baseurl."/logout");
+      $content            = $this->exec_curl($this->baseurl.'/logout');
       $this->is_loggedin  = false;
-      $this->cookies      = "";
+      $this->cookies      = '';
       return true;
    }
 
@@ -135,10 +135,9 @@ class unifiapi {
       $mac              = strtolower($mac);
       $return           = false;
       $json             = json_encode(array('cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/stamgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -155,10 +154,9 @@ class unifiapi {
       $return           = false;
       $mac              = strtolower($mac);
       $json             = json_encode(array('cmd' => 'unauthorize-guest', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/stamgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -175,10 +173,9 @@ class unifiapi {
       $return           = false;
       $mac              = strtolower($mac);
       $json             = json_encode(array('cmd' => 'kick-sta', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/stamgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -195,10 +192,9 @@ class unifiapi {
       $return           = false;
       $mac              = strtolower($mac);
       $json             = json_encode(array('cmd' => 'block-sta', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/stamgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -215,10 +211,9 @@ class unifiapi {
       $return           = false;
       $mac              = strtolower($mac);
       $json             = json_encode(array('cmd' => 'unblock-sta', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/stamgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -237,10 +232,9 @@ class unifiapi {
       $end              = is_null($end) ? ((time())*1000) : $end;
       $start            = is_null($start) ? $end-604800000 : $start;
       $json             = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/report/hourly.site","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $test) {
                   $return[]= $test;
@@ -264,10 +258,9 @@ class unifiapi {
       $end              = is_null($end) ? ((time())*1000) : $end;
       $start            = is_null($start) ? $end-604800000 : $start;
       $json             = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/report/hourly.ap","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.ap','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $test) {
                   $return[]= $test;
@@ -290,10 +283,9 @@ class unifiapi {
       $end              = is_null($end) ? time() : $end;
       $start            = is_null($start) ? $end-604800 : $start;
       $json             = json_encode(array('type'=> 'all', 'start' => $start, 'end' => $end));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/session","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/session','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $session) {
                   $return[]= $session;
@@ -316,10 +308,9 @@ class unifiapi {
       $end              = is_null($end) ? time() : $end;
       $start            = is_null($start) ? $end-604800 : $start;
       $json             = json_encode(array('start' => $start, 'end' => $end));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/authorization","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/authorization','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $auth) {
                   $return[]= $auth;
@@ -342,10 +333,9 @@ class unifiapi {
       $end              = is_null($end) ? ((time()-(time() % 3600))*1000) : $end;
       $start            = is_null($start) ? $end-18144000000 : $start;
       $json             = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/report/daily.site","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.site','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $test) {
                   $return[]= $test;
@@ -368,10 +358,9 @@ class unifiapi {
       $return           = array();
       $historyhours     = is_null($historyhours) ? 8760 : $historyhours;
       $json             = json_encode(array('type' => 'all', 'conn' => 'all', 'within' => $historyhours));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/alluser","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/alluser','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $stats) {
                   $return[]= $stats;
@@ -390,10 +379,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/guest","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/guest','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $guest) {
                   $return[]= $guest;
@@ -412,10 +400,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/sta","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sta','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $client) {
                   $return[]= $client;
@@ -434,10 +421,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/health","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/health','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $health) {
                   $return[]= $health;
@@ -456,10 +442,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/user","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/user','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $user) {
                   $return[]= $user;
@@ -478,10 +463,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/device","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/device','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $ap) {
                   $return[]= $ap;
@@ -501,10 +485,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array('within' => '24'));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/rogueap","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/rogueap','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $rogue) {
                   $return[]= $rogue;
@@ -522,10 +505,9 @@ class unifiapi {
    public function list_sites() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/self/sites");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/self/sites'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $site) {
                   $return[]= $site;
@@ -543,10 +525,9 @@ class unifiapi {
    public function list_wlan_groups() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/wlangroup");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/wlangroup'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $wlan_group) {
                   $return[]= $wlan_group;
@@ -564,10 +545,9 @@ class unifiapi {
    public function stat_sysinfo() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/sysinfo");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sysinfo'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $sysinfo) {
                   $return[]= $sysinfo;
@@ -585,10 +565,9 @@ class unifiapi {
    public function list_self() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/self");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/self'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $selfinfo) {
                   $return[]= $selfinfo;
@@ -606,10 +585,9 @@ class unifiapi {
    public function list_networkconf() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/networkconf");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/networkconf'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $networkconf) {
                   $return[]= $networkconf;
@@ -627,10 +605,9 @@ class unifiapi {
    public function stat_voucher() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/voucher");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $voucher) {
                   $return[]= $voucher;
@@ -648,10 +625,9 @@ class unifiapi {
    public function stat_payment() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/payment");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/payment'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $payment) {
                   $return[]= $payment;
@@ -669,10 +645,9 @@ class unifiapi {
    public function list_hotspotop() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/hotspotop");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/hotspotop'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $hotspotop) {
                   $return[]= $hotspotop;
@@ -690,10 +665,9 @@ class unifiapi {
    public function list_portforwarding() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/portforward");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/portforward'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $portforward) {
                   $return[]= $portforward;
@@ -711,10 +685,9 @@ class unifiapi {
    public function list_dynamicdns() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/dynamicdns");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/dynamicdns'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $dynamicdns) {
                   $return[]= $dynamicdns;
@@ -732,10 +705,9 @@ class unifiapi {
    public function list_portconf() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/portconf");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/portconf'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $portconf) {
                   $return[]= $portconf;
@@ -753,10 +725,9 @@ class unifiapi {
    public function list_extension() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/extension");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/extension'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $extension) {
                   $return[]= $extension;
@@ -774,10 +745,9 @@ class unifiapi {
    public function list_settings() {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/get/setting");
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/get/setting'));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $setting) {
                   $return[]= $setting;
@@ -798,10 +768,9 @@ class unifiapi {
       $mac              = strtolower($mac);
       $return           = false;
       $json             = json_encode(array('cmd' => 'restart', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/devmgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -818,10 +787,9 @@ class unifiapi {
       $mac              = strtolower($mac);
       $return           = false;
       $json             = json_encode(array('cmd' => 'set-locate', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/devmgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -838,10 +806,9 @@ class unifiapi {
       $return           = false;
       $jsonsettings     = json_encode(array('radio' => $radio, 'channel' => $channel, 'ht' => $ht, 'tx_power_mode' => $tx_power_mode, 'tx_power' =>$tx_power));
       $json             = '{"radio_table": ['.$jsonsettings.']}';
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/upd/device/".$ap_id,"json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.$ap_id,'json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -856,15 +823,14 @@ class unifiapi {
    */
    public function set_guestlogin_settings($portal_enabled, $portal_customized, $redirect_enabled, $redirect_url, $x_password, $expire_number, $expire_unit, $site_id) {
       if (!$this->is_loggedin) return false;
-      $return           =false;
+      $return = false;
       $json = json_encode(array('portal_enabled' => $portal_enabled, 'portal_customized' => $portal_customized,
                                 'redirect_enabled' => $redirect_enabled, 'redirect_url' => $redirect_url,
                                 'x_password' => $x_password, 'expire_number' => $expire_number,
                                 'expire_unit' => $expire_unit, 'site_id' => $site_id), JSON_UNESCAPED_SLASHES);
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/set/setting/guest_access","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/guest_access','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -880,10 +846,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('name' => $apname));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/upd/device/".$ap_id,"json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.$ap_id,'json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -899,10 +864,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('name' => $name, 'x_passphrase' => $x_passphrase));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/upd/wlanconf/".$wlan_id,"json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id,'json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -919,10 +883,9 @@ class unifiapi {
       $mac              = strtolower($mac);
       $return           = false;
       $json             = json_encode(array('cmd' => 'unset-locate', 'mac' => $mac));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/devmgr","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -937,10 +900,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('led_enabled' => true));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/set/setting/mgmt","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -955,10 +917,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('led_enabled' => false));
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/set/setting/mgmt","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             $return = true;
          }
       }
@@ -973,10 +934,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/event","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/event','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $event) {
                   $return[]= $event;
@@ -995,10 +955,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/wlanconf","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/wlanconf','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $wlan) {
                   $return[]= $wlan;
@@ -1018,10 +977,9 @@ class unifiapi {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/list/alarm","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/alarm','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $alarm) {
                   $return[]= $alarm;
@@ -1036,17 +994,16 @@ class unifiapi {
    list vouchers
    returns an array of voucher objects
    */
-   public function get_vouchers($create_time="") {
+   public function get_vouchers($create_time='') {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $json             = json_encode(array());
-      if (trim($create_time) != "") {
+      if (trim($create_time) != '') {
         $json=json_encode(array('create_time' => $create_time));
       }
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/stat/voucher","json=".$json);
-      $content_decoded  = json_decode($content);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher','json='.$json));
       if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == "ok") {
+         if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $voucher) {
                   $return[]= $voucher;
@@ -1062,11 +1019,11 @@ class unifiapi {
    parameter <minutes>,<number_of_vouchers_to_create>,<note>,<up>,<down>,<mb>
    returns an array of vouchers codes (Note: without the "-" in the middle)
    */
-   public function create_voucher($minutes,$number_of_vouchers_to_create=1,$note="",$up=0,$down=0,$Mbytes=0) {
+   public function create_voucher($minutes,$number_of_vouchers_to_create=1,$note='',$up=0,$down=0,$Mbytes=0) {
       if (!$this->is_loggedin) return false;
       $return   = array();
       $json     = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create);
-      if (trim($note) != "") {
+      if (trim($note) != '') {
          $json += array('note'=>$note);
       }
       if ($up > 0) {
@@ -1079,9 +1036,8 @@ class unifiapi {
          $json += array('bytes'=>$Mbytes);
       }
       $json             = json_encode($json);
-      $content          = $this->exec_curl($this->baseurl."/api/s/".$this->site."/cmd/hotspot","json=".$json);
-      $content_decoded  = json_decode($content);
-      if ($content_decoded->meta->rc == "ok") {
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
+      if ($content_decoded->meta->rc == 'ok') {
          if (is_array($content_decoded->data)) {
             $obj = $content_decoded->data[0];
             foreach ($this->get_vouchers($obj->create_time) as $voucher)  {
@@ -1092,11 +1048,11 @@ class unifiapi {
       return $return;
    }
 
-   private function exec_curl($url, $data = "") {
+   private function exec_curl($url, $data = '') {
       $ch = $this->get_curl_obj();
       curl_setopt($ch, CURLOPT_URL, $url);
 
-      if (trim($data) != "") {
+      if (trim($data) != '') {
          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       } else {
          curl_setopt($ch, CURLOPT_POST, FALSE);
@@ -1107,16 +1063,16 @@ class unifiapi {
       }
 
       if ($this->debug === true) {
-         print "<pre>";
-         print "\n\n-----cURL INFO---------------\n\n";
+         print '<pre>';
+         print '\n\n-----cURL INFO---------------\n\n';
          print_r (curl_getinfo($ch));
-         print "\n\n-----URL & PAYLOAD-----------\n\n";
-         print $url."\n";
+         print '\n\n-----URL & PAYLOAD-----------\n\n';
+         print $url.'\n';
          print $data;
-         print "\n\n-----RESPONSE----------------\n\n";
+         print '\n\n-----RESPONSE----------------\n\n';
          print $content;
-         print "\n\n-----------------------------\n\n";
-         print "</pre>";
+         print '\n\n-----------------------------\n\n';
+         print '</pre>';
       }
       curl_close ($ch);
       return $content;
@@ -1133,7 +1089,7 @@ class unifiapi {
          curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
       }
 
-      if ($this->cookies != "") {
+      if ($this->cookies != '') {
          curl_setopt($ch, CURLOPT_COOKIESESSION, TRUE);
          curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
       }
