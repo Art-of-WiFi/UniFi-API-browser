@@ -127,7 +127,8 @@ class unifiapi {
 
    /*
    Authorize a MAC address
-   parameter <MAC address>,<minutes until expires from now>
+   parameter <MAC address>
+   parameter <minutes until expires from now>
    return true on success
    */
    public function authorize_guest($mac,$minutes) {
@@ -224,7 +225,7 @@ class unifiapi {
    hourly stats method for a site
    parameter <start>
    parameter <end>
-   defaults to the past 7*24 hours
+   NOTE: defaults to the past 7*24 hours
    */
    public function stat_hourly_site($start = NULL, $end = NULL) {
       if (!$this->is_loggedin) return false;
@@ -249,7 +250,7 @@ class unifiapi {
    hourly stats method for all access points
    parameter <start>
    parameter <end>
-   defaults to the past 7*24 hours, but unifi controller does not
+   NOTE: defaults to the past 7*24 hours, but unifi controller does not
    keep these stats longer than 5 hours (controller v 4.6.6)
    */
    public function stat_hourly_aps($start = NULL, $end = NULL) {
@@ -275,7 +276,7 @@ class unifiapi {
    show all login sessions
    parameter <start>
    parameter <end>
-   default start value is 7 days ago
+   NOTE: default start value is 7 days ago
    */
    public function stat_sessions($start = NULL, $end = NULL) {
       if (!$this->is_loggedin) return false;
@@ -300,7 +301,7 @@ class unifiapi {
    show all authorizations
    parameter <start>
    parameter <end>
-   defaults to the past 7*24 hours
+   NOTE: defaults to the past 7*24 hours
    */
    public function stat_auths($start = NULL, $end = NULL) {
       if (!$this->is_loggedin) return false;
@@ -325,7 +326,7 @@ class unifiapi {
    daily stats method
    parameter <start>
    parameter <end>
-   defaults to the past 30*7*24 hours
+   NOTE: defaults to the past 30*7*24 hours
    */
    public function stat_daily_site($start = NULL, $end = NULL) {
       if (!$this->is_loggedin) return false;
@@ -348,8 +349,8 @@ class unifiapi {
 
    /*
    get details of all clients ever connected to the site
-   json parameters {type: "all", conn: "all", within: "24"}
-   Note: "within" only allows to select clients that were online in that period.
+   parameter <historyhours>
+   NOTE: "within" only allows to select clients that were online in that period.
    Stats per client are totals, irrespective of "within" value
    defaults to 1 year of history
    */
@@ -679,8 +680,8 @@ class unifiapi {
    }
 
    /*
-   list dynamic dns settings
-   returns an array of dynamic dns settings
+   list dynamic_dns settings
+   returns an array of dynamic DNS settings
    */
    public function list_dynamicdns() {
       if (!$this->is_loggedin) return false;
@@ -798,7 +799,12 @@ class unifiapi {
 
    /*
    set access point radio settings
-   parameter <ap_id> <radio>(default=ng) <channel> <ht>(default=20) <tx_power_mode> <tx_power>(default=0)
+   parameter <ap_id>
+   parameter <radio>(default=ng)
+   parameter <channel>
+   parameter <ht>(default=20)
+   parameter <tx_power_mode>
+   parameter <tx_power>(default=0)
    return true on success
    */
    public function set_ap_radiosettings($ap_id, $radio, $channel, $ht, $tx_power_mode, $tx_power) {
@@ -817,8 +823,15 @@ class unifiapi {
 
    /*
    set guest login settings
-   parameters  <portal_enabled> <portal_customized> <redirect_enabled> <redirect_url> <x_password> <expire_number> <expire_unit> <site_id>
-   both portal parameters are set to the same value!
+   parameter <portal_enabled>
+   parameter <portal_customized>
+   parameter <redirect_enabled>
+   parameter <redirect_url>
+   parameter <x_password>
+   parameter <expire_number>
+   parameter <expire_unit>
+   parameter <site_id>
+   NOTE: both portal parameters are set to the same value!
    return true on success
    */
    public function set_guestlogin_settings($portal_enabled, $portal_customized, $redirect_enabled, $redirect_url, $x_password, $expire_number, $expire_unit, $site_id) {
@@ -839,7 +852,8 @@ class unifiapi {
 
    /*
    rename access point
-   parameter <ap_id> <apname>
+   parameter <ap_id>
+   parameter <apname>
    return true on success
    */
    public function rename_ap($ap_id, $apname) {
@@ -857,7 +871,9 @@ class unifiapi {
 
    /*
    set wlan settings
-   parameter <wlan_id> <name> <x_passphrase>
+   parameter <wlan_id>
+   parameter <name>
+   parameter <x_passphrase>
    return true on success
    */
    public function set_wlansettings($wlan_id, $name, $x_passphrase) {
@@ -992,6 +1008,7 @@ class unifiapi {
 
    /*
    list vouchers
+   parameter <create_time>
    returns an array of voucher objects
    */
    public function get_vouchers($create_time='') {
@@ -1016,7 +1033,12 @@ class unifiapi {
 
    /*
    create voucher(s)
-   parameter <minutes>,<number_of_vouchers_to_create>,<note>,<up>,<down>,<mb>
+   parameter <minutes>
+   parameter <number_of_vouchers_to_create>
+   parameter <note>
+   parameter <up>
+   parameter <down>
+   parameter <mb>
    returns an array of vouchers codes (Note: without the "-" in the middle)
    */
    public function create_voucher($minutes,$number_of_vouchers_to_create=1,$note='',$up=0,$down=0,$Mbytes=0) {
