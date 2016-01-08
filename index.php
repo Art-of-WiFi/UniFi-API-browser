@@ -569,7 +569,7 @@ $logoutresults = $unifidata->logout();
         collection: <span class="label label-primary"><?php echo $selection ?></span>
       <?php } ?>
       output: <span class="label label-primary"><?php echo $outputformat ?></span>
-      <?php if ($objectscount) { ?>
+      <?php if ($objectscount !== '') { ?>
         # of objects: <span class="badge"><?php echo $objectscount ?></span>
       <?php } ?>
     </div>
@@ -612,6 +612,13 @@ $logoutresults = $unifidata->logout();
           </div>
         </div>
         <hr>
+        <div class="row">
+          <div class="col-sm-8 col-sm-offset-2"><a href="https://github.com/malle-pietje/Unifi-API-browser"
+          target="_blank">Unifi API browser on Github</a></div>
+          <div class="col-sm-8 col-sm-offset-2"><a href="http://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
+          target="_blank">Unifi API browser on Ubiquiti Community forum</a></div>
+        </div>
+        <hr>
         <dl class="dl-horizontal col-sm-offset-1">
           <dt>controller user</dt>
           <dd><span class="label label-primary"><?php echo $controlleruser ?></span></dd>
@@ -629,18 +636,15 @@ $logoutresults = $unifidata->logout();
         <dl class="dl-horizontal col-sm-offset-1">
           <dt>PHP version</dt>
           <dd><span class="label label-primary"><?php echo (phpversion()) ?></span></dd>
+          <dt>PHP memory_limit</dt>
+          <dd><span class="label label-primary"><?php echo (ini_get('memory_limit')) ?></span></dd>
+          <dt>PHP memory used</dt>
+          <dd><span class="label label-primary"><?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?></span></dd>
           <dt>cURL version</dt>
           <dd><span class="label label-primary"><?php echo $curl_version ?></span></dd>
           <dt>operating system</dt>
           <dd><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></dd>
         </dl>
-        <hr>
-        <div class="row">
-          <div class="col-sm-8 col-sm-offset-2"><a href="https://github.com/malle-pietje/Unifi-API-browser"
-          target="_blank">Unifi API browser on Github</a></div>
-          <div class="col-sm-8 col-sm-offset-2"><a href="http://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
-          target="_blank">Unifi API browser on Ubiquiti Community forum</a></div>
-        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
