@@ -102,4 +102,4 @@ Here's a screenshot of the tool in action showing the site's health metrics usin
 ![alt tag](https://cloud.githubusercontent.com/assets/12016131/12074555/f0ec7c08-b15a-11e5-9f9c-bb5662ec47ba.JPG "Sample screenshot")
 and here with one of the Bootswatch themes selected:
 ![alt tag](https://cloud.githubusercontent.com/assets/12016131/12074556/f3f03944-b15a-11e5-8299-b63d55dbd3ed.JPG "Sample screenshot with theme selected")this is the "About" modal:
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/12074557/f9a37482-b15a-11e5-8c53-b0a36e4c98c1.JPG "Screenshot of the "About" modal")
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/12512141/bc82ead0-c116-11e5-9bb2-f037e3f26a5f.JPG "Screenshot of the "About" modal")
