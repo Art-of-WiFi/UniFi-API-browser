@@ -20,6 +20,7 @@ The Unifi API browser tool offers the following features:
 - useful tool when developing applications that make use of the API
 - the API exposes more data than is visible through the Controller's web interface which makes the tool useful for troubleshooting purposes
 - comes bundled with an extensive PHP API client for accessing the Unifi Controller API
+- debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 ### Data collections currently implemented
 - Clients/users
