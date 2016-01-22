@@ -83,11 +83,11 @@ class unifiapi {
 
       if ($this->debug === true) {
          print '<pre>';
-         print '\n\n-----LOGIN-------------------\n\n';
+         print PHP_EOL.'-----LOGIN-------------------'.PHP_EOL;
          print_r (curl_getinfo($ch));
-         print '\n\n-----RESPONSE----------------\n\n';
+         print PHP_EOL.'-----RESPONSE----------------'.PHP_EOL;
          print $content;
-         print '\n\n-----------------------------\n\n';
+         print PHP_EOL.'-----------------------------'.PHP_EOL;
          print '</pre>';
       }
 
@@ -1086,14 +1086,14 @@ class unifiapi {
 
       if ($this->debug === true) {
          print '<pre>';
-         print '\n\n-----cURL INFO---------------\n\n';
+         print PHP_EOL.'-----cURL INFO---------------'.PHP_EOL;
          print_r (curl_getinfo($ch));
-         print '\n\n-----URL & PAYLOAD-----------\n\n';
-         print $url.'\n';
+         print PHP_EOL.'-----URL & PAYLOAD-----------'.PHP_EOL;
+         print $url.PHP_EOL;
          print $data;
-         print '\n\n-----RESPONSE----------------\n\n';
+         print PHP_EOL.'-----RESPONSE----------------'.PHP_EOL;
          print $content;
-         print '\n\n-----------------------------\n\n';
+         print PHP_EOL.'-----------------------------'.PHP_EOL;
          print '</pre>';
       }
       curl_close ($ch);
