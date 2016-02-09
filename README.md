@@ -39,6 +39,7 @@ The Unifi API browser tool offers the following features:
   - hourly access point stats
   - daily site stats
   - health metrics
+  - dashboard metrics (supported on controller version 4.9.1.alpha and higher)
 - Hotspot
   - stat vouchers
   - stat payments
