@@ -258,6 +258,10 @@ switch ($action) {
         $selection  = 'site health metrics';
         $data       = $unifidata->list_health();
         break;
+    case 'list_dashboard':
+        $selection  = 'site dashboard metrics';
+        $data       = $unifidata->list_dashboard();
+        break;
     case 'list_settings':
         $selection  = 'list site settings';
         $data       = $unifidata->list_settings();
@@ -475,6 +479,9 @@ $logoutresults = $unifidata->logout();
               <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
               <li role="separator" class="divider"></li>
               <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
+              <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
+                <li id="list_dashboard"><a href="?action=list_dashboard">site dashboard metrics</a></li>
+              <?php } ?>
             </ul>
           </li>
           <li id="hotspot-menu" class="dropdown">

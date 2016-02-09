@@ -436,6 +436,27 @@ class unifiapi {
    }
 
    /*
+   list dashboard metrics
+   returns an array of dashboard metric objects (available since controller version 4.9.1.alpha)
+   */
+   public function list_dashboard() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $json             = json_encode(array());
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dashboard','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $dashboard) {
+                  $return[]= $dashboard;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
    list users
    returns an array of known user objects
    */
