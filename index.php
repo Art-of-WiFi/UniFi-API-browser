@@ -290,6 +290,10 @@ switch ($action) {
         $selection  = 'list port forwarding rules';
         $data       = $unifidata->list_portforwarding();
         break;
+    case 'list_portforward_stats':
+        $selection  = 'list port forwarding stats';
+        $data       = $unifidata->list_portforward_stats();
+        break;        
     case 'stat_voucher':
         $selection  = 'list hotspot vouchers';
         $data       = $unifidata->stat_voucher();
@@ -482,6 +486,7 @@ $logoutresults = $unifidata->logout();
               <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
                 <li id="list_dashboard"><a href="?action=list_dashboard">site dashboard metrics</a></li>
               <?php } ?>
+              <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
             </ul>
           </li>
           <li id="hotspot-menu" class="dropdown">

@@ -222,17 +222,44 @@ class unifiapi {
    }
 
    /*
+   daily stats method
+   parameter <start>
+   parameter <end>
+   NOTE: defaults to the past 30*7*24 hours
+         "bytes" are no longer returned with controller version 4.9.1 and later
+   */
+   public function stat_daily_site($start = NULL, $end = NULL) {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $end              = is_null($end) ? ((time()-(time() % 3600))*1000) : $end;
+      $start            = is_null($start) ? $end-18144000000 : $start;
+      $json             = json_encode(array('attrs' => array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'), 'start' => $start, 'end' => $end));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.site','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $test) {
+                  $return[]= $test;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
    hourly stats method for a site
    parameter <start>
    parameter <end>
    NOTE: defaults to the past 7*24 hours
+         "bytes" are no longer returned with controller version 4.9.1 and later
    */
    public function stat_hourly_site($start = NULL, $end = NULL) {
       if (!$this->is_loggedin) return false;
       $return           = array();
       $end              = is_null($end) ? ((time())*1000) : $end;
       $start            = is_null($start) ? $end-604800000 : $start;
-      $json             = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
+      $json             = json_encode(array('attrs' => array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'), 'start' => $start, 'end' => $end));
       $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site','json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
@@ -315,31 +342,6 @@ class unifiapi {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $auth) {
                   $return[]= $auth;
-               }
-            }
-         }
-      }
-      return $return;
-   }
-
-   /*
-   daily stats method
-   parameter <start>
-   parameter <end>
-   NOTE: defaults to the past 30*7*24 hours
-   */
-   public function stat_daily_site($start = NULL, $end = NULL) {
-      if (!$this->is_loggedin) return false;
-      $return           = array();
-      $end              = is_null($end) ? ((time()-(time() % 3600))*1000) : $end;
-      $start            = is_null($start) ? $end-18144000000 : $start;
-      $json             = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.site','json='.$json));
-      if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == 'ok') {
-            if (is_array($content_decoded->data)) {
-               foreach ($content_decoded->data as $test) {
-                  $return[]= $test;
                }
             }
          }
@@ -673,6 +675,27 @@ class unifiapi {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $hotspotop) {
                   $return[]= $hotspotop;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   list port forwarding stats
+   returns an array of port forwarding stats
+   */
+   public function list_portforward_stats() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $json             = json_encode(array());
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/portforward','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $portforward) {
+                  $return[]= $portforward;
                }
             }
          }
