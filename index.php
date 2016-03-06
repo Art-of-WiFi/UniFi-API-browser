@@ -132,10 +132,12 @@ display info message when no site is selected or no data collection is selected
 placed here so they can be overwritten by more "severe" error messages later down
 */
 if ($action === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection.</div>';
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the drop-down menus'
+                    . ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
 if ($siteid === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the menu above.</div>';
+    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the drop-down menu <i class="fa fa-arrow-circle-up">'
+                    . '</i></div>';
 }
 
 /*
@@ -325,9 +327,9 @@ if($action!=''){
 create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
 */
 if ($theme === 'bootstrap') {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css';
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css';
 } else {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/' . $theme . '/bootstrap.min.css';
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/' . $theme . '/bootstrap.min.css';
 }
 
 /*
@@ -382,6 +384,7 @@ function print_output($outputformat, $data)
 log off from the Unifi controller API
 */
 $logoutresults = $unifidata->logout();
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -390,9 +393,9 @@ $logoutresults = $unifidata->logout();
   <meta charset="utf-8">
   <title>Unifi API browser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <!-- Latest compiled and minified Bootstrap, Font-awesome and Highlight CSS loaded from CDN -->
-  <link rel="stylesheet" href="<?php echo $cssurl ?>">
+  <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="<?php echo $cssurl ?>">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
   <style>
   body {
@@ -586,6 +589,8 @@ $logoutresults = $unifidata->logout();
       <?php } ?>
     </div>
     <div class="panel-body">
+      <!--only display panel content when an action has been selected-->
+      <?php if ($action !== '') { ?>
       <!-- present the timing results using an HTML5 progress bar -->
       total elapsed time: <?php echo $timetotal ?> seconds<br>
       <div class="progress">
@@ -597,7 +602,7 @@ $logoutresults = $unifidata->logout();
         <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>"
         aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;" data-toggle="tooltip"
         data-placement="bottom" data-original-title="<?php echo ($timeafterload - $timeafterlogin) ?> seconds">
-          API load time
+          data load time
         </div>
         <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>"
         aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remainperc ?>%;" data-toggle="tooltip"
@@ -606,6 +611,7 @@ $logoutresults = $unifidata->logout();
         </div>
       </div>
       <pre><?php print_output($outputformat, $data) ?></pre>
+      <?php } ?>
     </div>
   </div>
 </div>
@@ -665,8 +671,8 @@ $logoutresults = $unifidata->logout();
   </div>
 </div>
 <!-- Latest compiled and minified JavaScript versions, loaded from CDN's -->
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js"></script>
 <script>
   /*

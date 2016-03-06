@@ -5,11 +5,12 @@ Unifi PHP API
   the following developers:
     domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
     fbagnol: https://github.com/fbagnol/class.unifi.php
-  and the api as published by Ubiquiti:
+  and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
 NOTE: this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
       trying to use it with a pre-4.x version controller.
+      
 ------------------------------------------------------------------------------------
 
 The MIT License (MIT)
@@ -41,18 +42,18 @@ class unifiapi {
    public $password     = '';
    public $site         = 'default';
    public $baseurl      = 'https://127.0.0.1:8443';
-   public $controller   = '4.8.6';
+   public $version      = '4.8.6';
 
    public $is_loggedin  = false;
    private $cookies     = '/tmp/unify_browser';
    public $debug        = false;
 
-   function __construct($user = '', $password = '', $baseurl = '', $site = '', $controller = '') {
+   function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '') {
       if (!empty($user)) $this->user                = $user;
       if (!empty($password)) $this->password        = $password;
       if (!empty($baseurl)) $this->baseurl          = $baseurl;
       if (!empty($site)) $this->site                = $site;
-      if (!empty($controller)) $this->controller    = $controller;
+      if (!empty($version)) $this->version          = $version;
    }
 
    function __destruct() {
