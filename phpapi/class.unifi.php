@@ -13,7 +13,7 @@ this Class will only work with Unifi Controller versions 4.x. There are no check
 trying to use it with a pre-4.x version controller.
 
 IMPORTANT CHANGES:
-- function "list_vouchers" has been removed and has been replaced by "stat_voucher"
+- function "get_vouchers" has been removed and has been replaced by "stat_voucher"
 
 ------------------------------------------------------------------------------------
 
