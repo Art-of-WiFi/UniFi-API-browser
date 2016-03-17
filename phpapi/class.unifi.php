@@ -8,9 +8,13 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-NOTE: this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
-      trying to use it with a pre-4.x version controller.
-      
+NOTE:
+this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
+trying to use it with a pre-4.x version controller.
+
+IMPORTANT CHANGES:
+- function "list_vouchers" has been removed and has been replaced by "stat_voucher"
+
 ------------------------------------------------------------------------------------
 
 The MIT License (MIT)
@@ -37,13 +41,11 @@ THE SOFTWARE.
 
 */
 class unifiapi {
-
    public $user         = '';
    public $password     = '';
    public $site         = 'default';
    public $baseurl      = 'https://127.0.0.1:8443';
    public $version      = '4.8.6';
-
    public $is_loggedin  = false;
    private $cookies     = '/tmp/unify_browser';
    public $debug        = false;
@@ -129,14 +131,27 @@ class unifiapi {
    /*
    Authorize a MAC address
    parameter <MAC address>
-   parameter <minutes until expires from now>
+   parameter <minutes> = minutes (from now) until authorization expires
+   optional parameter <up> = upload speed limit in kbps
+   optional parameter <down> = download speed limit in kbps
+   optional parameter <MBytes> = data transfer limit in MB
+   optional parameter <ap_mac> = AP MAC address to which client is connected, should result in faster authorization
    return true on success
    */
-   public function authorize_guest($mac,$minutes) {
+   public function authorize_guest($mac, $minutes, $up = NULL, $down = NULL, $MBytes = NULL, $ap_mac = NULL) {
       if (!$this->is_loggedin) return false;
       $mac              = strtolower($mac);
       $return           = false;
-      $json             = json_encode(array('cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes));
+      $authorize_array  = array('cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes);
+
+      /*
+      if we have received values for up/down/MBytes we append them to the payload array to be submitted
+      */
+      if (isset($up)) $authorize_array['up'] = $up;
+      if (isset($down)) $authorize_array['down'] = $down;
+      if (isset($MBytes)) $authorize_array['bytes'] = $MBytes;
+      if (isset($ap_mac)) $authorize_array['ap_mac'] = $ap_mac;
+      $json             = json_encode($authorize_array);
       $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr','json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
@@ -276,8 +291,8 @@ class unifiapi {
 
    /*
    hourly stats method for all access points
-   parameter <start>
-   parameter <end>
+   optional parameter <start>
+   optional parameter <end>
    NOTE: defaults to the past 7*24 hours, but unifi controller does not
    keep these stats longer than 5 hours (controller v 4.6.6)
    */
@@ -302,8 +317,8 @@ class unifiapi {
 
    /*
    show all login sessions
-   parameter <start>
-   parameter <end>
+   optional parameter <start>
+   optional parameter <end>
    NOTE: default start value is 7 days ago
    */
    public function stat_sessions($start = NULL, $end = NULL) {
@@ -327,8 +342,8 @@ class unifiapi {
 
    /*
    show all authorizations
-   parameter <start>
-   parameter <end>
+   optional parameter <start>
+   optional parameter <end>
    NOTE: defaults to the past 7*24 hours
    */
    public function stat_auths($start = NULL, $end = NULL) {
@@ -352,7 +367,7 @@ class unifiapi {
 
    /*
    get details of all clients ever connected to the site
-   parameter <historyhours>
+   optional parameter <historyhours>
    NOTE: "within" only allows to select clients that were online in that period.
    Stats per client are totals, irrespective of "within" value
    defaults to 1 year of history
@@ -625,12 +640,17 @@ class unifiapi {
 
    /*
    stat vouchers
-   returns an array of hotspot vouchers
+   optional parameter <create_time>
+   returns an array of hotspot voucher objects
    */
-   public function stat_voucher() {
+   public function stat_voucher($create_time = NULL) {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher'));
+      $json             = json_encode(array());
+      if (trim($create_time) != NULL) {
+        $json=json_encode(array('create_time' => $create_time));
+      }
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher','json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
@@ -1029,7 +1049,6 @@ class unifiapi {
       return $return;
    }
 
-
    /*
    list alarms
    returns an array of known alarms
@@ -1052,56 +1071,28 @@ class unifiapi {
    }
 
    /*
-   list vouchers
-   parameter <create_time>
-   returns an array of voucher objects
-   */
-   public function get_vouchers($create_time='') {
-      if (!$this->is_loggedin) return false;
-      $return           = array();
-      $json             = json_encode(array());
-      if (trim($create_time) != '') {
-        $json=json_encode(array('create_time' => $create_time));
-      }
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher','json='.$json));
-      if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == 'ok') {
-            if (is_array($content_decoded->data)) {
-               foreach ($content_decoded->data as $voucher) {
-                  $return[]= $voucher;
-               }
-            }
-         }
-      }
-      return $return;
-   }
-
-   /*
    create voucher(s)
-   parameter <minutes>
+   parameter <minutes> = minutes the voucher is valid after activation
    parameter <number_of_vouchers_to_create>
-   parameter <note>
-   parameter <up>
-   parameter <down>
-   parameter <mb>
-   returns an array of vouchers codes (Note: without the "-" in the middle)
+   optional parameter <note> = note text to add to voucher when printing
+   optional parameter <up> = upload speed limit in kbps
+   optional parameter <down> = download speed limit in kbps
+   optional parameter <MBytes> = data transfer limit in MB
+   returns an array of vouchers codes (NOTE: without the "-" in the middle)
    */
-   public function create_voucher($minutes,$number_of_vouchers_to_create=1,$note='',$up=0,$down=0,$Mbytes=0) {
+   public function create_voucher($minutes, $number_of_vouchers_to_create = 1, $note = NULL, $up = NULL, $down = NULL, $MBytes = NULL) {
       if (!$this->is_loggedin) return false;
       $return   = array();
       $json     = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create);
-      if (trim($note) != '') {
-         $json += array('note'=>$note);
-      }
-      if ($up > 0) {
-         $json += array('up'=>$up);
-      }
-      if ($down > 0) {
-         $json += array('down'=>$down);
-      }
-      if ($Mbytes > 0) {
-         $json += array('bytes'=>$Mbytes);
-      }
+
+      /*
+      if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
+      */
+      if (isset($note))   $json += array('note' => trim($note));
+      if (isset($up))     $json += array('up' => $up);
+      if (isset($down))   $json += array('down' => $down);
+      if (isset($MBytes)) $json += array('bytes' => $MBytes);
+
       $json             = json_encode($json);
       $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
       if ($content_decoded->meta->rc == 'ok') {

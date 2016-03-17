@@ -50,6 +50,7 @@ $debug          = false;
 
 /*
 load the settings file
+- allows override of several of the previously declared variables
 - if the config.php file is unreadable or does not exist, an alert is displayed on the page
 */
 if(!is_readable('config.php')) {
@@ -97,7 +98,7 @@ if (isset($_GET['siteid'])) {
     if (isset($_SESSION['siteid'])) {
         $siteid = $_SESSION['siteid'];
         $sitename = $_SESSION['sitename'];
-        
+
         if (isset($_GET['action'])) {
             $action = $_GET['action'];
             $_SESSION['action'] = $action;
@@ -106,7 +107,7 @@ if (isset($_GET['siteid'])) {
                 $action = $_SESSION['action'];
             }
         }
-        
+
         if (isset($_GET['outputformat'])) {
             $outputformat = $_GET['outputformat'];
             $_SESSION['outputformat'] = $outputformat;
@@ -115,7 +116,7 @@ if (isset($_GET['siteid'])) {
                 $outputformat = $_SESSION['outputformat'];
             }
         }
-        
+
         if (isset($_GET['theme'])) {
             $theme = $_GET['theme'];
             $_SESSION['theme'] = $theme;
@@ -295,7 +296,7 @@ switch ($action) {
     case 'list_portforward_stats':
         $selection  = 'list port forwarding stats';
         $data       = $unifidata->list_portforward_stats();
-        break;        
+        break;
     case 'stat_voucher':
         $selection  = 'list hotspot vouchers';
         $data       = $unifidata->stat_voucher();
