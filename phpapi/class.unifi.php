@@ -704,6 +704,42 @@ class unifiapi {
    }
 
    /*
+   create voucher(s)
+   parameter <minutes> = minutes the voucher is valid after activation
+   parameter <number_of_vouchers_to_create>
+   optional parameter <note> = note text to add to voucher when printing
+   optional parameter <up> = upload speed limit in kbps
+   optional parameter <down> = download speed limit in kbps
+   optional parameter <MBytes> = data transfer limit in MB
+   returns an array of vouchers codes (NOTE: without the "-" in the middle)
+   */
+   public function create_voucher($minutes, $number_of_vouchers_to_create = 1, $note = NULL, $up = NULL, $down = NULL, $MBytes = NULL) {
+      if (!$this->is_loggedin) return false;
+      $return   = array();
+      $json     = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create);
+
+      /*
+      if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
+      */
+      if (isset($note))   $json += array('note' => trim($note));
+      if (isset($up))     $json += array('up' => $up);
+      if (isset($down))   $json += array('down' => $down);
+      if (isset($MBytes)) $json += array('bytes' => $MBytes);
+
+      $json             = json_encode($json);
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
+      if ($content_decoded->meta->rc == 'ok') {
+         if (is_array($content_decoded->data)) {
+            $obj = $content_decoded->data[0];
+            foreach ($this->get_vouchers($obj->create_time) as $voucher)  {
+               $return[]= $voucher->code;
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
    list port forwarding stats
    returns an array of port forwarding stats
    */
@@ -863,6 +899,59 @@ class unifiapi {
    }
 
    /*
+   stop flashing LED of an access point for locating purposes
+   parameter <MAC address>
+   return true on success
+   */
+   public function unset_locate_ap($mac) {
+      if (!$this->is_loggedin) return false;
+      $mac              = strtolower($mac);
+      $return           = false;
+      $json             = json_encode(array('cmd' => 'unset-locate', 'mac' => $mac));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
+   /*
+   switch LEDs of all the access points ON
+   return true on success
+   */
+   public function site_ledson() {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('led_enabled' => true));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
+   /*
+   switch LEDs of all the access points OFF
+   return true on success
+   */
+   public function site_ledsoff() {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('led_enabled' => false));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
+   /*
    set access point radio settings
    parameter <ap_id>
    parameter <radio>(default=ng)
@@ -955,59 +1044,6 @@ class unifiapi {
    }
 
    /*
-   start flashing LED of an access point for locating purposes
-   parameter <MAC address>
-   return true on success
-   */
-   public function unset_locate_ap($mac) {
-      if (!$this->is_loggedin) return false;
-      $mac              = strtolower($mac);
-      $return           = false;
-      $json             = json_encode(array('cmd' => 'unset-locate', 'mac' => $mac));
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr','json='.$json));
-      if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == 'ok') {
-            $return = true;
-         }
-      }
-      return $return;
-   }
-
-   /*
-   switch LEDs of all the access points ON
-   return true on success
-   */
-   public function site_ledson() {
-      if (!$this->is_loggedin) return false;
-      $return           = false;
-      $json             = json_encode(array('led_enabled' => true));
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
-      if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == 'ok') {
-            $return = true;
-         }
-      }
-      return $return;
-   }
-
-   /*
-   switch LEDs of all the access points OFF
-   return true on success
-   */
-   public function site_ledsoff() {
-      if (!$this->is_loggedin) return false;
-      $return           = false;
-      $json             = json_encode(array('led_enabled' => false));
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt','json='.$json));
-      if (isset($content_decoded->meta->rc)) {
-         if ($content_decoded->meta->rc == 'ok') {
-            $return = true;
-         }
-      }
-      return $return;
-   }
-
-   /*
    list events
    returns an array of known events
    */
@@ -1064,42 +1100,6 @@ class unifiapi {
                foreach ($content_decoded->data as $alarm) {
                   $return[]= $alarm;
                }
-            }
-         }
-      }
-      return $return;
-   }
-
-   /*
-   create voucher(s)
-   parameter <minutes> = minutes the voucher is valid after activation
-   parameter <number_of_vouchers_to_create>
-   optional parameter <note> = note text to add to voucher when printing
-   optional parameter <up> = upload speed limit in kbps
-   optional parameter <down> = download speed limit in kbps
-   optional parameter <MBytes> = data transfer limit in MB
-   returns an array of vouchers codes (NOTE: without the "-" in the middle)
-   */
-   public function create_voucher($minutes, $number_of_vouchers_to_create = 1, $note = NULL, $up = NULL, $down = NULL, $MBytes = NULL) {
-      if (!$this->is_loggedin) return false;
-      $return   = array();
-      $json     = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create);
-
-      /*
-      if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
-      */
-      if (isset($note))   $json += array('note' => trim($note));
-      if (isset($up))     $json += array('up' => $up);
-      if (isset($down))   $json += array('down' => $down);
-      if (isset($MBytes)) $json += array('bytes' => $MBytes);
-
-      $json             = json_encode($json);
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
-      if ($content_decoded->meta->rc == 'ok') {
-         if (is_array($content_decoded->data)) {
-            $obj = $content_decoded->data[0];
-            foreach ($this->get_vouchers($obj->create_time) as $voucher)  {
-               $return[]= $voucher->code;
             }
          }
       }
