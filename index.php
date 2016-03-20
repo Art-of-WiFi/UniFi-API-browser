@@ -1,5 +1,23 @@
 <?php
 /*
+Unifi API Browser
+
+This tool is for browsing data that is exposed through Ubiquiti's Unifi Controller API,
+written in PHP, javascript and the Bootstrap CSS framework.
+
+Please keep the following in mind:
+- not all data collections/API endpoints are supported (yet), see the list below of
+  the currently supported data collections/API endpoints
+- currently only supports versions 4.x.x of the Unifi Controller software
+- there is still work to be done to add/improve functionality and usability of this
+  tool so suggestions/comments are welcome. Please use the github issue list or the
+  Ubiquiti Community forums for this:
+  https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651
+
+VERSION: 1.0
+
+------------------------------------------------------------------------------------
+
 The MIT License (MIT)
 
 Copyright (c) 2015, Slooffmaster
@@ -21,6 +39,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
 */
 
 /*

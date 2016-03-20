@@ -1,12 +1,15 @@
 <?php
 /*
 Unifi PHP API
+
 - this Unifi API client comes bundled with the Unifi API Browser tool and is based on the work done by
   the following developers:
     domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
     fbagnol: https://github.com/fbagnol/class.unifi.php
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
+
+VERSION: 1.0
 
 NOTE:
 this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
@@ -239,8 +242,8 @@ class unifiapi {
 
    /*
    daily stats method
-   parameter <start>
-   parameter <end>
+   optional parameter <start>
+   optional parameter <end>
    NOTE: defaults to the past 30*7*24 hours
          "bytes" are no longer returned with controller version 4.9.1 and later
    */
@@ -265,8 +268,8 @@ class unifiapi {
 
    /*
    hourly stats method for a site
-   parameter <start>
-   parameter <end>
+   optional parameter <start>
+   optional parameter <end>
    NOTE: defaults to the past 7*24 hours
          "bytes" are no longer returned with controller version 4.9.1 and later
    */
