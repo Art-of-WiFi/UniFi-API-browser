@@ -14,7 +14,7 @@ Please keep the following in mind:
   Ubiquiti Community forums for this:
   https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651
 
-VERSION: 1.0
+VERSION: 1.0.1
 
 ------------------------------------------------------------------------------------
 
@@ -227,6 +227,10 @@ switch ($action) {
     case 'list_guests':
         $selection  = 'list guests';
         $data       = $unifidata->list_guests();
+        break;
+    case 'list_usergroups':
+        $selection  = 'list usergroups';
+        $data       = $unifidata->list_usergroups();
         break;
     case 'stat_hourly_site':
         $selection  = 'hourly site stats';
@@ -477,6 +481,7 @@ $logoutresults = $unifidata->logout();
               <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
               <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
               <li id="list_users"><a href="?action=list_users">list users</a></li>
+              <li id="list_usergroups"><a href="?action=list_usergroups">list user groups</a></li>
               <li role="separator" class="divider"></li>
               <li id="stat_allusers"><a href="?action=stat_allusers">stat all users</a></li>
               <li id="stat_auths"><a href="?action=stat_auths">stat authorisations</a></li>

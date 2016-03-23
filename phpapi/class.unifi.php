@@ -9,7 +9,7 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-VERSION: 1.0
+VERSION: 1.0.1
 
 NOTE:
 this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
@@ -428,6 +428,27 @@ class unifiapi {
             if (is_array($content_decoded->data)) {
                foreach ($content_decoded->data as $client) {
                   $return[]= $client;
+               }
+            }
+         }
+      }
+      return $return;
+   }
+
+   /*
+   list user groups
+   returns an array of user group objects
+   */
+   public function list_usergroups() {
+      if (!$this->is_loggedin) return false;
+      $return           = array();
+      $json             = json_encode(array());
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/usergroup','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $usergroup) {
+                  $return[]= $usergroup;
                }
             }
          }
