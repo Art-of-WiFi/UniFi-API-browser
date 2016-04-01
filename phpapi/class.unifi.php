@@ -7,7 +7,7 @@ Unifi PHP API
     domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
     fbagnol: https://github.com/fbagnol/class.unifi.php
   and the API as published by Ubiquiti:
-    https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
+    https://www.ubnt.com/downloads/unifi/4.8.14/unifi_sh_api
 
 VERSION: 1.0.1
 
