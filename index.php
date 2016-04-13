@@ -432,12 +432,14 @@ $logoutresults = $unifidata->logout();
 <nav id="navbar" class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
     <div class="navbar-header">
-      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-example-js-navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar-main">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="index.php">Unifi API browser</a>
     </div>
-    <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
+    <div id="navbar-main" class="collapse navbar-collapse">
       <ul class="nav navbar-nav navbar-left">
         <li id="site-menu" class="dropdown">
           <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
