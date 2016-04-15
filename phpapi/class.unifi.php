@@ -9,7 +9,7 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-VERSION: 1.0.1
+VERSION: 1.0.2
 
 NOTE:
 this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
@@ -22,7 +22,7 @@ IMPORTANT CHANGES:
 
 The MIT License (MIT)
 
-Copyright (c) 2015, Slooffmaster
+Copyright (c) 2016, Slooffmaster
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -48,17 +48,17 @@ class unifiapi {
    public $password     = '';
    public $site         = 'default';
    public $baseurl      = 'https://127.0.0.1:8443';
-   public $version      = '4.8.6';
+   public $version      = '4.8.15';
    public $is_loggedin  = false;
-   private $cookies     = '/tmp/unify_browser';
+   private $cookies     = '/tmp/unifi_browser';
    public $debug        = false;
 
    function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '') {
-      if (!empty($user)) $this->user                = $user;
-      if (!empty($password)) $this->password        = $password;
-      if (!empty($baseurl)) $this->baseurl          = $baseurl;
-      if (!empty($site)) $this->site                = $site;
-      if (!empty($version)) $this->version          = $version;
+      if (!empty($user)) $this->user          = $user;
+      if (!empty($password)) $this->password  = $password;
+      if (!empty($baseurl)) $this->baseurl    = $baseurl;
+      if (!empty($site)) $this->site          = $site;
+      if (!empty($version)) $this->version    = $version;
    }
 
    function __destruct() {
@@ -71,8 +71,9 @@ class unifiapi {
    Login to Unifi Controller
    */
    public function login() {
-      $this->cookies  = '';
-      $ch             = $this->get_curl_obj();
+      $this->cookies = '';
+
+      $ch = $this->get_curl_obj();
 
       curl_setopt($ch, CURLOPT_HEADER, 1);
       curl_setopt($ch, CURLOPT_REFERER, $this->baseurl.'/login');
@@ -134,7 +135,7 @@ class unifiapi {
    /*
    Authorize a MAC address
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = client MAC address
    required parameter <minutes> = minutes (from now) until authorization expires
    optional parameter <up> = upload speed limit in kbps
    optional parameter <down> = download speed limit in kbps
@@ -167,7 +168,7 @@ class unifiapi {
    /*
    unauthorize a MAC address
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = client MAC address
    */
    public function unauthorize_guest($mac) {
       if (!$this->is_loggedin) return false;
@@ -186,7 +187,7 @@ class unifiapi {
    /*
    reconnect a client
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = client MAC address
    */
    public function reconnect_sta($mac) {
       if (!$this->is_loggedin) return false;
@@ -205,7 +206,7 @@ class unifiapi {
    /*
    block a client
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = client MAC address
    */
    public function block_sta($mac) {
       if (!$this->is_loggedin) return false;
@@ -224,7 +225,7 @@ class unifiapi {
    /*
    unblock a client
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = client MAC address
    */
    public function unblock_sta($mac) {
       if (!$this->is_loggedin) return false;
@@ -243,8 +244,8 @@ class unifiapi {
    /*
    daily stats method
    returns an array of daily stats objects
-   optional parameter <start>
-   optional parameter <end>
+   optional parameter <start> = Unix timestamp in seconds
+   optional parameter <end> = Unix timestamp in seconds
    NOTES:
    - defaults to the past 52*7*24 hours
    - "bytes" are no longer returned with controller version 4.9.1 and later
@@ -271,8 +272,8 @@ class unifiapi {
    /*
    hourly stats method for a site
    returns an array of hourly stats objects
-   optional parameter <start>
-   optional parameter <end>
+   optional parameter <start> = Unix timestamp in seconds
+   optional parameter <end> = Unix timestamp in seconds
    NOTES:
    - defaults to the past 7*24 hours
    - "bytes" are no longer returned with controller version 4.9.1 and later
@@ -299,8 +300,8 @@ class unifiapi {
    /*
    hourly stats method for all access points
    returns an array of hourly stats objects
-   optional parameter <start>
-   optional parameter <end>
+   optional parameter <start> = Unix timestamp in seconds
+   optional parameter <end> = Unix timestamp in seconds
    NOTES:
    - defaults to the past 7*24 hours
    - Unifi controller does not keep these stats longer than 5 hours with versions < 4.6.6
@@ -327,8 +328,8 @@ class unifiapi {
    /*
    show all login sessions
    returns an array of login session objects
-   optional parameter <start> (must be in epoch seconds)
-   optional parameter <end> (must be in epoch seconds)
+   optional parameter <start>  = Unix timestamp in seconds
+   optional parameter <end>  = Unix timestamp in seconds
    NOTE: defaults to the past 7*24 hours
    */
    public function stat_sessions($start = NULL, $end = NULL) {
@@ -353,8 +354,8 @@ class unifiapi {
    /*
    show all authorizations
    returns an array of authorization objects
-   optional parameter <start>
-   optional parameter <end>
+   optional parameter <start> = Unix timestamp in seconds
+   optional parameter <end> = Unix timestamp in seconds
    NOTE: defaults to the past 7*24 hours
    */
    public function stat_auths($start = NULL, $end = NULL) {
@@ -523,12 +524,13 @@ class unifiapi {
 
    /*
    list access points and other devices under management of the controller (USW and/or USG devices)
-   returns an array of known device objects
+   returns an array of known device objects (or a single device when using the <device_mac> parameter)
+   optional parameter <device_mac> = the MAC address of a single device for which the call must be made
    */
-   public function list_aps() {
+   public function list_aps($device_mac = NULL) {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/device'));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/device/'.$device_mac));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
@@ -689,7 +691,7 @@ class unifiapi {
    /*
    stat vouchers
    returns an array of hotspot voucher objects
-   optional parameter <create_time>
+   optional parameter <create_time> = Unix timestamp in seconds
    */
    public function stat_voucher($create_time = NULL) {
       if (!$this->is_loggedin) return false;
@@ -910,7 +912,7 @@ class unifiapi {
    /*
    reboot an access point
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = device MAC address
    */
    public function restart_ap($mac) {
       if (!$this->is_loggedin) return false;
@@ -929,7 +931,7 @@ class unifiapi {
    /*
    start flashing LED of an access point for locating purposes
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = device MAC address
    */
    public function set_locate_ap($mac) {
       if (!$this->is_loggedin) return false;
@@ -948,7 +950,7 @@ class unifiapi {
    /*
    stop flashing LED of an access point for locating purposes
    return true on success
-   required parameter <MAC address>
+   required parameter <mac> = device MAC address
    */
    public function unset_locate_ap($mac) {
       if (!$this->is_loggedin) return false;

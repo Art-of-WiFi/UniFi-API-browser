@@ -14,13 +14,13 @@ Please keep the following in mind:
   Ubiquiti Community forums for this:
   https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651
 
-VERSION: 1.0.1
+VERSION: 1.0.2
 
 ------------------------------------------------------------------------------------
 
 The MIT License (MIT)
 
-Copyright (c) 2015, Slooffmaster
+Copyright (c) 2016, Slooffmaster
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -56,14 +56,14 @@ $time_start = microtime(true);
 assign variables which are required later on together with their default values
 */
 $action         = '';
-$siteid         = '';
-$sitename       = '';
+$site_id        = '';
+$site_name      = '';
 $selection      = '';
-$outputformat   = 'json';
+$output_format  = 'json';
 $theme          = 'bootstrap';
 $data           = '';
-$objectscount   = '';
-$alertmessage   = '';
+$objects_count  = '';
+$alert_message  = '';
 $cookietimeout  = '1800';
 $debug          = false;
 
@@ -73,7 +73,7 @@ load the settings file
 - if the config.php file is unreadable or does not exist, an alert is displayed on the page
 */
 if(!is_readable('config.php')) {
-    $alertmessage = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
+    $alert_message = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
                     . '<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify'
                     . 'the contents as required.</div>';
 }
@@ -102,21 +102,21 @@ $curl_version   = $curl_info['version'];
 /*
 process the GET variables and store them in the $_SESSION array,
 if a GET variable is not set, get the value from $_SESSION (if available)
-- siteid
-Only process these after siteid is set:
+- site_id
+Only process these after site_id is set:
 - action
-- outputformat
+- output_format
 - theme
 */
-if (isset($_GET['siteid'])) {
-    $siteid = $_GET['siteid'];
-    $_SESSION['siteid'] = $siteid;
-    $sitename = $_GET['sitename'];
-    $_SESSION['sitename'] = $sitename;
+if (isset($_GET['site_id'])) {
+    $site_id = $_GET['site_id'];
+    $_SESSION['site_id'] = $site_id;
+    $site_name = $_GET['site_name'];
+    $_SESSION['site_name'] = $site_name;
 } else {
-    if (isset($_SESSION['siteid'])) {
-        $siteid = $_SESSION['siteid'];
-        $sitename = $_SESSION['sitename'];
+    if (isset($_SESSION['site_id'])) {
+        $site_id = $_SESSION['site_id'];
+        $site_name = $_SESSION['site_name'];
 
         if (isset($_GET['action'])) {
             $action = $_GET['action'];
@@ -127,12 +127,12 @@ if (isset($_GET['siteid'])) {
             }
         }
 
-        if (isset($_GET['outputformat'])) {
-            $outputformat = $_GET['outputformat'];
-            $_SESSION['outputformat'] = $outputformat;
+        if (isset($_GET['output_format'])) {
+            $output_format = $_GET['output_format'];
+            $_SESSION['output_format'] = $output_format;
         } else {
-            if (isset($_SESSION['outputformat'])) {
-                $outputformat = $_SESSION['outputformat'];
+            if (isset($_SESSION['output_format'])) {
+                $output_format = $_SESSION['output_format'];
             }
         }
 
@@ -152,11 +152,11 @@ display info message when no site is selected or no data collection is selected
 placed here so they can be overwritten by more "severe" error messages later down
 */
 if ($action === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the drop-down menus'
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the drop-down menus'
                     . ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
-if ($siteid === '') {
-    $alertmessage = '<div class="alert alert-info" role="alert">Please select a site from the drop-down menu <i class="fa fa-arrow-circle-up">'
+if ($site_id === '') {
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the drop-down menu <i class="fa fa-arrow-circle-up">'
                     . '</i></div>';
 }
 
@@ -166,12 +166,12 @@ load the Unifi API connection class and log in to the controller
 */
 require('phpapi/class.unifi.php');
 
-$unifidata        = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $siteid, $controllerversion);
+$unifidata        = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $unifidata->debug = $debug;
 $loginresults     = $unifidata->login();
 
 if($loginresults === 400) {
-    $alertmessage = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
+    $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
                     . '<br>This is probably caused by a Unifi controller login failure, please check your credentials in '
                     . 'config.php</div>';
 }
@@ -190,7 +190,7 @@ if (!isset($_SESSION['sites']) || $_SESSION['sites'] === '') {
 get the version of the controller (if not already stored in $_SESSION or when empty)
 only get the version once a site has been selected
 */
-if($siteid != '') {
+if($site_id != '') {
     if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
         $site_info = $unifidata->stat_sysinfo();
         $detected_controller_version = $site_info[0]->version;
@@ -205,8 +205,8 @@ if($siteid != '') {
 /*
 execute timing of controller login
 */
-$time_1         = microtime(true);
-$timeafterlogin = $time_1 - $time_start;
+$time_1           = microtime(true);
+$time_after_login = $time_1 - $time_start;
 
 /*
 select the required call to the Unifi Controller API based on the selected action
@@ -344,7 +344,7 @@ switch ($action) {
 count the number of objects collected from the controller
 */
 if($action!=''){
-    $objectscount = count($data);
+    $objects_count = count($data);
 }
 
 /*
@@ -359,28 +359,28 @@ if ($theme === 'bootstrap') {
 /*
 execute timing of data collection from controller
 */
-$time_2         = microtime(true);
-$timeafterload  = $time_2 - $time_start;
+$time_2           = microtime(true);
+$time_after_load  = $time_2 - $time_start;
 
 /*
 calculate all the timings/percentages
 */
-$time_end   = microtime(true);
-$timetotal  = $time_end - $time_start;
-$loginperc  = ($timeafterlogin/$timetotal)*100;
-$loadperc   = (($timeafterload - $timeafterlogin)/$timetotal)*100;
-$remainperc = 100-$loginperc-$loadperc;
+$time_end    = microtime(true);
+$time_total  = $time_end - $time_start;
+$login_perc  = ($time_after_login/$time_total)*100;
+$load_perc   = (($time_after_load - $time_after_login)/$time_total)*100;
+$remain_perc = 100-$login_perc-$load_perc;
 
 /*
 shared functions
 */
-function print_output($outputformat, $data)
+function print_output($output_format, $data)
 {
     /*
     function to print the output
-    switch depending on the selected $outputformat
+    switch depending on the selected $output_format
     */
-    switch ($outputformat) {
+    switch ($output_format) {
         case 'json':
             echo json_encode($data, JSON_PRETTY_PRINT);
             break;
@@ -407,7 +407,7 @@ function print_output($outputformat, $data)
 /*
 log off from the Unifi controller API
 */
-$logoutresults = $unifidata->logout();
+$logout_results = $unifidata->logout();
 
 ?>
 <!DOCTYPE html>
@@ -422,9 +422,9 @@ $logoutresults = $unifidata->logout();
   <link rel="stylesheet" href="<?php echo $cssurl ?>">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
   <style>
-  body {
-    padding-top: 70px;
-  }
+    body {
+      padding-top: 70px;
+    }
   </style>
 </head>
 <body>
@@ -450,13 +450,13 @@ $logoutresults = $unifidata->logout();
             <li class="dropdown-header">Select a site</li>
             <?php
             foreach ($sites as $site) {
-              echo '<li id="' . $site->name . '"><a href="?siteid=' . $site->name . '&sitename=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
+              echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
             }
             ?>
            </ul>
         </li>
-        <!-- only show the data collection menus when a siteid is selected -->
-        <?php if ($siteid) { ?>
+        <!-- only show the data collection menus when a site_id is selected -->
+        <?php if ($site_id) { ?>
           <li id="output-menu" class="dropdown">
             <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
               Output
@@ -464,14 +464,14 @@ $logoutresults = $unifidata->logout();
             </a>
             <ul class="dropdown-menu" id="outputselection">
               <li class="dropdown-header">Select an output format</li>
-              <li id="json"><a href="?outputformat=json">json (default)</a></li>
+              <li id="json"><a href="?output_format=json">json (default)</a></li>
               <li role="separator" class="divider"></li>
-              <li id="php_array"><a href="?outputformat=php_array">PHP array</a></li>
-              <li id="php_var_dump"><a href="?outputformat=php_var_dump">PHP var_dump</a></li>
-              <li id="php_var_export"><a href="?outputformat=php_var_export">PHP var_export</a></li>
+              <li id="php_array"><a href="?output_format=php_array">PHP array</a></li>
+              <li id="php_var_dump"><a href="?output_format=php_var_dump">PHP var_dump</a></li>
+              <li id="php_var_export"><a href="?output_format=php_var_export">PHP var_export</a></li>
               <li role="separator" class="divider"></li>
               <li class="dropdown-header">Nice but slow with large collections</li>
-              <li id="json_color"><a href="?outputformat=json_color">json highlighted</a></li>
+              <li id="json_color"><a href="?output_format=json_color">json highlighted</a></li>
             </ul>
           </li>
           <li id="user-menu" class="dropdown">
@@ -599,45 +599,45 @@ $logoutresults = $unifidata->logout();
 </nav><!-- /navbar-example -->
 <div class="container-fluid">
   <div id="alertPlaceholder">
-    <?php echo $alertmessage ?>
+    <?php echo $alert_message ?>
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <?php if ($siteid) { ?>
-        site id: <span class="label label-primary"><?php echo $siteid ?></span>
-        site name: <span class="label label-primary"><?php echo $sitename ?></span>
+      <?php if ($site_id) { ?>
+        site id: <span class="label label-primary"><?php echo $site_id ?></span>
+        site name: <span class="label label-primary"><?php echo $site_name ?></span>
       <?php } ?>
       <?php if ($selection) { ?>
         collection: <span class="label label-primary"><?php echo $selection ?></span>
       <?php } ?>
-      output: <span class="label label-primary"><?php echo $outputformat ?></span>
-      <?php if ($objectscount !== '') { ?>
-        # of objects: <span class="badge"><?php echo $objectscount ?></span>
+      output: <span class="label label-primary"><?php echo $output_format ?></span>
+      <?php if ($objects_count !== '') { ?>
+        # of objects: <span class="badge"><?php echo $objects_count ?></span>
       <?php } ?>
     </div>
     <div class="panel-body">
       <!--only display panel content when an action has been selected-->
       <?php if ($action !== '') { ?>
       <!-- present the timing results using an HTML5 progress bar -->
-      total elapsed time: <?php echo $timetotal ?> seconds<br>
+      total elapsed time: <?php echo $time_total ?> seconds<br>
       <div class="progress">
-        <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $loginperc ?>"
-        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loginperc ?>%;" data-toggle="tooltip"
-        data-placement="bottom" data-original-title="<?php echo $timeafterlogin ?> seconds">
+        <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $login_perc ?>"
+        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $login_perc ?>%;" data-toggle="tooltip"
+        data-placement="bottom" data-original-title="<?php echo $time_after_login ?> seconds">
           API login time
         </div>
-        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $loadperc ?>"
-        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $loadperc ?>%;" data-toggle="tooltip"
-        data-placement="bottom" data-original-title="<?php echo ($timeafterload - $timeafterlogin) ?> seconds">
+        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $load_perc ?>"
+        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $load_perc ?>%;" data-toggle="tooltip"
+        data-placement="bottom" data-original-title="<?php echo ($time_after_load - $time_after_login) ?> seconds">
           data load time
         </div>
-        <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remainperc ?>"
-        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remainperc ?>%;" data-toggle="tooltip"
-        data-placement="bottom" data-original-title="PHP overhead: <?php echo $remainperc ?> seconds">
+        <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remain_perc ?>"
+        aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remain_perc ?>%;" data-toggle="tooltip"
+        data-placement="bottom" data-original-title="PHP overhead: <?php echo $remain_perc ?> seconds">
           PHP overhead
         </div>
       </div>
-      <pre><?php print_output($outputformat, $data) ?></pre>
+      <pre><?php print_output($output_format, $data) ?></pre>
       <?php } ?>
     </div>
   </div>
@@ -710,12 +710,12 @@ $logoutresults = $unifidata->logout();
 <script>
   /*
   highlight selected options in the pull down menus
-  for $action, $siteid, $theme and $outputformat:
+  for $action, $site_id, $theme and $output_format:
   */
   $('#<?php echo $theme ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
   $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-  $('#<?php echo $siteid ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-  $('#<?php echo $outputformat ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+  $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+  $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
