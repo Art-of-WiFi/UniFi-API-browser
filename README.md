@@ -47,6 +47,7 @@ The Unifi API browser tool offers the following features:
   - stat payments
   - list hotspot operators
 - Configuration
+  - add site
   - list sites on this controller
   - list site settings
   - sysinfo
