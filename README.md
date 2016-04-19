@@ -3,6 +3,7 @@ This tool is for browsing data that is exposed through Ubiquiti's Unifi Controll
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
 - currently only supports versions 4.x.x of the Unifi Controller software
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
+- please read the Security Notice below before installing this tool!
 
 If you'd like to buy me a beer, please use the donate button below. All donations go to the project maintainer (primarily for the procurement of liquid refreshments) :satisfied:
 
