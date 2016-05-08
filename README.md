@@ -78,7 +78,7 @@ Other included libraries:
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
 - network connectivity between this web server and the server (and port) where the Unifi controller is running (in case you are seeing errors, please check out [this issue] (https://github.com/malle-pietje/Unifi-API-browser/issues/4))
-- clients using this tool should have internet access to be able to load the required css files because they are loaded from CDNs.
+- clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
 ### Installation
 Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
