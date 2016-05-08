@@ -33,7 +33,7 @@ The Unifi API browser tool offers the following features:
   - stat authorisations
   - stat sessions
 - Devices
-  - list devices (access points, USGs and switches)
+  - list devices (access points, USG routers and USW switches)
   - list wlan groups
   - list rogue access points
 - Stats
