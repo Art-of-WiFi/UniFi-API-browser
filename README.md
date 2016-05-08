@@ -1,8 +1,8 @@
 ## Unifi API browser
 This tool is for browsing data that is exposed through Ubiquiti's Unifi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
-- currently only supports versions 4.x.x of the Unifi Controller software
-- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) for this.
+- currently supports versions 4.x.x of the Unifi Controller software and higher (5.0.1.alpha has been confirmed to work)
+- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) to share your ideas.
 - please read the Security Notice below before installing this tool!
 
 If you'd like to buy me a beer, please use the donate button below. All donations go to the project maintainer (primarily for the procurement of liquid refreshments) :satisfied:
@@ -17,7 +17,7 @@ The Unifi API browser tool offers the following features:
 - switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the Unifi Controller
 - very easy setup with minimal dependencies
-- timing details of API queries can help "benchmark" your controller
+- timing details of API queries can be useful to "benchmark" your controller
 - useful tool when developing applications that make use of the API
 - the API exposes more data than is visible through the Controller's web interface which makes the tool useful for troubleshooting purposes
 - comes bundled with an extensive PHP class for access to the Unifi Controller API, which supports even more API Endpoints
