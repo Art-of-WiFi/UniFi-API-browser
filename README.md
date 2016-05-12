@@ -23,7 +23,7 @@ The Unifi API browser tool offers the following features:
 - comes bundled with an extensive PHP class for access to the Unifi Controller API, which supports even more API Endpoints
 - debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
-### Data collections/API endpoints currently implemented
+### Data collections/API endpoints currently implemented in the API browser
 - Clients/users
   - list online clients
   - list guests
@@ -62,6 +62,8 @@ The Unifi API browser tool offers the following features:
 - Messages
   - list events
   - list alarms
+
+Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
 ### Credits
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
