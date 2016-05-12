@@ -9,11 +9,11 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-VERSION: 1.0.2
+VERSION: 1.0.3
 
 NOTE:
-this Class will only work with Unifi Controller versions 4.x. There are no checks to prevent you from
-trying to use it with a pre-4.x version controller.
+this Class will only work with Unifi Controller versions 4.x and higher. There are no checks to prevent
+you from trying to use it with a pre-4.x version controller.
 
 IMPORTANT CHANGES:
 - function "get_vouchers" has been removed and has been replaced by "stat_voucher"
@@ -43,6 +43,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
+define('API_CLASS_VERSION', '1.0.2');
+
 class unifiapi {
    public $user         = '';
    public $password     = '';
@@ -103,6 +105,7 @@ class unifiapi {
       $code         = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
       curl_close ($ch);
+
       preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
       if (isset($results[1])) {
          $this->cookies = implode(';', $results[1]);
@@ -404,12 +407,14 @@ class unifiapi {
 
    /*
    list guests
-   returns an array of guest objects
+   returns an array of guest objects with valid access
+   optional parameter <within> = time frame in hours to go back to list guests with valid access (default = 24*365 hours)
    */
-   public function list_guests() {
+   public function list_guests($within = 8760) {
       if (!$this->is_loggedin) return false;
       $return           = array();
-      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/guest'));
+      $json             = json_encode(array('within' => $within));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/guest','json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
             if (is_array($content_decoded->data)) {
@@ -441,6 +446,27 @@ class unifiapi {
       }
       return $return;
    }
+   
+   /*
+   gets data for a single client
+   returns an object with the client information
+   required parameter <client_mac>
+   */
+   public function stat_client($client_mac) {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+	    $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/user/'.$client_mac));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            if (is_array($content_decoded->data)) {
+               foreach ($content_decoded->data as $client) {
+                  $return[]= $client;
+               }
+            }
+         }
+      }
+      return $return;
+   }
 
    /*
    list user groups
@@ -461,6 +487,25 @@ class unifiapi {
       }
       return $return;
    }
+   
+   /*
+   assign user to another group
+   return true on success
+   required parameter <user_id> = id of the user to be modified
+   required parameter <group_id> = id of the user group to assign user to
+   */
+   public function set_usergroup($user_id, $group_id) {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('usergroup_id' => $group_id, "noted" => false));
+	    $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id,'json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }   
 
    /*
    list health metrics
