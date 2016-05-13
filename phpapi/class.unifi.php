@@ -43,7 +43,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-define('API_CLASS_VERSION', '1.0.2');
+define('API_CLASS_VERSION', '1.0.3');
 
 class unifiapi {
    public $user         = '';
