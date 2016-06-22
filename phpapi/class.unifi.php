@@ -9,7 +9,7 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-VERSION: 1.0.3
+VERSION: 1.0.4
 
 NOTE:
 this Class will only work with Unifi Controller versions 4.x and higher. There are no checks to prevent
@@ -43,7 +43,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-define('API_CLASS_VERSION', '1.0.3');
+define('API_CLASS_VERSION', '1.0.4');
 
 class unifiapi {
    public $user         = '';
@@ -136,7 +136,8 @@ class unifiapi {
    }
 
    /*
-   Authorize a MAC address
+   Authorize a client device
+   -------------------------
    return true on success
    required parameter <mac> = client MAC address
    required parameter <minutes> = minutes (from now) until authorization expires
@@ -169,7 +170,8 @@ class unifiapi {
    }
 
    /*
-   unauthorize a MAC address
+   Unauthorize a client device
+   ---------------------------
    return true on success
    required parameter <mac> = client MAC address
    */
@@ -188,7 +190,8 @@ class unifiapi {
    }
 
    /*
-   reconnect a client
+   Reconnect a client device
+   -------------------------
    return true on success
    required parameter <mac> = client MAC address
    */
@@ -207,7 +210,8 @@ class unifiapi {
    }
 
    /*
-   block a client
+   Block a client device
+   ---------------------
    return true on success
    required parameter <mac> = client MAC address
    */
@@ -226,7 +230,8 @@ class unifiapi {
    }
 
    /*
-   unblock a client
+   Unblock a client device
+   -----------------------
    return true on success
    required parameter <mac> = client MAC address
    */
@@ -245,7 +250,52 @@ class unifiapi {
    }
 
    /*
-   daily stats method
+   Add/modify a client device note
+   -------------------------------
+   return true on success
+   required parameter <user_id> = id of the user device to be modified
+   required parameter <note> = note to be applied to the user device
+   NOTES:
+   - when note is empty or not set, the existing note for the user will be removed
+   */
+   public function set_sta_note($user_id, $note) {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('note' => $note, 'noted' => true));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id,'json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
+   /*
+   Add/modify a client device name
+   -------------------------------
+   return true on success
+   required parameter <user_id> = id of the user device to be modified
+   required parameter <name> = name to be applied to the user device
+   NOTES:
+   - when name is empty or not set, the existing name for the user will be removed
+   */
+   public function set_sta_name($user_id, $name) {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('name' => $name));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id,'json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
+   /*
+   Daily stats method
+   ------------------
    returns an array of daily stats objects
    optional parameter <start> = Unix timestamp in seconds
    optional parameter <end> = Unix timestamp in seconds
@@ -273,7 +323,8 @@ class unifiapi {
    }
 
    /*
-   hourly stats method for a site
+   Hourly stats method for a site
+   ------------------------------
    returns an array of hourly stats objects
    optional parameter <start> = Unix timestamp in seconds
    optional parameter <end> = Unix timestamp in seconds
@@ -301,7 +352,8 @@ class unifiapi {
    }
 
    /*
-   hourly stats method for all access points
+   Hourly stats method for all access points
+   -----------------------------------------
    returns an array of hourly stats objects
    optional parameter <start> = Unix timestamp in seconds
    optional parameter <end> = Unix timestamp in seconds
@@ -329,7 +381,8 @@ class unifiapi {
    }
 
    /*
-   show all login sessions
+   Show all login sessions
+   -----------------------
    returns an array of login session objects
    optional parameter <start>  = Unix timestamp in seconds
    optional parameter <end>  = Unix timestamp in seconds
@@ -355,7 +408,8 @@ class unifiapi {
    }
 
    /*
-   show all authorizations
+   Show all authorizations
+   -----------------------
    returns an array of authorization objects
    optional parameter <start> = Unix timestamp in seconds
    optional parameter <end> = Unix timestamp in seconds
@@ -381,8 +435,9 @@ class unifiapi {
    }
 
    /*
-   get details of all clients ever connected to the site
-   returns an array of client objects
+   List all client devices ever connected to the site
+   --------------------------------------------------
+   returns an array of client device objects
    optional parameter <historyhours> = hours to go back (default is 8760 hours or 1 year)
    NOTES:
    - <historyhours> is only used to select clients that were online within that period
@@ -406,8 +461,9 @@ class unifiapi {
    }
 
    /*
-   list guests
-   returns an array of guest objects with valid access
+   List guest devices
+   ------------------
+   returns an array of guest device objects with valid access
    optional parameter <within> = time frame in hours to go back to list guests with valid access (default = 24*365 hours)
    */
    public function list_guests($within = 8760) {
@@ -428,8 +484,9 @@ class unifiapi {
    }
 
    /*
-   list clients
-   returns an array of client objects
+   List client devices
+   -------------------
+   returns an array of client device objects
    */
    public function list_clients() {
       if (!$this->is_loggedin) return false;
@@ -446,10 +503,11 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
-   gets data for a single client
-   returns an object with the client information
+   Get data for a single client device
+   -----------------------------------
+   returns an object with the client device information
    required parameter <client_mac>
    */
    public function stat_client($client_mac) {
@@ -469,7 +527,8 @@ class unifiapi {
    }
 
    /*
-   list user groups
+   List user groups
+   ----------------
    returns an array of user group objects
    */
    public function list_usergroups() {
@@ -487,11 +546,12 @@ class unifiapi {
       }
       return $return;
    }
-   
+
    /*
-   assign user to another group
+   Assign user device to another group
+   -----------------------------------
    return true on success
-   required parameter <user_id> = id of the user to be modified
+   required parameter <user_id> = id of the user device to be modified
    required parameter <group_id> = id of the user group to assign user to
    */
    public function set_usergroup($user_id, $group_id) {
@@ -505,10 +565,11 @@ class unifiapi {
          }
       }
       return $return;
-   }   
+   }
 
    /*
-   list health metrics
+   List health metrics
+   -------------------
    returns an array of health metric objects
    */
    public function list_health() {
@@ -528,7 +589,8 @@ class unifiapi {
    }
 
    /*
-   list dashboard metrics
+   List dashboard metrics
+   ----------------------
    returns an array of dashboard metric objects (available since controller version 4.9.1.alpha)
    */
    public function list_dashboard() {
@@ -548,8 +610,9 @@ class unifiapi {
    }
 
    /*
-   list users
-   returns an array of known user objects
+   List user devices
+   -----------------
+   returns an array of known user device objects
    */
    public function list_users() {
       if (!$this->is_loggedin) return false;
@@ -568,7 +631,8 @@ class unifiapi {
    }
 
    /*
-   list access points and other devices under management of the controller (USW and/or USG devices)
+   List access points and other devices under management of the controller (USW and/or USG devices)
+   ------------------------------------------------------------------------------------------------
    returns an array of known device objects (or a single device when using the <device_mac> parameter)
    optional parameter <device_mac> = the MAC address of a single device for which the call must be made
    */
@@ -589,7 +653,8 @@ class unifiapi {
    }
 
    /*
-   list rogue access points
+   List rogue access points
+   ------------------------
    returns an array of known rogue access point objects
    optional parameter <within> = hours to go back to list discovered "rogue" access points (default = 24 hours)
    */
@@ -611,7 +676,8 @@ class unifiapi {
    }
 
    /*
-   list sites
+   List sites
+   ----------
    returns a list sites hosted on this controller with some details
    */
    public function list_sites() {
@@ -631,10 +697,11 @@ class unifiapi {
    }
 
    /*
-   add a site
+   Add a site
+   ----------
    returns an array containing a single object with attributes of the new site ("_id", "desc", "name") on success
    required parameter <description> = the long name for the new site
-   NOTE: immediately after being added, the new site will be included in the output of the "list_sites" function
+   NOTE: immediately after being added, the new site will be available in the output of the "list_sites" function
    */
    public function add_site($description) {
       if (!$this->is_loggedin) return false;
@@ -654,7 +721,8 @@ class unifiapi {
    }
 
    /*
-   list wlan_groups
+   List wlan_groups
+   ----------------
    returns an array of known wlan_groups
    */
    public function list_wlan_groups() {
@@ -674,7 +742,8 @@ class unifiapi {
    }
 
    /*
-   stat sysinfo
+   List sysinfo
+   ------------
    returns an array of known sysinfo data
    */
    public function stat_sysinfo() {
@@ -694,7 +763,8 @@ class unifiapi {
    }
 
    /*
-   list self
+   List self
+   ---------
    returns an array of information about the logged in user
    */
    public function list_self() {
@@ -714,7 +784,8 @@ class unifiapi {
    }
 
    /*
-   list networkconf
+   List networkconf
+   ----------------
    returns an array of network configuration data
    */
    public function list_networkconf() {
@@ -734,7 +805,8 @@ class unifiapi {
    }
 
    /*
-   stat vouchers
+   List vouchers
+   -------------
    returns an array of hotspot voucher objects
    optional parameter <create_time> = Unix timestamp in seconds
    */
@@ -759,7 +831,8 @@ class unifiapi {
    }
 
    /*
-   stat payment
+   List payments
+   -------------
    returns an array of hotspot payments
    */
    public function stat_payment() {
@@ -779,7 +852,8 @@ class unifiapi {
    }
 
    /*
-   list hotspot operators
+   List hotspot operators
+   ----------------------
    returns an array of hotspot operators
    */
    public function list_hotspotop() {
@@ -799,7 +873,8 @@ class unifiapi {
    }
 
    /*
-   create voucher(s)
+   Create voucher(s)
+   -----------------
    returns an array of vouchers codes (NOTE: without the "-" in the middle)
    required parameter <minutes> = minutes the voucher is valid after activation
    required parameter <number_of_vouchers_to_create>
@@ -835,7 +910,8 @@ class unifiapi {
    }
 
    /*
-   list port forwarding stats
+   List port forwarding stats
+   --------------------------
    returns an array of port forwarding stats
    */
    public function list_portforward_stats() {
@@ -855,7 +931,8 @@ class unifiapi {
    }
 
    /*
-   list port forwarding settings
+   List port forwarding settings
+   -----------------------------
    returns an array of port forwarding settings
    */
    public function list_portforwarding() {
@@ -875,7 +952,8 @@ class unifiapi {
    }
 
    /*
-   list dynamic DNS settings
+   List dynamic DNS settings
+   -------------------------
    returns an array of dynamic DNS settings
    */
    public function list_dynamicdns() {
@@ -895,7 +973,8 @@ class unifiapi {
    }
 
    /*
-   list port configuration
+   List port configuration
+   -----------------------
    returns an array of port configurations
    */
    public function list_portconf() {
@@ -915,7 +994,8 @@ class unifiapi {
    }
 
    /*
-   list VoIP extensions
+   List VoIP extensions
+   --------------------
    returns an array of VoIP extensions
    */
    public function list_extension() {
@@ -935,7 +1015,8 @@ class unifiapi {
    }
 
    /*
-   list site settings
+   List site settings
+   ------------------
    returns an array of site configuration settings
    */
    public function list_settings() {
@@ -955,7 +1036,8 @@ class unifiapi {
    }
 
    /*
-   reboot an access point
+   Reboot an access point
+   ----------------------
    return true on success
    required parameter <mac> = device MAC address
    */
@@ -974,7 +1056,8 @@ class unifiapi {
    }
 
    /*
-   start flashing LED of an access point for locating purposes
+   Start flashing LED of an access point for locating purposes
+   -----------------------------------------------------------
    return true on success
    required parameter <mac> = device MAC address
    */
@@ -993,7 +1076,8 @@ class unifiapi {
    }
 
    /*
-   stop flashing LED of an access point for locating purposes
+   Stop flashing LED of an access point for locating purposes
+   ----------------------------------------------------------
    return true on success
    required parameter <mac> = device MAC address
    */
@@ -1012,7 +1096,8 @@ class unifiapi {
    }
 
    /*
-   switch LEDs of all the access points ON
+   Switch LEDs of all the access points ON
+   ---------------------------------------
    return true on success
    */
    public function site_ledson() {
@@ -1029,7 +1114,8 @@ class unifiapi {
    }
 
    /*
-   switch LEDs of all the access points OFF
+   Switch LEDs of all the access points OFF
+   ----------------------------------------
    return true on success
    */
    public function site_ledsoff() {
@@ -1046,7 +1132,8 @@ class unifiapi {
    }
 
    /*
-   set access point radio settings
+   Set access point radio settings
+   -------------------------------
    return true on success
    required parameter <ap_id>
    required parameter <radio>(default=ng)
@@ -1070,7 +1157,8 @@ class unifiapi {
    }
 
    /*
-   set guest login settings
+   Set guest login settings
+   ------------------------
    return true on success
    required parameter <portal_enabled>
    required parameter <portal_customized>
@@ -1099,7 +1187,8 @@ class unifiapi {
    }
 
    /*
-   rename access point
+   Rename access point
+   -------------------
    return true on success
    required parameter <ap_id>
    required parameter <apname>
@@ -1118,7 +1207,8 @@ class unifiapi {
    }
 
    /*
-   set wlan settings
+   Set wlan settings
+   -----------------
    return true on success
    required parameter <wlan_id>
    required parameter <name>
@@ -1138,7 +1228,8 @@ class unifiapi {
    }
 
    /*
-   list events
+   List events
+   -----------
    returns an array of known events
    */
    public function list_events() {
@@ -1158,7 +1249,8 @@ class unifiapi {
    }
 
    /*
-   list wireless settings
+   List wireless settings
+   ----------------------
    returns an array of wireless networks and settings
    */
    public function list_wlanconf() {
@@ -1178,7 +1270,8 @@ class unifiapi {
    }
 
    /*
-   list alarms
+   List alarms
+   -----------
    returns an array of known alarms
    */
    public function list_alarms() {
@@ -1197,6 +1290,9 @@ class unifiapi {
       return $return;
    }
 
+   /*
+   Internal (private) functions from here
+   */
    private function exec_curl($url, $data = '') {
       $ch = $this->get_curl_obj();
       curl_setopt($ch, CURLOPT_URL, $url);
