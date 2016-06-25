@@ -9,14 +9,14 @@ Unifi PHP API
   and the API as published by Ubiquiti:
     https://dl.ubnt.com/unifi/4.7.6/unifi_sh_api
 
-VERSION: 1.0.4
+VERSION: 1.0.5
 
 NOTE:
 this Class will only work with Unifi Controller versions 4.x and higher. There are no checks to prevent
 you from trying to use it with a pre-4.x version controller.
 
 IMPORTANT CHANGES:
-- function "get_vouchers" has been removed and has been replaced by "stat_voucher"
+- function/method "get_vouchers" has been removed and has been replaced by "stat_voucher"
 
 ------------------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-define('API_CLASS_VERSION', '1.0.4');
+define('API_CLASS_VERSION', '1.0.5');
 
 class unifiapi {
    public $user         = '';
@@ -254,14 +254,15 @@ class unifiapi {
    -------------------------------
    return true on success
    required parameter <user_id> = id of the user device to be modified
-   required parameter <note> = note to be applied to the user device
+   optional parameter <note> = note to be applied to the user device
    NOTES:
-   - when note is empty or not set, the existing note for the user will be removed
+   - when note is empty or not set, the existing note for the user will be removed and "noted" attribute set to false
    */
-   public function set_sta_note($user_id, $note) {
+   public function set_sta_note($user_id, $note = NULL) {
       if (!$this->is_loggedin) return false;
       $return           = false;
-      $json             = json_encode(array('note' => $note, 'noted' => true));
+      $noted            = (is_null($note)) || (empty($note)) ? false : true;
+      $json             = json_encode(array('note' => $note, 'noted' => $noted));
       $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id,'json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
@@ -276,11 +277,11 @@ class unifiapi {
    -------------------------------
    return true on success
    required parameter <user_id> = id of the user device to be modified
-   required parameter <name> = name to be applied to the user device
+   optional parameter <name> = name to be applied to the user device
    NOTES:
    - when name is empty or not set, the existing name for the user will be removed
    */
-   public function set_sta_name($user_id, $name) {
+   public function set_sta_name($user_id, $name = NULL) {
       if (!$this->is_loggedin) return false;
       $return           = false;
       $json             = json_encode(array('name' => $name));
