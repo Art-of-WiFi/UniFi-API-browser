@@ -558,7 +558,7 @@ class unifiapi {
    public function set_usergroup($user_id, $group_id) {
       if (!$this->is_loggedin) return false;
       $return           = false;
-      $json             = json_encode(array('usergroup_id' => $group_id, "noted" => false));
+      $json             = json_encode(array('usergroup_id' => $group_id));
 	    $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id,'json='.$json));
       if (isset($content_decoded->meta->rc)) {
          if ($content_decoded->meta->rc == 'ok') {
