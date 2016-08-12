@@ -85,7 +85,7 @@ Other included libraries:
 Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
 - open up a terminal window on your server and cd to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```bash
-git clone https://github.com/malle-pietje/Unifi-API-browser.git
+git clone https://github.com/malle-pietje/UniFi-API-browser.git
 ```
 - when git is done cloning, follow the configuration steps below to configure the settings for access to your UniFi Controller's API
 
