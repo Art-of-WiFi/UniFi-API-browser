@@ -94,7 +94,7 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 ### Configuration
 - credentials for access to the UniFi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the UniFi API browser tool
 - please see the `config.template.php` file for further instructions
-- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http://serverip/Unifi-API-browser/`
+- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http://serverip/UniFi-API-browser/`
 
 ### Updates
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
