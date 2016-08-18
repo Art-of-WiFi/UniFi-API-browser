@@ -2,7 +2,7 @@
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
 - currently supports versions 4.x.x of the UniFi Controller software and higher (version 5.0.6 has been confirmed to work)
-- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/Unifi-API-browser-tool-released/m-p/1392651) to share your ideas.
+- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas.
 - please read the Security Notice below before installing this tool!
 
 If you'd like to buy me a beer, please use the donate button below. All donations go to the project maintainer (primarily for the procurement of liquid refreshments) :satisfied:
@@ -78,7 +78,7 @@ Other included libraries:
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue] (https://github.com/malle-pietje/Unifi-API-browser/issues/4))
+- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue] (https://github.com/malle-pietje/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
 ### Installation
