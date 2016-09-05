@@ -1228,6 +1228,26 @@ class unifiapi {
       return $return;
    }
 
+      /*
+   Set pre-shared key (PSK)
+   -----------------
+   return true on success
+   required parameter <wlan_id>
+   required parameter <x_passphrase>
+   */
+   public function set_psk($wlan_id, $x_passphrase) {
+      if (!$this->is_loggedin) return false;
+      $return           = false;
+      $json             = json_encode(array('x_passphrase' => $x_passphrase));
+      $content_decoded  = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id,'json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = true;
+         }
+      }
+      return $return;
+   }
+
    /*
    List events
    -----------
