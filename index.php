@@ -126,17 +126,19 @@ if (isset($_GET['controller_id'])) {
     if (isset($_SESSION['controller']) && isset($controllers)) {
         $controller = $_SESSION['controller'];
     } else {
-        /**
-         * if the user has configured a single controller, we push it's details
-         * to the $_SESSION and $controller arrays
-         */
-        $_SESSION['controller'] = array('user'     => $controlleruser,
-                                        'password' => $controllerpassword,
-                                        'url'      => $controllerurl,
-                                        'name'     => 'Default Controller',
-                                        'version'  => $controllerversion
-                                    );
-        $controller = $_SESSION['controller'];
+        if (!isset($controllers)) {
+            /**
+             * if the user has configured a single controller, we push it's details
+             * to the $_SESSION and $controller arrays
+             */
+            $_SESSION['controller'] = array('user'     => $controlleruser,
+                                            'password' => $controllerpassword,
+                                            'url'      => $controllerurl,
+                                            'name'     => 'Controller',
+                                            'version'  => $controllerversion
+                                        );
+            $controller = $_SESSION['controller'];
+        }
     }
 
     if (isset($_GET['site_id'])) {
