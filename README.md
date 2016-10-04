@@ -68,7 +68,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.0.7/unifi_sh_api
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.2.9/unifi_sh_api
 
 Other included libraries:
 - Bootstrap (version 3.3.5) http://getbootstrap.com/
