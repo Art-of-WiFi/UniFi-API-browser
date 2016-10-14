@@ -40,6 +40,7 @@ The UniFi API browser tool offers the following features:
   - hourly site stats
   - hourly access point stats
   - daily site stats
+  - all sites stats (supported on controller version 5.2.9 and higher)
   - health metrics
   - dashboard metrics (supported on controller version 4.9.1.alpha and higher)
   - port forward stats

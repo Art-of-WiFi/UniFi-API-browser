@@ -7,9 +7,9 @@
  *   domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
  *   fbagnol: https://github.com/fbagnol/class.unifi.php
  * and the API as published by Ubiquiti:
- *   https://www.ubnt.com/downloads/unifi/4.8.20/unifi_sh_api
+ *   https://www.ubnt.com/downloads/unifi/5.2.9/unifi_sh_api
  *
- * VERSION: 1.0.7
+ * VERSION: 1.0.8
  *
  * NOTES:
  * - this Class will only work with UniFi Controller versions 4.x and higher. There are no checks to prevent
@@ -27,7 +27,7 @@
  *
  */
 
-define('API_CLASS_VERSION', '1.0.7');
+define('API_CLASS_VERSION', '1.0.8');
 
 class unifiapi {
    public $user        = '';
@@ -40,11 +40,11 @@ class unifiapi {
    public $debug       = FALSE;
 
    function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '') {
-      if (!empty($user)) $this->user          = $user;
-      if (!empty($password)) $this->password  = $password;
-      if (!empty($baseurl)) $this->baseurl    = $baseurl;
-      if (!empty($site)) $this->site          = $site;
-      if (!empty($version)) $this->version    = $version;
+      if (!empty($user)) $this->user         = $user;
+      if (!empty($password)) $this->password = $password;
+      if (!empty($baseurl)) $this->baseurl   = $baseurl;
+      if (!empty($site)) $this->site         = $site;
+      if (!empty($version)) $this->version   = $version;
    }
 
    function __destruct() {
@@ -76,9 +76,9 @@ class unifiapi {
 
       if ($this->debug === TRUE) {
          print '<pre>';
-         print PHP_EOL.'-----LOGIN-------------------'.PHP_EOL;
+         print PHP_EOL.'-----------LOGIN-------------'.PHP_EOL;
          print_r (curl_getinfo($ch));
-         print PHP_EOL.'-----RESPONSE----------------'.PHP_EOL;
+         print PHP_EOL.'----------RESPONSE-----------'.PHP_EOL;
          print $content;
          print PHP_EOL.'-----------------------------'.PHP_EOL;
          print '</pre>';
@@ -1359,12 +1359,12 @@ class unifiapi {
 
       if ($this->debug === TRUE) {
          print '<pre>';
-         print PHP_EOL.'-----cURL INFO---------------'.PHP_EOL;
+         print PHP_EOL.'---------cURL INFO-----------'.PHP_EOL;
          print_r (curl_getinfo($ch));
-         print PHP_EOL.'-----URL & PAYLOAD-----------'.PHP_EOL;
+         print PHP_EOL.'-------URL & PAYLOAD---------'.PHP_EOL;
          print $url.PHP_EOL;
          print $data;
-         print PHP_EOL.'-----RESPONSE----------------'.PHP_EOL;
+         print PHP_EOL.'---------RESPONSE------------'.PHP_EOL;
          print $content;
          print PHP_EOL.'-----------------------------'.PHP_EOL;
          print '</pre>';

@@ -14,7 +14,7 @@
  *   Ubiquiti Community forums for this:
  *   https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651
  *
- * VERSION: 1.0.3
+ * VERSION: 1.0.4
  *
  * ------------------------------------------------------------------------------------
  *
@@ -25,7 +25,7 @@
  *
  */
 
-define('API_BROWSER_VERSION', '1.0.3');
+define('API_BROWSER_VERSION', '1.0.4');
 
 /**
  * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -51,6 +51,7 @@ $objects_count = '';
 $alert_message = '';
 $cookietimeout = '1800';
 $debug         = false;
+$detected_controller_version = '';
 
 /**
  * load the configuration file
@@ -105,6 +106,7 @@ if (isset($_GET['controller_id'])) {
     unset($_SESSION['site_id']);
     unset($_SESSION['site_name']);
     unset($_SESSION['sites']);
+    unset($_SESSION['detected_controller_version']);
 } else {
     if (isset($_SESSION['controller']) && isset($controllers)) {
         $controller = $_SESSION['controller'];
@@ -214,19 +216,19 @@ if (isset($_SESSION['controller'])) {
     }
 
     /**
-     * get the version of the controller (if not already stored in $_SESSION or when empty)
-     * only get the version once a site has been selected
+     * Get the version of the controller (if not already stored in $_SESSION or when empty)
      */
-    if($site_id != '') {
-        if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === '') {
-            $site_info = $unifidata->stat_sysinfo();
-            $detected_controller_version = $site_info[0]->version;
-            $_SESSION['detected_controller_version'] = $detected_controller_version;
+    if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] == '') {
+        $site_info = $unifidata->stat_sysinfo();
+        $detected_controller_version = $site_info[0]->version;
+
+        if ($detected_controller_version == '') {
+            $_SESSION['detected_controller_version'] = 'undetected';
         } else {
-            $detected_controller_version = $_SESSION['detected_controller_version'];
+            $_SESSION['detected_controller_version'] = $detected_controller_version;
         }
     } else {
-        $detected_controller_version = 'undetected';
+        $detected_controller_version = $_SESSION['detected_controller_version'];
     }
 }
 
@@ -364,6 +366,10 @@ switch ($action) {
         $selection = 'self';
         $data      = $unifidata->list_self();
         break;
+    case 'stat_sites':
+        $selection = 'all site stats';
+        $data      = $unifidata->stat_sites();
+        break;
     default:
         break;
 }
@@ -432,6 +438,14 @@ function print_output($output_format, $data)
     }
 }
 
+/**
+ * function to sort the sites collection
+ */
+function sites_sort($a, $b)
+{
+    return strcmp($a->desc, $b->desc);
+}
+
 if (isset($_SESSION['controller'])) {
     /**
      * log off from the UniFi controller API
@@ -454,6 +468,12 @@ if (isset($_SESSION['controller'])) {
         body {
             padding-top: 70px;
         }
+
+        .scrollable-menu {
+            height: auto;
+            max-height: 600px;
+            overflow-x: hidden;
+        }
     </style>
 </head>
 <body>
@@ -466,7 +486,7 @@ if (isset($_SESSION['controller'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.php">UniFi API browser</a>
+            <a class="navbar-brand hidden-sm hidden-md" href="index.php">UniFi API browser</a>
         </div>
         <div id="navbar-main" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-left">
@@ -485,7 +505,7 @@ if (isset($_SESSION['controller'])) {
                             ?>
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="controllerslist">
+                        <ul class="dropdown-menu scrollable-menu" id="controllerslist">
                             <li class="dropdown-header">Select a controller</li>
                             <?php
                             /**
@@ -505,12 +525,14 @@ if (isset($_SESSION['controller'])) {
                             Sites
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="siteslist">
+                        <ul class="dropdown-menu scrollable-menu" id="siteslist">
                             <li class="dropdown-header">Select a site</li>
                             <?php
                             /**
-                             * here we loop through the available sites
+                             * here we loop through the available sites, after we have sorted the sites collection
                              */
+                            usort($sites, "sites_sort");
+
                             foreach ($sites as $site) {
                                 echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
                             }
@@ -572,6 +594,9 @@ if (isset($_SESSION['controller'])) {
                         <ul class="dropdown-menu">
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
+                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
+                                <li id="list_dashboard"><a href="?action=stat_sites">all sites stats</a></li>
+                            <?php } ?>
                             <li role="separator" class="divider"></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
                             <li role="separator" class="divider"></li>
@@ -740,7 +765,7 @@ if (isset($_SESSION['controller'])) {
                     <dt>controller url</dt>
                     <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $controller['url']; } ?></span></dd>
                     <dt>version detected</dt>
-                    <dd><span class="label label-primary"><?php echo $detected_controller_version ?></span></dd>
+                    <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $detected_controller_version; } ?></span></dd>
                 </dl>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
