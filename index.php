@@ -14,7 +14,7 @@
  *   Ubiquiti Community forums for this:
  *   https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651
  *
- * VERSION: 1.0.4
+ * VERSION: 1.0.5
  *
  * ------------------------------------------------------------------------------------
  *
@@ -25,7 +25,7 @@
  *
  */
 
-define('API_BROWSER_VERSION', '1.0.4');
+define('API_BROWSER_VERSION', '1.0.5');
 
 /**
  * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -40,6 +40,7 @@ $time_start = microtime(true);
 /**
  * assign variables which are required later on together with their default values
  */
+$controller_id = '';
 $action        = '';
 $site_id       = '';
 $site_name     = '';
@@ -50,7 +51,7 @@ $data          = '';
 $objects_count = '';
 $alert_message = '';
 $cookietimeout = '1800';
-$debug         = false;
+$debug         = FALSE;
 $detected_controller_version = '';
 
 /**
@@ -72,10 +73,13 @@ if(!is_readable('config.php')) {
  */
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $cookietimeout)) {
     /**
-     * last activity was longer than "$cookietimeout" seconds ago
+     * last activity was longer than $cookietimeout seconds ago
      */
     session_unset();
     session_destroy();
+    if ($debug) {
+        error_log('UniFi API browser INFO: session cookie timed out');
+    }
 }
 
 $_SESSION['last_activity'] = time();
@@ -100,16 +104,20 @@ $curl_version = $curl_info['version'];
  * - theme
  */
 if (isset($_GET['controller_id'])) {
-    $controller             = $controllers[$_GET['controller_id']];
-    $_SESSION['controller'] = $controller;
+    $controller                = $controllers[$_GET['controller_id']];
+    $controller_id             = $_GET['controller_id'];
+    $_SESSION['controller']    = $controller;
+    $_SESSION['controller_id'] = $_GET['controller_id'];
 
     unset($_SESSION['site_id']);
     unset($_SESSION['site_name']);
     unset($_SESSION['sites']);
+    unset($_SESSION['action']);
     unset($_SESSION['detected_controller_version']);
 } else {
     if (isset($_SESSION['controller']) && isset($controllers)) {
-        $controller = $_SESSION['controller'];
+        $controller    = $_SESSION['controller'];
+        $controller_id = $_SESSION['controller_id'];
     } else {
         if (!isset($controllers)) {
             /**
@@ -135,34 +143,43 @@ if (isset($_GET['controller_id'])) {
         if (isset($_SESSION['site_id'])) {
             $site_id   = $_SESSION['site_id'];
             $site_name = $_SESSION['site_name'];
-
-            if (isset($_GET['action'])) {
-                $action             = $_GET['action'];
-                $_SESSION['action'] = $action;
-            } else {
-                if (isset($_SESSION['action'])) {
-                    $action = $_SESSION['action'];
-                }
-            }
-
-            if (isset($_GET['output_format'])) {
-                $output_format             = $_GET['output_format'];
-                $_SESSION['output_format'] = $output_format;
-            } else {
-                if (isset($_SESSION['output_format'])) {
-                    $output_format = $_SESSION['output_format'];
-                }
-            }
-
-            if (isset($_GET['theme'])) {
-                $theme             = $_GET['theme'];
-                $_SESSION['theme'] = $theme;
-            } else {
-                if (isset($_SESSION['theme'])) {
-                    $theme = $_SESSION['theme'];
-                }
-            }
         }
+    }
+}
+
+/**
+ * get requested theme or use the theme stored in $_SESSION
+ */
+if (isset($_GET['theme'])) {
+    $theme             = $_GET['theme'];
+    $_SESSION['theme'] = $theme;
+} else {
+    if (isset($_SESSION['theme'])) {
+        $theme = $_SESSION['theme'];
+    }
+}
+
+/**
+ * get requested output_format or use the output_format stored in $_SESSION
+ */
+if (isset($_GET['output_format'])) {
+    $output_format             = $_GET['output_format'];
+    $_SESSION['output_format'] = $output_format;
+} else {
+    if (isset($_SESSION['output_format'])) {
+        $output_format = $_SESSION['output_format'];
+    }
+}
+
+/**
+ * get requested action or use the action stored in $_SESSION
+ */
+if (isset($_GET['action'])) {
+    $action             = $_GET['action'];
+    $_SESSION['action'] = $action;
+} else {
+    if (isset($_SESSION['action'])) {
+        $action = $_SESSION['action'];
     }
 }
 
@@ -170,12 +187,12 @@ if (isset($_GET['controller_id'])) {
  * display info message when no controller, site or data collection is selected
  * placed here so they can be overwritten by more "severe" error messages later down
  */
-if ($action == '') {
+if ($action === '') {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the drop-down menus'
                     . ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
 
-if ($site_id == '' && isset($_SESSION['controller'])) {
+if ($site_id === '' && isset($_SESSION['controller'])) {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the drop-down menu <i class="fa fa-arrow-circle-up">'
                     . '</i></div>';
 }
@@ -202,13 +219,13 @@ if (isset($_SESSION['controller'])) {
     if($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
                         . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
-                        . 'config.php. After correcting your credentials, please close your browser before attempting to use the API browser tool again.</div>';
+                        . 'config.php. After correcting your credentials, please restart your browser before attempting to use the API Browser tool again.</div>';
     }
 
     /**
      * Get the list of sites managed by the controller (if not already stored in $_SESSION)
      */
-    if (!isset($_SESSION['sites']) || $_SESSION['sites'] == '') {
+    if (!isset($_SESSION['sites']) || $_SESSION['sites'] === '') {
         $sites  = $unifidata->list_sites();
         $_SESSION['sites'] = $sites;
     } else {
@@ -216,16 +233,17 @@ if (isset($_SESSION['controller'])) {
     }
 
     /**
-     * Get the version of the controller (if not already stored in $_SESSION or when empty)
+     * Get the version of the controller (if not already stored in $_SESSION or when 'undetected')
      */
-    if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] == '') {
+    if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === 'undetected') {
         $site_info = $unifidata->stat_sysinfo();
-        $detected_controller_version = $site_info[0]->version;
 
-        if ($detected_controller_version == '') {
-            $_SESSION['detected_controller_version'] = 'undetected';
-        } else {
+        if (isset($site_info[0]->version)) {
+            $detected_controller_version             = $site_info[0]->version;
             $_SESSION['detected_controller_version'] = $detected_controller_version;
+        } else {
+            $detected_controller_version             = 'undetected';
+            $_SESSION['detected_controller_version'] = 'undetected';
         }
     } else {
         $detected_controller_version = $_SESSION['detected_controller_version'];
@@ -238,140 +256,142 @@ if (isset($_SESSION['controller'])) {
 $time_1           = microtime(true);
 $time_after_login = $time_1 - $time_start;
 
-/**
- * select the required call to the UniFi Controller API based on the selected action
- */
-switch ($action) {
-    case 'list_clients':
-        $selection = 'list online clients';
-        $data      = $unifidata->list_clients();
-        break;
-    case 'stat_allusers':
-        $selection = 'stat all users';
-        $data      = $unifidata->stat_allusers();
-        break;
-    case 'stat_auths':
-        $selection = 'stat active authorisations';
-        $data      = $unifidata->stat_auths();
-        break;
-    case 'list_guests':
-        $selection = 'list guests';
-        $data      = $unifidata->list_guests();
-        break;
-    case 'list_usergroups':
-        $selection = 'list usergroups';
-        $data      = $unifidata->list_usergroups();
-        break;
-    case 'stat_hourly_site':
-        $selection = 'hourly site stats';
-        $data      = $unifidata->stat_hourly_site();
-        break;
-    case 'stat_sysinfo':
-        $selection = 'sysinfo';
-        $data      = $unifidata->stat_sysinfo();
-        break;
-    case 'stat_hourly_aps':
-        $selection = 'hourly ap stats';
-        $data      = $unifidata->stat_hourly_aps();
-        break;
-    case 'stat_daily_site':
-        $selection = 'daily site stats';
-        $data      = $unifidata->stat_daily_site();
-        break;
-    case 'list_devices':
-        $selection = 'list devices';
-        $data      = $unifidata->list_aps();
-        break;
-    case 'list_wlan_groups':
-        $selection = 'list wlan groups';
-        $data      = $unifidata->list_wlan_groups();
-        break;
-    case 'stat_sessions':
-        $selection = 'stat sessions';
-        $data      = $unifidata->stat_sessions();
-        break;
-    case 'list_users':
-        $selection = 'list users';
-        $data      = $unifidata->list_users();
-        break;
-    case 'list_rogueaps':
-        $selection = 'list rogue access points';
-        $data      = $unifidata->list_rogueaps();
-        break;
-    case 'list_events':
-        $selection = 'list events';
-        $data      = $unifidata->list_events();
-        break;
-    case 'list_alarms':
-        $selection = 'list alerts';
-        $data      = $unifidata->list_alarms();
-        break;
-    case 'list_wlanconf':
-        $selection = 'list wlan config';
-        $data      = $unifidata->list_wlanconf();
-        break;
-    case 'list_health':
-        $selection = 'site health metrics';
-        $data      = $unifidata->list_health();
-        break;
-    case 'list_dashboard':
-        $selection = 'site dashboard metrics';
-        $data      = $unifidata->list_dashboard();
-        break;
-    case 'list_settings':
-        $selection = 'list site settings';
-        $data      = $unifidata->list_settings();
-        break;
-    case 'list_sites':
-        $selection = 'details of available sites';
-        $data      = $sites;
-        break;
-    case 'list_extension':
-        $selection = 'list VoIP extensions';
-        $data      = $unifidata->list_extension();
-        break;
-    case 'list_portconf':
-        $selection = 'list port configuration';
-        $data      = $unifidata->list_portconf();
-        break;
-    case 'list_networkconf':
-        $selection = 'list network configuration';
-        $data      = $unifidata->list_networkconf();
-        break;
-    case 'list_dynamicdns':
-        $selection = 'dynamic dns configuration';
-        $data      = $unifidata->list_dynamicdns();
-        break;
-    case 'list_portforwarding':
-        $selection = 'list port forwarding rules';
-        $data      = $unifidata->list_portforwarding();
-        break;
-    case 'list_portforward_stats':
-        $selection = 'list port forwarding stats';
-        $data      = $unifidata->list_portforward_stats();
-        break;
-    case 'stat_voucher':
-        $selection = 'list hotspot vouchers';
-        $data      = $unifidata->stat_voucher();
-        break;
-    case 'stat_payment':
-        $selection = 'list hotspot payments';
-        $data      = $unifidata->stat_payment();
-        break;
-    case 'list_hotspotop':
-        $selection = 'list hotspot operators';
-        $data      = $unifidata->list_hotspotop();
-        break;
-    case 'list_self':
-        $selection = 'self';
-        $data      = $unifidata->list_self();
-        break;
-    case 'stat_sites':
-        $selection = 'all site stats';
-        $data      = $unifidata->stat_sites();
-        break;
-    default:
-        break;
+if (isset($unifidata)) {
+    /**
+     * select the required call to the UniFi Controller API based on the selected action
+     */
+    switch ($action) {
+        case 'list_clients':
+            $selection = 'list online clients';
+            $data      = $unifidata->list_clients();
+            break;
+        case 'stat_allusers':
+            $selection = 'stat all users';
+            $data      = $unifidata->stat_allusers();
+            break;
+        case 'stat_auths':
+            $selection = 'stat active authorisations';
+            $data      = $unifidata->stat_auths();
+            break;
+        case 'list_guests':
+            $selection = 'list guests';
+            $data      = $unifidata->list_guests();
+            break;
+        case 'list_usergroups':
+            $selection = 'list usergroups';
+            $data      = $unifidata->list_usergroups();
+            break;
+        case 'stat_hourly_site':
+            $selection = 'hourly site stats';
+            $data      = $unifidata->stat_hourly_site();
+            break;
+        case 'stat_sysinfo':
+            $selection = 'sysinfo';
+            $data      = $unifidata->stat_sysinfo();
+            break;
+        case 'stat_hourly_aps':
+            $selection = 'hourly ap stats';
+            $data      = $unifidata->stat_hourly_aps();
+            break;
+        case 'stat_daily_site':
+            $selection = 'daily site stats';
+            $data      = $unifidata->stat_daily_site();
+            break;
+        case 'list_devices':
+            $selection = 'list devices';
+            $data      = $unifidata->list_aps();
+            break;
+        case 'list_wlan_groups':
+            $selection = 'list wlan groups';
+            $data      = $unifidata->list_wlan_groups();
+            break;
+        case 'stat_sessions':
+            $selection = 'stat sessions';
+            $data      = $unifidata->stat_sessions();
+            break;
+        case 'list_users':
+            $selection = 'list users';
+            $data      = $unifidata->list_users();
+            break;
+        case 'list_rogueaps':
+            $selection = 'list rogue access points';
+            $data      = $unifidata->list_rogueaps();
+            break;
+        case 'list_events':
+            $selection = 'list events';
+            $data      = $unifidata->list_events();
+            break;
+        case 'list_alarms':
+            $selection = 'list alerts';
+            $data      = $unifidata->list_alarms();
+            break;
+        case 'list_wlanconf':
+            $selection = 'list wlan config';
+            $data      = $unifidata->list_wlanconf();
+            break;
+        case 'list_health':
+            $selection = 'site health metrics';
+            $data      = $unifidata->list_health();
+            break;
+        case 'list_dashboard':
+            $selection = 'site dashboard metrics';
+            $data      = $unifidata->list_dashboard();
+            break;
+        case 'list_settings':
+            $selection = 'list site settings';
+            $data      = $unifidata->list_settings();
+            break;
+        case 'list_sites':
+            $selection = 'details of available sites';
+            $data      = $sites;
+            break;
+        case 'list_extension':
+            $selection = 'list VoIP extensions';
+            $data      = $unifidata->list_extension();
+            break;
+        case 'list_portconf':
+            $selection = 'list port configuration';
+            $data      = $unifidata->list_portconf();
+            break;
+        case 'list_networkconf':
+            $selection = 'list network configuration';
+            $data      = $unifidata->list_networkconf();
+            break;
+        case 'list_dynamicdns':
+            $selection = 'dynamic dns configuration';
+            $data      = $unifidata->list_dynamicdns();
+            break;
+        case 'list_portforwarding':
+            $selection = 'list port forwarding rules';
+            $data      = $unifidata->list_portforwarding();
+            break;
+        case 'list_portforward_stats':
+            $selection = 'list port forwarding stats';
+            $data      = $unifidata->list_portforward_stats();
+            break;
+        case 'stat_voucher':
+            $selection = 'list hotspot vouchers';
+            $data      = $unifidata->stat_voucher();
+            break;
+        case 'stat_payment':
+            $selection = 'list hotspot payments';
+            $data      = $unifidata->stat_payment();
+            break;
+        case 'list_hotspotop':
+            $selection = 'list hotspot operators';
+            $data      = $unifidata->list_hotspotop();
+            break;
+        case 'list_self':
+            $selection = 'self';
+            $data      = $unifidata->list_self();
+            break;
+        case 'stat_sites':
+            $selection = 'all site stats';
+            $data      = $unifidata->stat_sites();
+            break;
+        default:
+            break;
+    }
 }
 
 /**
@@ -464,6 +484,7 @@ if (isset($_SESSION['controller'])) {
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="<?php echo $cssurl ?>">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
+    <!-- custom CSS styling -->
     <style>
         body {
             padding-top: 70px;
@@ -490,12 +511,13 @@ if (isset($_SESSION['controller'])) {
         </div>
         <div id="navbar-main" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-left">
+                <!-- only show the controllers dropdown when multiple controllers have been configured -->
                 <?php if (isset($controllers)) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="controller-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             <?php
                             /**
-                             * here we display the controller name, if selected
+                             * here we display the controller name, if selected, else just label it
                              */
                             if (isset($controller)) {
                                 echo $controller['name'];
@@ -512,7 +534,7 @@ if (isset($_SESSION['controller'])) {
                              * here we loop through the configured controllers
                              */
                             foreach ($controllers as $key => $value) {
-                                echo '<li id="' . $key . '"><a href="?controller_id=' . $key . '">' . $value['name'] . '</a></li>' . "\n";
+                                echo '<li id="controller_' . $key . '"><a href="?controller_id=' . $key . '">' . $value['name'] . '</a></li>' . "\n";
                             }
                             ?>
                          </ul>
@@ -540,7 +562,7 @@ if (isset($_SESSION['controller'])) {
                          </ul>
                     </li>
                 <?php } ?>
-                <!-- only show the data collection menus when a site_id is selected -->
+                <!-- only show the data collection dropdowns when a site_id is selected -->
                 <?php if ($site_id) { ?>
                     <li id="output-menu" class="dropdown">
                         <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -811,6 +833,7 @@ if (isset($_SESSION['controller'])) {
     $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
     $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
     $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    $('#controller_<?php echo $controller_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
     /**
     * enable Bootstrap tooltips
