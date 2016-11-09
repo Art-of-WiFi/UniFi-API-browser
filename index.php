@@ -14,7 +14,7 @@
  *   Ubiquiti Community forums for this:
  *   https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651
  *
- * VERSION: 1.0.5
+ * VERSION: 1.0.6
  *
  * ------------------------------------------------------------------------------------
  *
@@ -25,7 +25,7 @@
  *
  */
 
-define('API_BROWSER_VERSION', '1.0.5');
+define('API_BROWSER_VERSION', '1.0.6');
 
 /**
  * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -617,7 +617,7 @@ if (isset($_SESSION['controller'])) {
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
-                                <li id="list_dashboard"><a href="?action=stat_sites">all sites stats</a></li>
+                                <li id="stat_sites"><a href="?action=stat_sites">all sites stats</a></li>
                             <?php } ?>
                             <li role="separator" class="divider"></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
@@ -788,11 +788,6 @@ if (isset($_SESSION['controller'])) {
                     <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $controller['url']; } ?></span></dd>
                     <dt>version detected</dt>
                     <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $detected_controller_version; } ?></span></dd>
-                </dl>
-                <hr>
-                <dl class="dl-horizontal col-sm-offset-1">
-                    <dt>cookie timeout setting</dt>
-                    <dd><span class="label label-primary"><?php echo $cookietimeout ?> seconds</span></dd>
                 </dl>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">

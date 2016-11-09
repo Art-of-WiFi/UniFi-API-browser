@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *   https://www.ubnt.com/downloads/unifi/5.2.9/unifi_sh_api
  *
- * VERSION: 1.0.8
+ * VERSION: 1.0.9
  *
  * NOTES:
  * - this Class will only work with UniFi Controller versions 4.x and higher. There are no checks to prevent
@@ -27,7 +27,7 @@
  *
  */
 
-define('API_CLASS_VERSION', '1.0.8');
+define('API_CLASS_VERSION', '1.0.9');
 
 class unifiapi {
    public $user        = '';
@@ -921,19 +921,19 @@ class unifiapi {
    /**
     * Create voucher(s)
     * -----------------
-    * returns an array of vouchers codes (NOTE: without the "-" in the middle) by calling the stat_voucher method
+    * returns an array of voucher codes (NOTE: without the "-" in the middle) by calling the stat_voucher method
     * required parameter <minutes> = minutes the voucher is valid after activation
-    * required parameter <number_of_vouchers_to_create>
+    * optional parameter <number_of_vouchers_to_create> = number of vouchers to create, default value is 1
+    * optional parameter <quota> = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use
     * optional parameter <note> = note text to add to voucher when printing
     * optional parameter <up> = upload speed limit in kbps
     * optional parameter <down> = download speed limit in kbps
     * optional parameter <MBytes> = data transfer limit in MB
     */
-   public function create_voucher($minutes, $number_of_vouchers_to_create = 1, $note = NULL, $up = NULL, $down = NULL, $MBytes = NULL) {
+   public function create_voucher($minutes, $number_of_vouchers_to_create = 1, $quota = '0', $note = NULL, $up = NULL, $down = NULL, $MBytes = NULL) {
       if (!$this->is_loggedin) return FALSE;
       $return = array();
-      $json   = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create);
-
+      $json   = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $number_of_vouchers_to_create, 'quota' => $quota);
       /**
        * if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
        */
@@ -941,7 +941,6 @@ class unifiapi {
       if (isset($up))     $json['up'] = $up;
       if (isset($down))   $json['down'] = $down;
       if (isset($MBytes)) $json['bytes'] = $MBytes;
-
       $json            = json_encode($json);
       $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
       if ($content_decoded->meta->rc == 'ok') {
@@ -950,6 +949,25 @@ class unifiapi {
             foreach ($this->stat_voucher($obj->create_time) as $voucher)  {
                $return[]= $voucher->code;
             }
+         }
+      }
+      return $return;
+   }
+
+   /**
+    * Revoke voucher
+    * --------------
+    * return TRUE on success
+    * required parameter <voucher_id> = _id of the voucher to revoke
+    */
+   public function revoke_voucher($voucher_id) {
+      if (!$this->is_loggedin) return FALSE;
+      $return          = FALSE;
+      $json            = json_encode(array('_id' => $voucher_id, 'cmd' => 'delete-voucher'));
+      $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
+      if (isset($content_decoded->meta->rc)) {
+         if ($content_decoded->meta->rc == 'ok') {
+            $return = TRUE;
          }
       }
       return $return;
