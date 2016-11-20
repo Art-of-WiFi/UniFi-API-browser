@@ -72,9 +72,9 @@ The PHP API client that comes bundled with this tool is based on the work done b
 - and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.2.9/unifi_sh_api
 
 Other included libraries:
-- Bootstrap (version 3.3.5) http://getbootstrap.com/
-- Font-awesome (version 4.4.0) https://fortawesome.github.io/Font-Awesome/
-- jQuery (version 2.1.4) https://jquery.com/
+- Bootstrap (version 3.3.6) http://getbootstrap.com/
+- Font-awesome (version 4.5.0) https://fortawesome.github.io/Font-Awesome/
+- jQuery (version 2.2.0) https://jquery.com/
 - Highlight.js (version 9.0.0) https://highlightjs.org/
 
 ### Requirements
