@@ -1,7 +1,7 @@
 ## UniFi API browser
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
-- currently supports versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.2.9 has been confirmed to work)
+- currently supports versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.3.7 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas.
 - please read the Security Notice below before installing this tool!
 
@@ -17,10 +17,10 @@ The UniFi API browser tool offers the following features:
 - switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the UniFi Controller
 - very easy setup with minimal dependencies
-- timing details of API queries can be useful to "benchmark" your controller
-- useful tool when developing applications that make use of the API
-- the API exposes more data than is visible through the Controller's web interface which makes the tool useful for troubleshooting purposes
-- comes bundled with an extensive PHP class for access to the UniFi Controller API, which supports even more API Endpoints
+- timing details of API calls can be useful to "benchmark" your UniFi Controller
+- useful tool when developing applications that make use of the UniFi Controller API
+- the API exposes more data than is visible through the UniFi controller's web interface which makes the tool useful for troubleshooting purposes
+- comes bundled with an extensive PHP class for access to the UniFi Controller API, which supports even more API endpoints
 - debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 ### Data collections/API endpoints currently implemented in the API browser
@@ -102,7 +102,7 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
 
 ### Security notice
-The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the UniFi controller!
+The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the UniFi Controller!
 
 ### Screenshots
 Here's a screenshot of the tool in action showing the site's health metrics using the default Bootstrap theme:
