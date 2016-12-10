@@ -1456,7 +1456,7 @@ class unifiapi {
 
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            curl_setopt($ch, CURLOPT_PUT, true);
+            //curl_setopt($ch, CURLOPT_PUT, true);
         } else {
             curl_setopt($ch, CURLOPT_POST, FALSE);
         }
