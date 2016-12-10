@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.0.10
+ * VERSION: 1.0.11
  *
  * NOTES:
  * - this Class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -26,17 +26,19 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.0.10');
+define('API_CLASS_VERSION', '1.0.11');
 
 class unifiapi {
-    public  $user        = '';
-    public  $password    = '';
-    public  $site        = 'default';
-    public  $baseurl     = 'https://127.0.0.1:8443';
-    public  $version     = '4.8.20';
-    public  $is_loggedin = FALSE;
-    public  $debug       = TRUE;
-    private $cookies     = '';
+    public  $user         = '';
+    public  $password     = '';
+    public  $site         = 'default';
+    public  $baseurl      = 'https://127.0.0.1:8443';
+    public  $version      = '4.8.20';
+    public  $is_loggedin  = FALSE;
+    public  $debug        = FALSE;
+    private $cookies      = '';
+    private $payload_len  = '';
+    private $request_type = 'POST';
 
     function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '') {
         if (!empty($user)) $this->user         = $user;
@@ -1198,6 +1200,33 @@ class unifiapi {
     }
 
     /**
+     * Disable/enable an access point
+     * ------------------------------
+     * return TRUE on success
+     * required parameter <ap_id>   = value of _id for the access point which can be obtained from the device list
+     * required parameter <disable> = boolean; TRUE will disable the device, FALSE will enable the device
+     *
+     * NOTES:
+     * - a disabled device will be excluded from the dashboard status and device count and its LED and WLAN will be turned off
+     * - appears to only be supported for access points
+     * - available since controller versions 5.2.X
+     */
+    public function disable_ap($ap_id, $disable) {
+        if (!$this->is_loggedin) return FALSE;
+        $this->request_type = 'PUT';
+        $return             = FALSE;
+        $json               = json_encode(array('disabled' => $disable));
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.$ap_id, $json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                $return = TRUE;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Start flashing LED of an access point for locating purposes
      * -----------------------------------------------------------
      * return TRUE on success
@@ -1456,7 +1485,13 @@ class unifiapi {
 
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            //curl_setopt($ch, CURLOPT_PUT, true);
+            if ($this->request_type == 'PUT') {
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: ' . strlen($data)));
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+            } else {
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            }
+
         } else {
             curl_setopt($ch, CURLOPT_POST, FALSE);
         }
