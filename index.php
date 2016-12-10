@@ -3,18 +3,14 @@
  * UniFi API Browser
  *
  * This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API,
- * written in PHP, javascript and the Bootstrap CSS framework.
+ * written in PHP, JavaScript and the Bootstrap CSS framework.
  *
  * Please keep the following in mind:
- * - not all data collections/API endpoints are supported (yet), see the list below of
- *   the currently supported data collections/API endpoints
- * - currently only supports versions 4.x.x of the UniFi Controller software
- * - there is still work to be done to add/improve functionality and usability of this
- *   tool so suggestions/comments are welcome. Please use the github issue list or the
- *   Ubiquiti Community forums for this:
- *   https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651
+ * - not all data collections/API endpoints are supported (yet), see the list of
+ *   the currently supported data collections/API endpoints in the README.md file
+ * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.6
+ * VERSION: 1.0.7
  *
  * ------------------------------------------------------------------------------------
  *
@@ -24,11 +20,10 @@
  * with this package in the file LICENSE.md
  *
  */
-
-define('API_BROWSER_VERSION', '1.0.6');
+define('API_BROWSER_VERSION', '1.0.7');
 
 /**
- * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 session_start();
 
@@ -60,8 +55,8 @@ $detected_controller_version = '';
  * - if the config.php file is unreadable or does not exist, an alert is displayed on the page
  */
 if(!is_readable('config.php')) {
-    $alert_message = '<div class="alert alert-danger" role="alert">The file config.php is not readable or does not exist.'
-                    . '<br>If you have not yet done so, please copy/rename the config.template.php file to config.php and modify'
+    $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.'
+                    . '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and modify '
                     . 'the contents as required.</div>';
 } else {
     include('config.php');
@@ -92,7 +87,7 @@ $curl_version = $curl_info['version'];
 
 /**
  * process the GET variables and store them in the $_SESSION array
- * if a GET variable is not set, get the values from $_SESSION (if available)
+ * if a GET variable is not set, get the values from the $_SESSION array (if available)
  *
  * Process in this order:
  * - controller_id
@@ -104,11 +99,17 @@ $curl_version = $curl_info['version'];
  * - theme
  */
 if (isset($_GET['controller_id'])) {
+    /**
+     * user has requested a controller switch
+     */
     $controller                = $controllers[$_GET['controller_id']];
     $controller_id             = $_GET['controller_id'];
     $_SESSION['controller']    = $controller;
     $_SESSION['controller_id'] = $_GET['controller_id'];
 
+    /**
+     * clear the variables from the $_SESSION array that are associated with the previous controller
+     */
     unset($_SESSION['site_id']);
     unset($_SESSION['site_name']);
     unset($_SESSION['sites']);
@@ -148,7 +149,7 @@ if (isset($_GET['controller_id'])) {
 }
 
 /**
- * get requested theme or use the theme stored in $_SESSION
+ * get requested theme or use the theme stored in the $_SESSION array
  */
 if (isset($_GET['theme'])) {
     $theme             = $_GET['theme'];
@@ -160,7 +161,7 @@ if (isset($_GET['theme'])) {
 }
 
 /**
- * get requested output_format or use the output_format stored in $_SESSION
+ * get requested output_format or use the output_format stored in the $_SESSION array
  */
 if (isset($_GET['output_format'])) {
     $output_format             = $_GET['output_format'];
@@ -172,7 +173,7 @@ if (isset($_GET['output_format'])) {
 }
 
 /**
- * get requested action or use the action stored in $_SESSION
+ * get requested action or use the action stored in the $_SESSION array
  */
 if (isset($_GET['action'])) {
     $action             = $_GET['action'];
@@ -185,31 +186,31 @@ if (isset($_GET['action'])) {
 
 /**
  * display info message when no controller, site or data collection is selected
- * placed here so they can be overwritten by more "severe" error messages later down
+ * placed here so they can be overwritten by more "severe" error messages later on
  */
 if ($action === '') {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the drop-down menus'
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus'
                     . ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 if ($site_id === '' && isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the drop-down menu <i class="fa fa-arrow-circle-up">'
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu <i class="fa fa-arrow-circle-up">'
                     . '</i></div>';
 }
 
 if (!isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the drop-down menu <i class="fa fa-arrow-circle-up">'
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu <i class="fa fa-arrow-circle-up">'
                     . '</i></div>';
 }
 
 /**
- * load the UniFi API client class and log in to the controller
+ * load the UniFi API client class and log in to the UniFi controller
  * - if an error occurs during the login process, an alert is displayed on the page
  */
 require('phpapi/class.unifi.php');
 
 /**
- * Do this when a controller has been selected and was stored in $_SESSION
+ * Do this when a controller has been selected and was stored in the $_SESSION array
  */
 if (isset($_SESSION['controller'])) {
     $unifidata        = new unifiapi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
@@ -223,7 +224,7 @@ if (isset($_SESSION['controller'])) {
     }
 
     /**
-     * Get the list of sites managed by the controller (if not already stored in $_SESSION)
+     * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
      */
     if (!isset($_SESSION['sites']) || $_SESSION['sites'] === '') {
         $sites  = $unifidata->list_sites();
@@ -233,7 +234,7 @@ if (isset($_SESSION['controller'])) {
     }
 
     /**
-     * Get the version of the controller (if not already stored in $_SESSION or when 'undetected')
+     * Get the version of the UniFi controller (if not already stored in the $_SESSION array or when 'undetected')
      */
     if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === 'undetected') {
         $site_info = $unifidata->stat_sysinfo();
@@ -395,7 +396,7 @@ if (isset($unifidata)) {
 }
 
 /**
- * count the number of objects collected from the controller
+ * count the number of objects collected from the UniFi controller
  */
 if($action!=''){
     $objects_count = count($data);
@@ -405,13 +406,13 @@ if($action!=''){
  * create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
  */
 if ($theme === 'bootstrap') {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css';
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
 } else {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/' . $theme . '/bootstrap.min.css';
+    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . $theme . '/bootstrap.min.css';
 }
 
 /**
- * execute timing of data collection from controller
+ * execute timing of data collection from UniFi controller
  */
 $time_2          = microtime(true);
 $time_after_load = $time_2 - $time_start;
@@ -481,9 +482,9 @@ if (isset($_SESSION['controller'])) {
     <title>UniFi API browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo $cssurl ?>">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css" integrity="sha256-Zd1icfZ72UBmsId/mUcagrmN7IN5Qkrvh75ICHIQVTk=" crossorigin="anonymous" />
     <!-- custom CSS styling -->
     <style>
         body {
@@ -517,7 +518,7 @@ if (isset($_SESSION['controller'])) {
                         <a id="controller-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             <?php
                             /**
-                             * here we display the controller name, if selected, else just label it
+                             * here we display the UniFi controller name, if selected, else just label it
                              */
                             if (isset($controller)) {
                                 echo $controller['name'];
@@ -531,7 +532,7 @@ if (isset($_SESSION['controller'])) {
                             <li class="dropdown-header">Select a controller</li>
                             <?php
                             /**
-                             * here we loop through the configured controllers
+                             * here we loop through the configured UniFi controllers
                              */
                             foreach ($controllers as $key => $value) {
                                 echo '<li id="controller_' . $key . '"><a href="?controller_id=' . $key . '">' . $value['name'] . '</a></li>' . "\n";
@@ -540,7 +541,7 @@ if (isset($_SESSION['controller'])) {
                          </ul>
                     </li>
                 <?php } ?>
-                <!-- only show the sites dropdown when a controller is selected -->
+                <!-- only show the sites dropdown when a controller has been selected -->
                 <?php if (isset($_SESSION['controller'])) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -587,6 +588,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
                             <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
                             <li id="list_users"><a href="?action=list_users">list users</a></li>
@@ -603,6 +605,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
                             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
@@ -614,6 +617,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
@@ -635,6 +639,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
                             <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
                             <li role="separator" class="divider"></li>
@@ -647,6 +652,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
                             <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
                             <li id="list_self"><a href="?action=list_self">self</a></li>
@@ -669,6 +675,7 @@ if (isset($_SESSION['controller'])) {
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header">Select a data collection</li>
                             <li id="list_alarms"><a href="?action=list_alarms">list alerts</a></li>
                             <li id="list_events"><a href="?action=list_events">list events</a></li>
                         </ul>
@@ -682,7 +689,7 @@ if (isset($_SESSION['controller'])) {
                     </a>
                     <ul class="dropdown-menu">
                         <li class="dropdown-header">Select a theme</li>
-                        <li id="bootstrap"><a href="?theme=bootstrap">default Bootstrap</a></li>
+                        <li id="bootstrap"><a href="?theme=bootstrap">Bootstrap (default)</a></li>
                         <li id="cerulean"><a href="?theme=cerulean">Cerulean</a></li>
                         <li id="cosmo"><a href="?theme=cosmo">Cosmo</a></li>
                         <li id="cyborg"><a href="?theme=cyborg">Cyborg</a></li>
@@ -700,7 +707,7 @@ if (isset($_SESSION['controller'])) {
                         <li id="united"><a href="?theme=united">United</a></li>
                         <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About</a></li>
+                        <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API Browser</a></li>
                     </ul>
                 </li>
             </ul>
@@ -711,6 +718,8 @@ if (isset($_SESSION['controller'])) {
     <div id="alertPlaceholder">
         <?php echo $alert_message ?>
     </div>
+    <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected -->
+    <?php if (isset($_SESSION['controller']) && $action) { ?>
     <div class="panel panel-default">
         <div class="panel-heading">
             <?php if ($site_id) { ?>
@@ -727,7 +736,7 @@ if (isset($_SESSION['controller'])) {
         </div>
         <div class="panel-body">
             <!--only display panel content when an action has been selected-->
-            <?php if ($action !== '') { ?>
+            <?php if ($action !== '' && isset($_SESSION['controller'])) { ?>
             <!-- present the timing results using an HTML5 progress bar -->
             total elapsed time: <?php echo $time_total ?> seconds<br>
             <div class="progress">
@@ -751,9 +760,11 @@ if (isset($_SESSION['controller'])) {
             <?php } ?>
         </div>
     </div>
+    <?php } ?>
+    <!-- /data-panel -->
 </div>
 <!-- Modal -->
-<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -766,11 +777,10 @@ if (isset($_SESSION['controller'])) {
                         A tool for browsing the data collections which are exposed through Ubiquiti's UniFi Controller API.
                     </div>
                 </div>
-                <hr>
                 <div class="row">
-                    <div class="col-sm-8 col-sm-offset-2"><a href="https://github.com/malle-pietje/UniFi-API-browser"
+                    <div class="col-sm-8 col-sm-offset-1"><a href="https://github.com/malle-pietje/UniFi-API-browser"
                     target="_blank">UniFi API browser on Github</a></div>
-                    <div class="col-sm-8 col-sm-offset-2"><a href="http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
+                    <div class="col-sm-8 col-sm-offset-1"><a href="http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
                     target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
                 </div>
                 <hr>
@@ -809,33 +819,35 @@ if (isset($_SESSION['controller'])) {
         </div>
     </div>
 </div>
-<!-- Latest compiled and minified JavaScript versions, loaded from CDN's -->
-<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js"></script>
+<!-- Latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js" integrity="sha256-+mpyNVJsNt4rVXCw0F+pAOiB3YxmHgrbJsx4ecPuUaI=" crossorigin="anonymous"></script>
 <script>
+$(document).ready(function() {
     /**
-    * initialise the Highlighting.js library
-    */
-    hljs.initHighlightingOnLoad();
-</script>
-<script>
-    /**
-    * highlight selected options in the pull down menus
-    * for $action, $site_id, $theme and $output_format:
-    */
-    $('#<?php echo $theme ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#controller_<?php echo $controller_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+     * initialise the Highlighting.js library, only when required
+     */
+    ('<?php echo $output_format ?>' == 'json_color') ? hljs.initHighlightingOnLoad() : false;
 
     /**
-    * enable Bootstrap tooltips
-    */
+     * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
+     * NOTE:
+     * these actions are performed conditionally when values are set for the respective PHP variables
+     */
+    ('<?php echo $action ?>' != '') ? $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    ('<?php echo $site_id ?>' != '') ? $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    ('<?php echo $controller_id ?>' != '') ? $('#controller_<?php echo $controller_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    $('#<?php echo $theme ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+
+    /**
+     * enable Bootstrap tooltips
+     */
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
+});
 </script>
 </body>
 </html>
