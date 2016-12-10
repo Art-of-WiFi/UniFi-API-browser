@@ -1,5 +1,7 @@
 ## UniFi API browser
-This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. Please keep the following in mind:
+This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. It comes bundled with an extensive PHP class for access to the UniFi Controller API, which supports more API endpoints than the UniFi API browser tool does.
+
+Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
 - currently supports versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.3.8 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas.
@@ -20,7 +22,6 @@ The UniFi API browser tool offers the following features:
 - timing details of API calls can be useful to "benchmark" your UniFi Controller
 - useful tool when developing applications that make use of the UniFi Controller API
 - the API exposes more data than is visible through the UniFi controller's web interface which makes the tool useful for troubleshooting purposes
-- comes bundled with an extensive PHP class for access to the UniFi Controller API, which supports even more API endpoints
 - debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 ### Data collections/API endpoints currently implemented in the API browser
