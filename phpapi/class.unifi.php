@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.0.11
+ * VERSION: 1.0.12
  *
  * NOTES:
  * - this Class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -26,7 +26,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.0.11');
+define('API_CLASS_VERSION', '1.0.12');
 
 class unifiapi {
     public  $user         = '';
@@ -37,7 +37,6 @@ class unifiapi {
     public  $is_loggedin  = FALSE;
     public  $debug        = FALSE;
     private $cookies      = '';
-    private $payload_len  = '';
     private $request_type = 'POST';
 
     function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '') {
@@ -524,14 +523,15 @@ class unifiapi {
     }
 
     /**
-     * List client devices
-     * -------------------
-     * returns an array of client device objects
+     * List online client device(s)
+     * ----------------------------
+     * returns an array of online client device objects, or in case of a single device request, returns a single client device object
+     * optional parameter <client_mac> = the MAC address of a single online client device for which the call must be made
      */
-    public function list_clients() {
+    public function list_clients($client_mac = NULL) {
         if (!$this->is_loggedin) return FALSE;
         $return          = array();
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sta'));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sta/'.$client_mac));
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 if (is_array($content_decoded->data)) {
@@ -549,7 +549,7 @@ class unifiapi {
      * Get data for a single client device
      * -----------------------------------
      * returns an object with the client device information
-     * required parameter <client_mac> = client MAC address
+     * required parameter <client_mac> = client device MAC address
      */
     public function stat_client($client_mac) {
         if (!$this->is_loggedin) return FALSE;

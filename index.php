@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.7
+ * VERSION: 1.0.8
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,12 +20,23 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.7');
+define('API_BROWSER_VERSION', '1.0.8');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 session_start();
+
+/**
+ * check whether user has requested to clear the PHP session
+ * - this function can be useful when login errors occur, mostly after upgrades or incorrect credential changes
+ */
+if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
+    $_SESSION = array();
+    session_unset();
+    session_destroy();
+    session_start();
+}
 
 /**
  * starting timing of the session here
@@ -707,6 +718,8 @@ if (isset($_SESSION['controller'])) {
                         <li id="united"><a href="?theme=united">United</a></li>
                         <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
                         <li role="separator" class="divider"></li>
+                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
+                        <li role="separator" class="divider"></li>
                         <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API Browser</a></li>
                     </ul>
                 </li>
@@ -833,11 +846,15 @@ $(document).ready(function() {
     /**
      * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
      * NOTE:
-     * these actions are performed conditionally when values are set for the respective PHP variables
+     * these actions are performed conditionally if values are set for the respective PHP variables
      */
     ('<?php echo $action ?>' != '') ? $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
     ('<?php echo $site_id ?>' != '') ? $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
     ('<?php echo $controller_id ?>' != '') ? $('#controller_<?php echo $controller_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+
+    /**
+     * these two options have default values so no conditions needed here
+     */
     $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
     $('#<?php echo $theme ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
