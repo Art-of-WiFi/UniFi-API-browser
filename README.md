@@ -52,6 +52,7 @@ The UniFi API browser tool offers the following features:
 - Configuration
   - list sites on this controller
   - list site settings
+  - list admins for current site
   - sysinfo
   - self
   - wlan config

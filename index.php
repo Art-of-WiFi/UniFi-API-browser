@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.8
+ * VERSION: 1.0.9
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.8');
+define('API_BROWSER_VERSION', '1.0.9');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -57,7 +57,7 @@ $data          = '';
 $objects_count = '';
 $alert_message = '';
 $cookietimeout = '1800';
-$debug         = FALSE;
+$debug         = false;
 $detected_controller_version = '';
 
 /**
@@ -401,6 +401,10 @@ if (isset($unifidata)) {
             $selection = 'all site stats';
             $data      = $unifidata->stat_sites();
             break;
+        case 'list_admins':
+            $selection = 'list_admins';
+            $data      = $unifidata->list_admins();
+            break;
         default:
             break;
     }
@@ -669,6 +673,7 @@ if (isset($_SESSION['controller'])) {
                             <li id="list_self"><a href="?action=list_self">self</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
+                            <li id="list_settings"><a href="?action=list_admins">list admins for current site</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
                             <li role="separator" class="divider"></li>
@@ -718,7 +723,7 @@ if (isset($_SESSION['controller'])) {
                         <li id="united"><a href="?theme=united">United</a></li>
                         <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
+                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
                         <li role="separator" class="divider"></li>
                         <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API Browser</a></li>
                     </ul>
