@@ -80,7 +80,7 @@ Other included libraries:
 - Highlight.js (version 9.0.0) https://highlightjs.org/
 
 ### Requirements
-- a web server with PHP and cURL modules installed (tested on PHP Version 5.6.1 and cURL 7.42.1)
+- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue] (https://github.com/malle-pietje/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
