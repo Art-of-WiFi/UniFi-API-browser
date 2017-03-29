@@ -1565,6 +1565,30 @@ class unifiapi
         return $return;
     }
 
+	 /**
+     * Disable/Enable wlan
+     * -----------------
+     * return true on success
+     * required parameter <wlan_id>
+     * required parameter <disable> = true or false which determines the action to be done
+     */
+	public function disable_wlan($wlan_id, $disable)
+    {
+        if (!$this->is_loggedin) return false;
+		if ($disable == "false") {$disable = true;} else  {$disable = false;}
+        $return          = false;
+		$json            = array('enabled' => (bool)$disable);
+        $json			 = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id,'json='.$json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                $return = true;
+            }
+        }
+		
+        return $return;
+    }
+	
     /**
      * List events
      * -----------
