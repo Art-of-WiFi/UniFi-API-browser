@@ -117,4 +117,4 @@ and here with one of the Bootswatch themes selected:
 
 this is the "About" modal:
 
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/12512141/bc82ead0-c116-11e5-9bb2-f037e3f26a5f.JPG "Screenshot of the "About" modal")
+![alt tag](https://cloud.githubusercontent.com/assets/12016131/12512141/bc82ead0-c116-11e5-9bb2-f037e3f26a5f.JPG "Screenshot of the About modal")
