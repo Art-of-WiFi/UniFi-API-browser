@@ -1134,6 +1134,27 @@ class unifiapi
     }
 
     /**
+     * Extend guest validity
+     * --------------
+     * return true on success
+     * required parameter <guest_id> = _id (24 char string) of the guest to extend validity
+     */
+    public function extend_guest_validity($guest_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $return          = false;
+        $json            = json_encode(array('_id' => $guest_id, 'cmd' => 'extend'));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot','json='.$json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                $return = true;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * List port forwarding stats
      * --------------------------
      * returns an array of port forwarding stats
