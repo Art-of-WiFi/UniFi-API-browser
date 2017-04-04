@@ -1591,6 +1591,27 @@ class unifiapi
     }
 
     /**
+     * Delete a wlan
+     * -------------
+     * return true on success
+     * required parameter <wlan_id> = _id (24 char string) of the wlan that can be found with the list_wlanconf() function
+     */
+    public function delete_wlan($wlan_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $return          = false;
+        $json           = array();
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.$wlan_id, 'json='.$json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                $return = true;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Set wlan settings
      * -----------------
      * return true on success
