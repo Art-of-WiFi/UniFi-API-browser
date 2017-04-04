@@ -1541,6 +1541,56 @@ class unifiapi
     }
 
     /**
+     * Add wlan
+     * -----------------
+     * return true on success
+     * required parameter <name> = SSID
+     * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63
+     * required parameter <usergroup_id> = user group id that can be found using the list_usergroups() function
+     * required parameter <wlangroup_id> = wlan group id that can be found using the list_wlan_groups() function
+     * optional parameter <enabled> = enable/disable wlan
+     * optional parameter <hide_ssid> = hide wlan SSID
+     * optional parameter <is_guest> = apply guest policies
+     * optional parameter <security> = security type
+     * optional parameter <wpa_mode> = wpa mode (wpa, wpa2, ..)
+     * optional parameter <wpa_enc> = encryption (auto, ccmp)
+     * optional parameter <vlan_enabled> = enable vlan for this wlan
+     * optional parameter <vlan> = vlan id
+     * optional parameter <uapsd_enabled> = enable Unscheduled Automatic Power Save Delivery
+     * optional parameter <schedule_enabled> = enable wlan schedule
+     * optional parameter <schedule> = schedule rules
+     * -----------------
+     * TODO: Check parameter values
+     */
+    public function create_wlan($name, $x_passphrase, $usergroup_id, $wlangroup_id, $enabled = null, $hide_ssid = null, $is_guest = null, $security = null,
+                                $wpa_mode = null, $wpa_enc = null, $vlan_enabled = null, $vlan = null, $uapsd_enabled = null, $schedule_enabled = null, $schedule = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $return          = false;
+        $json            = array('name' => $name, 'x_passphrase' => $x_passphrase, 'usergroup_id' => $usergroup_id, 'wlangroup_id' => $wlangroup_id);
+        $json['enabled'] = (!is_null($enabled) ? $enabled : true);
+        $json['hide_ssid'] = (!is_null($hide_ssid) ? $hide_ssid : false);
+        $json['is_guest'] = (!is_null($is_guest) ? $is_guest : false);
+        $json['security'] = (!is_null($security) ? $security : 'open');
+        $json['wpa_mode'] = (!is_null($wpa_mode) ? $wpa_mode : 'wpa2');
+        $json['wpa_enc'] = (!is_null($wpa_enc) ? $wpa_enc : 'ccmp');
+        $json['vlan_enabled'] = (!is_null($vlan_enabled) ? $vlan_enabled : false);
+        if (!is_null($vlan)) $json['vlan'] = $vlan_enabled;
+        $json['uapsd_enabled'] = (!is_null($uapsd_enabled) ? $uapsd_enabled : false);
+        $json['schedule_enabled'] = (!is_null($schedule_enabled) ? $schedule_enabled : false);
+        $json['schedule'] = (!is_null($schedule) ? $schedule : array());
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/add/wlanconf','json='.$json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                $return = true;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Set wlan settings
      * -----------------
      * return true on success
