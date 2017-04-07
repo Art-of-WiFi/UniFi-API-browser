@@ -1,5 +1,5 @@
 ## UniFi API browser
-This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap] (http://getbootstrap.com/) CSS framework. It comes bundled with **an extensive PHP class for access to the UniFi Controller API**, which supports more API endpoints than the UniFi API browser tool does. Please refer to the code samples in the `examples` directory for a starting point if you wish to develop your own PHP code.
+This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework. It comes bundled with **an extensive PHP class for access to the UniFi Controller API**, which supports more API endpoints than the UniFi API browser tool does. Please refer to the code samples in the `examples` directory for a starting point if you wish to develop your own PHP code.
 
 Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
@@ -16,7 +16,7 @@ The UniFi API browser tool offers the following features:
 - browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
 - switch between sites managed by the connected controller
 - switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export` and `json highlighted` have been implemented)
-- switch between default Bootstrap theme and the [Bootswatch] (https://bootswatch.com/) themes
+- switch between default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the UniFi Controller
 - very easy setup with minimal dependencies
 - timing details of API calls can be useful to "benchmark" your UniFi Controller
@@ -82,7 +82,7 @@ Other included libraries:
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue] (https://github.com/malle-pietje/UniFi-API-browser/issues/4))
+- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/malle-pietje/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
 ### Installation
