@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.0.13
+ * VERSION: 1.0.14
  *
  * NOTES:
  * - this Class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -26,7 +26,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.0.13');
+define('API_CLASS_VERSION', '1.0.14');
 
 class unifiapi
 {
@@ -301,9 +301,9 @@ class unifiapi
     }
 
     /**
-     * Daily stats method
-     * ------------------
-     * returns an array of daily stats objects
+     * Daily site stats method
+     * ------------------------
+     * returns an array of daily stats objects for the current site
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      *
@@ -322,8 +322,8 @@ class unifiapi
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 if (is_array($content_decoded->data)) {
-                    foreach ($content_decoded->data as $test) {
-                        $return[]= $test;
+                    foreach ($content_decoded->data as $stat) {
+                        $return[]= $stat;
                     }
                 }
             }
@@ -333,9 +333,9 @@ class unifiapi
     }
 
     /**
-     * Hourly stats method for a site
-     * ------------------------------
-     * returns an array of hourly stats objects
+     * Hourly site stats method
+     * ------------------------
+     * returns an array of hourly stats objects for the current site
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      *
@@ -354,8 +354,8 @@ class unifiapi
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 if (is_array($content_decoded->data)) {
-                    foreach ($content_decoded->data as $test) {
-                        $return[]= $test;
+                    foreach ($content_decoded->data as $stat) {
+                        $return[]= $stat;
                     }
                 }
             }
@@ -386,8 +386,40 @@ class unifiapi
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 if (is_array($content_decoded->data)) {
-                    foreach ($content_decoded->data as $test) {
-                        $return[]= $test;
+                    foreach ($content_decoded->data as $stat) {
+                        $return[]= $stat;
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Daily stats method for all access points
+     * ----------------------------------------
+     * returns an array of daily stats objects
+     * optional parameter <start> = Unix timestamp in seconds
+     * optional parameter <end>   = Unix timestamp in seconds
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - UniFi controller does not keep these stats longer than 5 hours with versions < 4.6.6
+     */
+    public function stat_daily_aps($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $return          = array();
+        $end             = is_null($end) ? ((time())*1000) : $end;
+        $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
+        $json            = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.ap','json='.$json));
+        if (isset($content_decoded->meta->rc)) {
+            if ($content_decoded->meta->rc == 'ok') {
+                if (is_array($content_decoded->data)) {
+                    foreach ($content_decoded->data as $stat) {
+                        $return[]= $stat;
                     }
                 }
             }
@@ -1080,7 +1112,7 @@ class unifiapi
      * returns an array of voucher codes (NOTE: without the "-" in the middle) by calling the stat_voucher method
      * required parameter <minutes> = minutes the voucher is valid after activation
      * optional parameter <count>   = number of vouchers to create, default value is 1
-     * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use
+     * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use, "n" is for multi-use n times
      * optional parameter <note>    = note text to add to voucher when printing
      * optional parameter <up>      = upload speed limit in kbps
      * optional parameter <down>    = download speed limit in kbps
@@ -1135,7 +1167,7 @@ class unifiapi
 
     /**
      * Extend guest validity
-     * --------------
+     * ---------------------
      * return true on success
      * required parameter <guest_id> = _id (24 char string) of the guest to extend validity
      */
@@ -1562,24 +1594,24 @@ class unifiapi
     }
 
     /**
-     * Add wlan
-     * -----------------
+     * Add a wlan
+     * ----------
      * return true on success
-     * required parameter <name> = SSID
-     * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63
-     * required parameter <usergroup_id> = user group id that can be found using the list_usergroups() function
-     * required parameter <wlangroup_id> = wlan group id that can be found using the list_wlan_groups() function
-     * optional parameter <enabled> = enable/disable wlan
-     * optional parameter <hide_ssid> = hide wlan SSID
-     * optional parameter <is_guest> = apply guest policies
-     * optional parameter <security> = security type
-     * optional parameter <wpa_mode> = wpa mode (wpa, wpa2, ..)
-     * optional parameter <wpa_enc> = encryption (auto, ccmp)
-     * optional parameter <vlan_enabled> = enable vlan for this wlan
-     * optional parameter <vlan> = vlan id
-     * optional parameter <uapsd_enabled> = enable Unscheduled Automatic Power Save Delivery
+     * required parameter <name>             = SSID
+     * required parameter <x_passphrase>     = new pre-shared key, minimal length is 8 characters, maximum length is 63
+     * required parameter <usergroup_id>     = user group id that can be found using the list_usergroups() function
+     * required parameter <wlangroup_id>     = wlan group id that can be found using the list_wlan_groups() function
+     * optional parameter <enabled>          = enable/disable wlan
+     * optional parameter <hide_ssid>        = hide wlan SSID
+     * optional parameter <is_guest>         = apply guest policies
+     * optional parameter <security>         = security type
+     * optional parameter <wpa_mode>         = wpa mode (wpa, wpa2, ..)
+     * optional parameter <wpa_enc>          = encryption (auto, ccmp)
+     * optional parameter <vlan_enabled>     = enable vlan for this wlan
+     * optional parameter <vlan>             = vlan id
+     * optional parameter <uapsd_enabled>    = enable Unscheduled Automatic Power Save Delivery
      * optional parameter <schedule_enabled> = enable wlan schedule
-     * optional parameter <schedule> = schedule rules
+     * optional parameter <schedule>         = schedule rules
      * -----------------
      * TODO: Check parameter values
      */
@@ -1587,21 +1619,21 @@ class unifiapi
                                 $wpa_mode = null, $wpa_enc = null, $vlan_enabled = null, $vlan = null, $uapsd_enabled = null, $schedule_enabled = null, $schedule = null)
     {
         if (!$this->is_loggedin) return false;
-        $return          = false;
-        $json            = array('name' => $name, 'x_passphrase' => $x_passphrase, 'usergroup_id' => $usergroup_id, 'wlangroup_id' => $wlangroup_id);
-        $json['enabled'] = (!is_null($enabled) ? $enabled : true);
-        $json['hide_ssid'] = (!is_null($hide_ssid) ? $hide_ssid : false);
-        $json['is_guest'] = (!is_null($is_guest) ? $is_guest : false);
-        $json['security'] = (!is_null($security) ? $security : 'open');
-        $json['wpa_mode'] = (!is_null($wpa_mode) ? $wpa_mode : 'wpa2');
-        $json['wpa_enc'] = (!is_null($wpa_enc) ? $wpa_enc : 'ccmp');
-        $json['vlan_enabled'] = (!is_null($vlan_enabled) ? $vlan_enabled : false);
+        $return                   = false;
+        $json                     = array('name' => $name, 'x_passphrase' => $x_passphrase, 'usergroup_id' => $usergroup_id, 'wlangroup_id' => $wlangroup_id);
+        $json['enabled']          = (!is_null($enabled) ? $enabled : true);
+        $json['hide_ssid']        = (!is_null($hide_ssid) ? $hide_ssid : false);
+        $json['is_guest']         = (!is_null($is_guest) ? $is_guest : false);
+        $json['security']         = (!is_null($security) ? $security : 'open');
+        $json['wpa_mode']         = (!is_null($wpa_mode) ? $wpa_mode : 'wpa2');
+        $json['wpa_enc']          = (!is_null($wpa_enc) ? $wpa_enc : 'ccmp');
+        $json['vlan_enabled']     = (!is_null($vlan_enabled) ? $vlan_enabled : false);
         if (!is_null($vlan)) $json['vlan'] = $vlan_enabled;
-        $json['uapsd_enabled'] = (!is_null($uapsd_enabled) ? $uapsd_enabled : false);
+        $json['uapsd_enabled']    = (!is_null($uapsd_enabled) ? $uapsd_enabled : false);
         $json['schedule_enabled'] = (!is_null($schedule_enabled) ? $schedule_enabled : false);
-        $json['schedule'] = (!is_null($schedule) ? $schedule : array());
-        $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/add/wlanconf','json='.$json));
+        $json['schedule']         = (!is_null($schedule) ? $schedule : array());
+        $json                     = json_encode($json);
+        $content_decoded          = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/add/wlanconf','json='.$json));
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 $return = true;
@@ -1621,7 +1653,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $return          = false;
-        $json           = array();
+        $json            = array();
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.$wlan_id, 'json='.$json));
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
@@ -1637,14 +1669,16 @@ class unifiapi
      * -----------------
      * return true on success
      * required parameter <wlan_id>
-     * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63
+     * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63,
+     *                                     will be ignored if set to NULL
      * optional parameter <name>
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
         if (!$this->is_loggedin) return false;
         $return          = false;
-        $json            = array('x_passphrase' => $x_passphrase);
+        $json            = array();
+        if (!is_null($x_passphrase)) $json['x_passphrase'] = $x_passphrase;
         if (!is_null($name)) $json['name'] = $name;
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id,'json='.$json));
@@ -1657,30 +1691,30 @@ class unifiapi
         return $return;
     }
 
-	 /**
+    /**
      * Disable/Enable wlan
-     * -----------------
+     * -------------------
      * return true on success
      * required parameter <wlan_id>
      * required parameter <disable> = true or false which determines the action to be done
      */
-	public function disable_wlan($wlan_id, $disable)
+    public function disable_wlan($wlan_id, $disable)
     {
         if (!$this->is_loggedin) return false;
-		if ($disable == "false") {$disable = true;} else  {$disable = false;}
+        if ($disable == 'false') {$disable = true;} else  {$disable = false;}
         $return          = false;
-		$json            = array('enabled' => (bool)$disable);
-        $json			 = json_encode($json);
+        $json            = array('enabled' => (bool)$disable);
+        $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id,'json='.$json));
         if (isset($content_decoded->meta->rc)) {
             if ($content_decoded->meta->rc == 'ok') {
                 $return = true;
             }
         }
-		
+
         return $return;
     }
-	
+
     /**
      * List events
      * -----------

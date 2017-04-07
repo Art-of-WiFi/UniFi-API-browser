@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.9
+ * VERSION: 1.0.10
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.9');
+define('API_BROWSER_VERSION', '1.0.10');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -297,17 +297,21 @@ if (isset($unifidata)) {
             $selection = 'hourly site stats';
             $data      = $unifidata->stat_hourly_site();
             break;
-        case 'stat_sysinfo':
-            $selection = 'sysinfo';
-            $data      = $unifidata->stat_sysinfo();
+        case 'stat_daily_site':
+            $selection = 'daily site stats';
+            $data      = $unifidata->stat_daily_site();
             break;
         case 'stat_hourly_aps':
             $selection = 'hourly ap stats';
             $data      = $unifidata->stat_hourly_aps();
             break;
-        case 'stat_daily_site':
-            $selection = 'daily site stats';
-            $data      = $unifidata->stat_daily_site();
+        case 'stat_daily_aps':
+            $selection = 'daily ap stats';
+            $data      = $unifidata->stat_daily_aps();
+            break;
+        case 'stat_sysinfo':
+            $selection = 'sysinfo';
+            $data      = $unifidata->stat_sysinfo();
             break;
         case 'list_devices':
             $selection = 'list devices';
@@ -460,13 +464,13 @@ function print_output($output_format, $data)
             echo '</code>';
             break;
         case 'php_array':
-            print_r ($data);
+            print_r($data);
             break;
         case 'php_var_dump':
-            var_dump ($data);
+            var_dump($data);
             break;
         case 'php_var_export':
-            var_export ($data);
+            var_export($data);
             break;
         default:
             echo json_encode($data, JSON_PRETTY_PRINT);
@@ -475,7 +479,7 @@ function print_output($output_format, $data)
 }
 
 /**
- * function to sort the sites collection
+ * function to sort the sites collection alpabetically by description
  */
 function sites_sort($a, $b)
 {
@@ -499,7 +503,9 @@ if (isset($_SESSION['controller'])) {
     <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo $cssurl ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css" integrity="sha256-Zd1icfZ72UBmsId/mUcagrmN7IN5Qkrvh75ICHIQVTk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/vs.min.css" integrity="sha256-w6kCMnFvhY2tI1OnsYR/rb5DG9yFGodJknvFZOkp51E=" crossorigin="anonymous" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- custom CSS styling -->
     <style>
         body {
@@ -640,6 +646,7 @@ if (isset($_SESSION['controller'])) {
                             <?php } ?>
                             <li role="separator" class="divider"></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
+                            <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
@@ -733,48 +740,41 @@ if (isset($_SESSION['controller'])) {
     </div><!-- /.container-fluid -->
 </nav><!-- /navbar-example -->
 <div class="container-fluid">
-    <div id="alertPlaceholder">
-        <?php echo $alert_message ?>
-    </div>
-    <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected -->
+    <div id="alert_placeholder"></div>
+    <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
     <?php if (isset($_SESSION['controller']) && $action) { ?>
-    <div class="panel panel-default">
+    <div id="output_panel_loading" class="text-center">
+        <br>
+        <h2><i class="fa fa-spinner fa-spin fa-fw"></i></h2>
+    </div>
+    <div id="output_panel" class="panel panel-default" style="display: none">
         <div class="panel-heading">
             <?php if ($site_id) { ?>
-                site id: <span class="label label-primary"><?php echo $site_id ?></span>
-                site name: <span class="label label-primary"><?php echo $site_name ?></span>
+                site id: <span id="span_site_id" class="label label-primary"></span>
+                site name: <span id="span_site_name" class="label label-primary"></span>
             <?php } ?>
             <?php if ($selection) { ?>
-                collection: <span class="label label-primary"><?php echo $selection ?></span>
+                collection: <span id="span_selection" class="label label-primary"></span>
             <?php } ?>
-            output: <span class="label label-primary"><?php echo $output_format ?></span>
+            output: <span id="span_output_format" class="label label-primary"></span>
             <?php if ($objects_count !== '') { ?>
-                # of objects: <span class="badge"><?php echo $objects_count ?></span>
+                # of objects: <span id="span_objects_count" class="badge"></span>
             <?php } ?>
         </div>
         <div class="panel-body">
             <!--only display panel content when an action has been selected-->
             <?php if ($action !== '' && isset($_SESSION['controller'])) { ?>
             <!-- present the timing results using an HTML5 progress bar -->
-            total elapsed time: <?php echo $time_total ?> seconds<br>
+            <span id="span_elapsed_time"></span>
+            <br>
             <div class="progress">
-                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="<?php echo $login_perc ?>"
-                aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $login_perc ?>%;" data-toggle="tooltip"
-                data-placement="bottom" data-original-title="<?php echo $time_after_login ?> seconds">
-                    API login time
-                </div>
-                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $load_perc ?>"
-                aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $load_perc ?>%;" data-toggle="tooltip"
-                data-placement="bottom" data-original-title="<?php echo ($time_after_load - $time_after_login) ?> seconds">
-                    data load time
-                </div>
-                <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<?php echo $remain_perc ?>"
-                aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $remain_perc ?>%;" data-toggle="tooltip"
-                data-placement="bottom" data-original-title="PHP overhead: <?php echo $remain_perc ?> seconds">
-                    PHP overhead
-                </div>
+                <div id="timing_login_perc" class="progress-bar progress-bar-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
             </div>
-            <pre><?php print_output($output_format, $data) ?></pre>
+            <div id="output" style="display: none">
+                <pre><?php print_output($output_format, $data) ?></pre>
+            </div>
             <?php } ?>
         </div>
     </div>
@@ -804,31 +804,31 @@ if (isset($_SESSION['controller'])) {
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
                     <dt>API Browser version</dt>
-                    <dd><span class="label label-primary"><?php echo API_BROWSER_VERSION ?></span></dd>
+                    <dd><span id="span_api_browser_version" class="label label-primary"></span></dd>
                     <dt>API Class version</dt>
-                    <dd><span class="label label-primary"><?php echo API_CLASS_VERSION ?></span></dd>
+                    <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
                 </dl>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
                     <dt>controller user</dt>
-                    <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $controller['user']; } ?></span></dd>
+                    <dd><span id="span_controller_user" class="label label-primary"></span></dd>
                     <dt>controller url</dt>
-                    <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $controller['url']; } ?></span></dd>
+                    <dd><span id="span_controller_url" class="label label-primary"></span></dd>
                     <dt>version detected</dt>
-                    <dd><span class="label label-primary"><?php if (isset($_SESSION['controller'])) { echo $detected_controller_version; } ?></span></dd>
+                    <dd><span id="span_controller_version" class="label label-primary"></span></dd>
                 </dl>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
                     <dt>PHP version</dt>
-                    <dd><span class="label label-primary"><?php echo (phpversion()) ?></span></dd>
+                    <dd><span id="span_php_version" class="label label-primary"></span></dd>
                     <dt>PHP memory_limit</dt>
-                    <dd><span class="label label-primary"><?php echo (ini_get('memory_limit')) ?></span></dd>
+                    <dd><span id="span_memory_limit" class="label label-primary"></span></dd>
                     <dt>PHP memory used</dt>
-                    <dd><span class="label label-primary"><?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?></span></dd>
+                    <dd><span id="span_memory_used" class="label label-primary"></span></dd>
                     <dt>cURL version</dt>
-                    <dd><span class="label label-primary"><?php echo $curl_version ?></span></dd>
+                    <dd><span id="span_curl_version" class="label label-primary"></span></dd>
                     <dt>operating system</dt>
-                    <dd><span class="label label-primary"><?php echo (php_uname('s') . ' ' . php_uname('r')) ?></span></dd>
+                    <dd><span id="span_os_version" class="label label-primary"></span></dd>
                 </dl>
             </div>
             <div class="modal-footer">
@@ -840,28 +840,107 @@ if (isset($_SESSION['controller'])) {
 <!-- Latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js" integrity="sha256-+mpyNVJsNt4rVXCw0F+pAOiB3YxmHgrbJsx4ecPuUaI=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js" integrity="sha256-3SFEu3qBPVRitcXI7ITnBKtwkYmoqF7ap4xI5dEexaY=" crossorigin="anonymous"></script>
 <script>
 $(document).ready(function() {
     /**
+     * we hide the loading div and show the output panel
+     */
+    $("#output_panel_loading").hide();
+    $("#output_panel").show();
+
+    /**
+     * populate some Javascript variables with PHP output for cleaner code
+     */
+    var alert_message       = '<?php echo $alert_message ?>';
+    var action              = '<?php echo $action ?>';
+    var site_id             = '<?php echo $site_id ?>';
+    var site_name           = '<?php echo $site_name ?>';
+    var controller_id       = '<?php echo $controller_id ?>';
+    var output_format       = '<?php echo $output_format ?>';
+    var selection           = '<?php echo $selection ?>';
+    var objects_count       = '<?php echo $objects_count ?>';
+    var timing_login_perc   = '<?php echo $login_perc ?>';
+    var time_after_login    = '<?php echo $time_after_login ?>';
+    var timing_load_perc    = '<?php echo $load_perc ?>';
+    var time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>';
+    var timing_remain_perc  = '<?php echo $remain_perc ?>';
+    var timing_total_time   = '<?php echo $time_total ?>';
+    var theme               = '<?php echo $theme ?>';
+    var php_version         = '<?php echo (phpversion()) ?>';
+    var memory_limit        = '<?php echo (ini_get('memory_limit')) ?>';
+    var memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>';
+    var curl_version        = '<?php echo $curl_version ?>';
+    var os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>';
+    var api_browser_version = '<?php echo API_BROWSER_VERSION ?>';
+    var api_class_version   = '<?php echo API_CLASS_VERSION ?>';
+    var controller_user     = '<?php if (isset($_SESSION['controller'])) { echo $controller['user']; } ?>';
+    var controller_url      = '<?php if (isset($_SESSION['controller'])) { echo $controller['url']; } ?>';
+    var controller_version  = '<?php if (isset($_SESSION['controller'])) { echo $detected_controller_version; } ?>';
+
+    /**
+     * update dynamic elements in the DOM using some of the above variables
+     */
+    $('#alert_placeholder').html(alert_message);
+    $('#span_site_id').html(site_id);
+    $('#span_site_name').html(site_name);
+    $('#span_output_format').html(output_format);
+    $('#span_selection').html(selection);
+    $('#span_objects_count').html(objects_count);
+
+    $('#span_elapsed_time').html('total elapsed time: ' + timing_total_time + ' seconds');
+
+    $('#timing_login_perc').attr('aria-valuenow', timing_login_perc);
+    $('#timing_login_perc').css('width', timing_login_perc + '%');
+    $('#timing_login_perc').attr('data-original-title', time_after_login + ' seconds');
+    $('#timing_login_perc').html('API login time');
+
+    $('#timing_load_perc').attr('aria-valuenow', timing_load_perc);
+    $('#timing_load_perc').css('width', timing_load_perc + '%');
+    $('#timing_load_perc').attr('data-original-title', time_for_load + ' seconds');
+    $('#timing_load_perc').html('data load time');
+
+    $('#timing_remain_perc').attr('aria-valuenow', timing_remain_perc);
+    $('#timing_remain_perc').css('width', timing_remain_perc + '%');
+    $('#timing_remain_perc').attr('data-original-title', 'PHP overhead: ' + timing_remain_perc + '%');
+    $('#timing_remain_perc').html('PHP overhead');
+
+    $('#span_api_browser_version').html(api_browser_version);
+    $('#span_api_class_version').html(api_class_version);
+    $('#span_controller_user').html(controller_user);
+    $('#span_controller_url').html(controller_url);
+    $('#span_controller_version').html(controller_version);
+    $('#span_php_version').html(php_version);
+    $('#span_curl_version').html(curl_version);
+    $('#span_os_version').html(os_version);
+    $('#span_memory_limit').html(memory_limit);
+    $('#span_memory_used').html(memory_used);
+
+    /**
      * initialise the Highlighting.js library, only when required
      */
-    ('<?php echo $output_format ?>' == 'json_color') ? hljs.initHighlightingOnLoad() : false;
+    (output_format == 'json_color') ? hljs.initHighlightingOnLoad() : false;
+
+    /**
+     * only now do we display the output
+     */
+    $("#output").show();
 
     /**
      * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
+     *
      * NOTE:
-     * these actions are performed conditionally if values are set for the respective PHP variables
+     * these actions are performed conditionally
      */
-    ('<?php echo $action ?>' != '') ? $('#<?php echo $action ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    ('<?php echo $site_id ?>' != '') ? $('#<?php echo $site_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    ('<?php echo $controller_id ?>' != '') ? $('#controller_<?php echo $controller_id ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    (action != '')        ? $('#' + action).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    (site_id != '')       ? $('#' + site_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    (controller_id != '') ? $('#controller_' + controller_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
 
     /**
      * these two options have default values so no conditions needed here
      */
-    $('#<?php echo $output_format ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#<?php echo $theme ?>').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    $('#' + theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
     /**
      * enable Bootstrap tooltips
