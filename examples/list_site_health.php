@@ -9,8 +9,11 @@
 
 /**
  * include the config file (place you credentials etc. there if not already present)
+ *
+ * NOTE:
+ * this example will only work out of the box with a single controller config file!
  */
-include('../config.php');
+require_once('../config.php');
 
 /**
  * the short name of the site you wish to query
@@ -20,7 +23,7 @@ $site_id = '<enter your site id here>';
 /**
  * load the Unifi API connection class and log in to the controller and pull the requested data
  */
-require('../phpapi/class.unifi.php');
+require_once('../phpapi/class.unifi.php');
 
 $unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $loginresults = $unifidata->login();

@@ -9,8 +9,11 @@
 
 /**
  * include the config file (place your credentials etc. there if not already present)
+ *
+ * NOTE:
+ * this example will only work out of the box with a single controller config file!
  */
-include('../config-local.php');
+require_once('../config-local.php');
 
 /**
  * site id to use
@@ -25,11 +28,12 @@ $mac = '<enter MAC address of your AP here>';
 /**
  * load the Unifi API connection class and log in to the controller to do our thing
  */
-require('../phpapi/class.unifi.php');
+require_once('../phpapi/class.unifi.php');
 $unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion); // initialize the class instance
 $loginresults = $unifidata->login(); // log into the controller
+
 $data         = $unifidata->set_locate_ap($mac); // uncomment to switch locating on
-//$data         = $unifidata->unset_locate_ap($mac); // uncomment to switch locating off
+//$data         = $unifidata->unset_locate_ap($mac); // uncomment to switch locating off (choose either of these two lines!)
 
 /**
  * provide feedback in json format
