@@ -1,6 +1,6 @@
 <?php
 /**
- * UniFi API Browser
+ * UniFi API browser
  *
  * This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API,
  * written in PHP, JavaScript and the Bootstrap CSS framework.
@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.10
+ * VERSION: 1.0.11
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.10');
+define('API_BROWSER_VERSION', '1.0.11');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -67,10 +67,10 @@ $detected_controller_version = '';
  */
 if(!is_readable('config.php')) {
     $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.'
-                    . '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and modify '
-                    . 'the contents as required.</div>';
+                   . '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and follow '
+                   . 'the instructions inside to enter your credentials and controller details.</div>';
 } else {
-    include('config.php');
+    require_once('config.php');
 }
 
 /**
@@ -136,12 +136,13 @@ if (isset($_GET['controller_id'])) {
              * if the user has configured a single controller, we push it's details
              * to the $_SESSION and $controller arrays
              */
-            $_SESSION['controller'] = array('user'     => $controlleruser,
-                                            'password' => $controllerpassword,
-                                            'url'      => $controllerurl,
-                                            'name'     => 'Controller',
-                                            'version'  => $controllerversion
-                                        );
+            $_SESSION['controller'] = array(
+                'user'     => $controlleruser,
+                'password' => $controllerpassword,
+                'url'      => $controllerurl,
+                'name'     => 'Controller',
+                'version'  => $controllerversion
+            );
             $controller = $_SESSION['controller'];
         }
     }
@@ -201,24 +202,24 @@ if (isset($_GET['action'])) {
  */
 if ($action === '') {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus'
-                    . ' <i class="fa fa-arrow-circle-up"></i></div>';
+                   . ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 if ($site_id === '' && isset($_SESSION['controller'])) {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu <i class="fa fa-arrow-circle-up">'
-                    . '</i></div>';
+                   . '</i></div>';
 }
 
 if (!isset($_SESSION['controller'])) {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu <i class="fa fa-arrow-circle-up">'
-                    . '</i></div>';
+                   . '</i></div>';
 }
 
 /**
  * load the UniFi API client class and log in to the UniFi controller
  * - if an error occurs during the login process, an alert is displayed on the page
  */
-require('phpapi/class.unifi.php');
+require_once('phpapi/class.unifi.php');
 
 /**
  * Do this when a controller has been selected and was stored in the $_SESSION array
@@ -230,8 +231,9 @@ if (isset($_SESSION['controller'])) {
 
     if($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
-                        . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
-                        . 'config.php. After correcting your credentials, please restart your browser before attempting to use the API Browser tool again.</div>';
+                       . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
+                       . 'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function in the dropdown '
+                       . 'menu on the right, before attempting to use the API browser tool again.</div>';
     }
 
     /**
@@ -425,9 +427,9 @@ if($action!=''){
  * create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
  */
 if ($theme === 'bootstrap') {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
+    $css_url = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
 } else {
-    $cssurl = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . $theme . '/bootstrap.min.css';
+    $css_url = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . $theme . '/bootstrap.min.css';
 }
 
 /**
@@ -443,7 +445,7 @@ $time_end    = microtime(true);
 $time_total  = $time_end - $time_start;
 $login_perc  = ($time_after_login/$time_total)*100;
 $load_perc   = (($time_after_load - $time_after_login)/$time_total)*100;
-$remain_perc = 100-$login_perc-$load_perc;
+$remain_perc = 100 - $login_perc-$load_perc;
 
 /**
  * shared functions
@@ -502,7 +504,7 @@ if (isset($_SESSION['controller'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?php echo $cssurl ?>">
+    <link rel="stylesheet" href="<?php echo $css_url ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/vs.min.css" integrity="sha256-w6kCMnFvhY2tI1OnsYR/rb5DG9yFGodJknvFZOkp51E=" crossorigin="anonymous" />
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -680,7 +682,7 @@ if (isset($_SESSION['controller'])) {
                             <li id="list_self"><a href="?action=list_self">self</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
-                            <li id="list_settings"><a href="?action=list_admins">list admins for current site</a></li>
+                            <li id="list_admins"><a href="?action=list_admins">list admins for current site</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
                             <li role="separator" class="divider"></li>
@@ -732,7 +734,7 @@ if (isset($_SESSION['controller'])) {
                         <li role="separator" class="divider"></li>
                         <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API Browser</a></li>
+                        <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
                     </ul>
                 </li>
             </ul>
@@ -764,17 +766,17 @@ if (isset($_SESSION['controller'])) {
         <div class="panel-body">
             <!--only display panel content when an action has been selected-->
             <?php if ($action !== '' && isset($_SESSION['controller'])) { ?>
-            <!-- present the timing results using an HTML5 progress bar -->
-            <span id="span_elapsed_time"></span>
-            <br>
-            <div class="progress">
-                <div id="timing_login_perc" class="progress-bar progress-bar-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-                <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-                <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-            </div>
-            <div id="output" style="display: none">
-                <pre><?php print_output($output_format, $data) ?></pre>
-            </div>
+                <!-- present the timing results using an HTML5 progress bar -->
+                <span id="span_elapsed_time"></span>
+                <br>
+                <div class="progress">
+                    <div id="timing_login_perc" class="progress-bar progress-bar-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                    <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                    <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                </div>
+                <div id="output" style="display: none">
+                    <pre><?php print_output($output_format, $data) ?></pre>
+                </div>
             <?php } ?>
         </div>
     </div>
@@ -787,7 +789,7 @@ if (isset($_SESSION['controller'])) {
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"></i> About UniFi API Browser</h4>
+                <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"></i> About UniFi API browser</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -803,7 +805,7 @@ if (isset($_SESSION['controller'])) {
                 </div>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
-                    <dt>API Browser version</dt>
+                    <dt>API browser version</dt>
                     <dd><span id="span_api_browser_version" class="label label-primary"></span></dd>
                     <dt>API Class version</dt>
                     <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
@@ -917,6 +919,22 @@ $(document).ready(function() {
     $('#span_memory_used').html(memory_used);
 
     /**
+     * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
+     *
+     * NOTE:
+     * these actions are performed conditionally
+     */
+    (action != '') ? $('#' + action).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    (site_id != '') ? $('#' + site_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+    (controller_id != '') ? $('#controller_' + controller_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+
+    /**
+     * these two options have default values so no tests needed here
+     */
+    $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    $('#' + theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+
+    /**
      * initialise the Highlighting.js library, only when required
      */
     (output_format == 'json_color') ? hljs.initHighlightingOnLoad() : false;
@@ -925,22 +943,6 @@ $(document).ready(function() {
      * only now do we display the output
      */
     $("#output").show();
-
-    /**
-     * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
-     *
-     * NOTE:
-     * these actions are performed conditionally
-     */
-    (action != '')        ? $('#' + action).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    (site_id != '')       ? $('#' + site_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    (controller_id != '') ? $('#controller_' + controller_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-
-    /**
-     * these two options have default values so no conditions needed here
-     */
-    $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#' + theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
     /**
      * enable Bootstrap tooltips
