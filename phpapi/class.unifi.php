@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.0
+ * VERSION: 1.1.1
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -26,7 +26,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.0');
+define('API_CLASS_VERSION', '1.1.1');
 
 class unifiapi
 {
@@ -39,6 +39,7 @@ class unifiapi
     public  $debug        = false;
     private $cookies      = '';
     private $request_type = 'POST';
+    private $last_response;
 
     function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '')
     {
@@ -1182,6 +1183,29 @@ class unifiapi
         return $this->process_response($content_decoded);
     }
 
+    /**
+     * Get last raw results
+     * --------------------
+     * returns the raw results of the last method called, in PHP stdClass Object format, if not set returns false
+     * optional parameter <return_json> = true will return results in "pretty printed" json format
+     *
+     * NOTES:
+     * for example this method can be used to get the original error message when the last used method returns false
+     */
+    public function get_last_results_raw($return_json = false)
+    {
+        if ($this->last_response != null) {
+            if ($return_json) {
+                return json_encode($this->last_response, JSON_PRETTY_PRINT);
+            } else {
+                return $this->last_response;
+            }
+
+        } else {
+            return false;
+        }
+    }
+
     /****************************************************************
      * Internal (private) functions from here:
      ****************************************************************/
@@ -1191,6 +1215,7 @@ class unifiapi
      */
     private function process_response($response)
     {
+        $this->last_response = $response;
         if (isset($response->meta->rc)) {
             if ($response->meta->rc == 'ok') {
                 if (is_array($response->data)) {
@@ -1216,6 +1241,7 @@ class unifiapi
      */
     private function process_response_boolean($response)
     {
+        $this->last_response = $response;
         $output = false;
         if (isset($response->meta->rc)) {
             if ($response->meta->rc == 'ok') {
@@ -1226,6 +1252,9 @@ class unifiapi
         return $output;
     }
 
+    /**
+     * execute the cURL request
+     */
     private function exec_curl($url, $data = '')
     {
         $ch = $this->get_curl_obj();
@@ -1265,6 +1294,9 @@ class unifiapi
         return $content;
     }
 
+    /**
+     * get the cURL object
+     */
     private function get_curl_obj()
     {
         $ch = curl_init();

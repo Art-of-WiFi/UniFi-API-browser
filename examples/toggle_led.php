@@ -35,7 +35,16 @@ $loginresults = $unifidata->login(); // log into the controller
 $data         = $unifidata->set_locate_ap($mac); // uncomment to switch locating on
 //$data         = $unifidata->unset_locate_ap($mac); // uncomment to switch locating off (choose either of these two lines!)
 
-/**
- * provide feedback in json format
- */
-echo json_encode($data, JSON_PRETTY_PRINT);
+if ($data) {
+    /**
+     * provide feedback in json format
+     */
+    echo json_encode($data, JSON_PRETTY_PRINT);
+} else {
+    /**
+     * method returned false so we display the raw results in json format
+     */
+    echo '<pre>';
+    print_r($unifidata->get_last_results_raw(true));
+    echo '</pre>';
+}

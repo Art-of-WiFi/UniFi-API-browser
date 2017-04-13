@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.11
+ * VERSION: 1.0.12
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.11');
+define('API_BROWSER_VERSION', '1.0.12');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -734,7 +734,7 @@ if (isset($_SESSION['controller'])) {
                         <li role="separator" class="divider"></li>
                         <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="info" data-toggle="modal" data-target="#aboutModal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
+                        <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
                     </ul>
                 </li>
             </ul>
@@ -784,7 +784,7 @@ if (isset($_SESSION['controller'])) {
     <!-- /data-panel -->
 </div>
 <!-- Modal -->
-<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -798,15 +798,15 @@ if (isset($_SESSION['controller'])) {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-8 col-sm-offset-1"><a href="https://github.com/malle-pietje/UniFi-API-browser"
+                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/malle-pietje/UniFi-API-browser"
                     target="_blank">UniFi API browser on Github</a></div>
-                    <div class="col-sm-8 col-sm-offset-1"><a href="http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
+                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
                     target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
                 </div>
                 <hr>
                 <dl class="dl-horizontal col-sm-offset-1">
                     <dt>API browser version</dt>
-                    <dd><span id="span_api_browser_version" class="label label-primary"></span></dd>
+                    <dd><span id="span_api_browser_version" class="label label-primary"></span> <span id="span_api_browser_update" class="label label-success"><i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span></dd>
                     <dt>API Class version</dt>
                     <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
                 </dl>
@@ -949,6 +949,35 @@ $(document).ready(function() {
      */
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    /**
+     * check latest version of API browser tool and inform user when it's more recent than the current,
+     * but only when the "about" modal is opened
+     */
+    $('#about_modal').on('shown.bs.modal', function (e) {
+        $.getJSON('https://api.github.com/repos/malle-pietje/UniFi-API-browser/releases/latest', function(external) {
+            if (api_browser_version != '' && typeof(external.tag_name) !== 'undefined') {
+                if (api_browser_version < external.tag_name.substring(1)) {
+                    $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));
+                    $('#span_api_browser_update').removeClass('label-success').addClass('label-warning');
+                } else {
+                    $('#span_api_browser_update').html('up to date');
+                }
+            }
+        }).fail(function(d, textStatus, error) {
+            $('#span_api_browser_update').html('error checking updates');
+            $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
+            console.error("getJSON failed, status: " + textStatus + ", error: " + error);
+        });;
+    })
+
+    /**
+     * and reset the span again when the "about" modal is closed
+     */
+    $('#about_modal').on('hidden.bs.modal', function (e) {
+        $('#span_api_browser_update').html('<i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span>');
+        $('#span_api_browser_update').removeClass('label-warning').removeClass('label-danger').addClass('label-success');
     })
 });
 </script>
