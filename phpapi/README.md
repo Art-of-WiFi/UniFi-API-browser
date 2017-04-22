@@ -3,6 +3,7 @@
 This directory contains a PHP class, which is based off the work of @domwo and @fbagnol and the API shell client as published by UBNT.
 
 The class currently supports the following functions/methods to get/set data through the UniFi controller API:
+
 - login()
 - logout()
 - add_site()
@@ -72,7 +73,21 @@ The class currently supports the following functions/methods to get/set data thr
 
 Please refer to the source code for more details on each function/method and it's parameters.
 
-For example usage of this class you can have a look at the examples in the `examples` directory.
+### Example usage
+A basic example how to use the class:
+
+```php
+/**
+ * load the Unifi API connection class, log in to the controller and request the alarms collection
+ * (this examples assumes you have already assigned the correct values to the variables used)
+ */
+require_once('../phpapi/class.unifi.php');
+$unifidata    = new unifiapi($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
+$loginresults = $unifidata->login();
+$data         = $unifidata->list_alarms(); // returns the alarms in a PHP array
+```
+
+Have a look at the files in the `examples` directory for more examples how to use this class.
 
 ## Important Disclaimer
 Many of these functions are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi controller API.

@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.12
+ * VERSION: 1.0.13
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.12');
+define('API_BROWSER_VERSION', '1.0.13');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -58,7 +58,6 @@ $objects_count = '';
 $alert_message = '';
 $cookietimeout = '1800';
 $debug         = false;
-$detected_controller_version = '';
 
 /**
  * load the configuration file
@@ -72,6 +71,11 @@ if(!is_readable('config.php')) {
 } else {
     require_once('config.php');
 }
+
+/**
+ * load the UniFi API client class
+ */
+require_once('phpapi/class.unifi.php');
 
 /**
  * determine whether we have reached the cookie timeout, if so, refresh the PHP session
@@ -216,15 +220,13 @@ if (!isset($_SESSION['controller'])) {
 }
 
 /**
- * load the UniFi API client class and log in to the UniFi controller
- * - if an error occurs during the login process, an alert is displayed on the page
- */
-require_once('phpapi/class.unifi.php');
-
-/**
  * Do this when a controller has been selected and was stored in the $_SESSION array
  */
 if (isset($_SESSION['controller'])) {
+    /**
+     * create a new instance of the API client class and log in to the UniFi controller
+     * - if an error occurs during the login process, an alert is displayed on the page
+     */
     $unifidata        = new unifiapi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
     $unifidata->debug = $debug;
     $loginresults     = $unifidata->login();
@@ -259,6 +261,7 @@ if (isset($_SESSION['controller'])) {
             $detected_controller_version             = 'undetected';
             $_SESSION['detected_controller_version'] = 'undetected';
         }
+
     } else {
         $detected_controller_version = $_SESSION['detected_controller_version'];
     }
@@ -424,7 +427,7 @@ if($action!=''){
 }
 
 /**
- * create the url to the css file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
+ * construct the url for the Bootstrap CSS file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
  */
 if ($theme === 'bootstrap') {
     $css_url = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
@@ -461,9 +464,7 @@ function print_output($output_format, $data)
             echo json_encode($data, JSON_PRETTY_PRINT);
             break;
         case 'json_color':
-            echo '<code class="json">';
-            echo json_encode($data, JSON_PRETTY_PRINT);
-            echo '</code>';
+            echo json_encode($data);
             break;
         case 'php_array':
             print_r($data);
@@ -504,8 +505,9 @@ if (isset($_SESSION['controller'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <!-- Load the appropriate Bootstrap CSS file from CDN -->
     <link rel="stylesheet" href="<?php echo $css_url ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/vs.min.css" integrity="sha256-w6kCMnFvhY2tI1OnsYR/rb5DG9yFGodJknvFZOkp51E=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- custom CSS styling -->
@@ -518,6 +520,10 @@ if (isset($_SESSION['controller'])) {
             height: auto;
             max-height: 600px;
             overflow-x: hidden;
+        }
+
+        #output_panel_loading {
+            color: rgba(0,0,0,.4);
         }
     </style>
 </head>
@@ -535,7 +541,7 @@ if (isset($_SESSION['controller'])) {
         </div>
         <div id="navbar-main" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-left">
-                <!-- only show the controllers dropdown when multiple controllers have been configured -->
+                <!-- controllers dropdown, only show when multiple controllers have been configured -->
                 <?php if (isset($controllers)) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="controller-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -564,7 +570,8 @@ if (isset($_SESSION['controller'])) {
                          </ul>
                     </li>
                 <?php } ?>
-                <!-- only show the sites dropdown when a controller has been selected -->
+                <!-- /controllers dropdown -->
+                <!-- sites dropdown, only show when a controller has been selected -->
                 <?php if (isset($_SESSION['controller'])) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -586,7 +593,8 @@ if (isset($_SESSION['controller'])) {
                          </ul>
                     </li>
                 <?php } ?>
-                <!-- only show the data collection dropdowns when a site_id is selected -->
+                <!-- /sites dropdown -->
+                <!-- data collection dropdowns, only show when a site_id is selected -->
                 <?php if ($site_id) { ?>
                     <li id="output-menu" class="dropdown">
                         <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -643,17 +651,21 @@ if (isset($_SESSION['controller'])) {
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
+                            <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
                                 <li id="stat_sites"><a href="?action=stat_sites">all sites stats</a></li>
                             <?php } ?>
+                            <!-- /all sites stats -->
                             <li role="separator" class="divider"></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
                             <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
+                            <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
                                 <li id="list_dashboard"><a href="?action=list_dashboard">site dashboard metrics</a></li>
                             <?php } ?>
+                            <!-- /site dashboard metrics -->
                             <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
                         </ul>
                     </li>
@@ -706,6 +718,7 @@ if (isset($_SESSION['controller'])) {
                         </ul>
                     </li>
                 <?php } ?>
+                <!-- /data collection dropdowns -->
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li id="theme-menu" class="dropdown">
@@ -740,7 +753,7 @@ if (isset($_SESSION['controller'])) {
             </ul>
         </div><!-- /.nav-collapse -->
     </div><!-- /.container-fluid -->
-</nav><!-- /navbar-example -->
+</nav><!-- /top navbar -->
 <div class="container-fluid">
     <div id="alert_placeholder"></div>
     <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
@@ -751,17 +764,23 @@ if (isset($_SESSION['controller'])) {
     </div>
     <div id="output_panel" class="panel panel-default" style="display: none">
         <div class="panel-heading">
+            <!-- site info, only to be displayed when a site has been selected -->
             <?php if ($site_id) { ?>
                 site id: <span id="span_site_id" class="label label-primary"></span>
                 site name: <span id="span_site_name" class="label label-primary"></span>
             <?php } ?>
+            <!-- /site info -->
+            <!-- selection, only to be displayed when a selection has been made -->
             <?php if ($selection) { ?>
                 collection: <span id="span_selection" class="label label-primary"></span>
             <?php } ?>
+            <!-- /selection -->
             output: <span id="span_output_format" class="label label-primary"></span>
+            <!-- objects_count, only to be displayed when we have results -->
             <?php if ($objects_count !== '') { ?>
                 # of objects: <span id="span_objects_count" class="badge"></span>
             <?php } ?>
+            <!-- /objects_count -->
         </div>
         <div class="panel-body">
             <!--only display panel content when an action has been selected-->
@@ -774,8 +793,13 @@ if (isset($_SESSION['controller'])) {
                     <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
                     <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
                 </div>
+                <div id="toggle_button" style="display: none">
+                    <button id="toggle-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse</button>
+                    <button id="toggle-level2-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-level2-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse level 2</button>
+                    <br><br>
+                </div>
                 <div id="output" style="display: none">
-                    <pre><?php print_output($output_format, $data) ?></pre>
+                    <pre id="pre_output"><?php print_output($output_format, $data) ?></pre>
                 </div>
             <?php } ?>
         </div>
@@ -842,7 +866,8 @@ if (isset($_SESSION['controller'])) {
 <!-- Latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js" integrity="sha256-3SFEu3qBPVRitcXI7ITnBKtwkYmoqF7ap4xI5dEexaY=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha256-yB+xHoEi5PoOnEAgHNbRMIbN4cNtOXAmBzkhNE/tQlI=" crossorigin="anonymous"></script>
+
 <script>
 $(document).ready(function() {
     /**
@@ -935,14 +960,32 @@ $(document).ready(function() {
     $('#' + theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
     /**
-     * initialise the Highlighting.js library, only when required
+     * initialise the jquery-jsonview library, only when required
      */
-    (output_format == 'json_color') ? hljs.initHighlightingOnLoad() : false;
+    if (output_format == 'json_color') {
+        $('#toggle_button').show();
+        $('#pre_output').JSONView($('#pre_output').text());
+
+        /**
+         * the expand/collapse toggle buttons to control the json view
+         */
+        $('#toggle-btn').on('click', function() {
+            $('#pre_output').JSONView('toggle');
+            $('#i_toggle-btn').toggleClass('fa-plus').toggleClass('fa-minus');
+            $(this).blur();
+        });
+
+        $('#toggle-level2-btn').on('click', function() {
+            $('#pre_output').JSONView('toggle', 2);
+            $('#i_toggle-level2-btn').toggleClass('fa-plus').toggleClass('fa-minus');
+            $(this).blur();
+        });
+    }
 
     /**
      * only now do we display the output
      */
-    $("#output").show();
+    $('#output').show();
 
     /**
      * enable Bootstrap tooltips

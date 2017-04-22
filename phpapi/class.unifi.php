@@ -9,14 +9,19 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.1
+ * VERSION: 1.1.2
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
  *   you from trying to use it with other versions of the UniFi Controller.
  *
  * IMPORTANT CHANGES:
- * - function/method "get_vouchers" has been removed and has been replaced by "stat_voucher"
+ * - function/method get_vouchers() has been removed and has been replaced by stat_voucher()
+ * as of version 1.1.2:
+ * - functions/methods unset_locate_ap() and set_locate_ap() have deprecated and replaced
+ *   by locate_ap(), but are still available as alias.
+ * - functions/methods site_ledson() and site_ledsoff() have deprecated and replaced
+ *   by site_leds(), but are still available as alias.
  *
  * ------------------------------------------------------------------------------------
  *
@@ -26,7 +31,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.1');
+define('API_CLASS_VERSION', '1.1.2');
 
 class unifiapi
 {
@@ -35,8 +40,9 @@ class unifiapi
     public  $site         = 'default';
     public  $baseurl      = 'https://127.0.0.1:8443';
     public  $version      = '4.8.20';
-    public  $is_loggedin  = false;
     public  $debug        = false;
+
+    private $is_loggedin  = false;
     private $cookies      = '';
     private $request_type = 'POST';
     private $last_response;
@@ -268,7 +274,8 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time()-(time() % 3600))*1000) : $end;
         $start           = is_null($start) ? $end-(52*7*24*3600*1000) : $start;
-        $json            = json_encode(array('attrs' => array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'), 'start' => $start, 'end' => $end));
+        $attributes      = array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time');
+        $json            = json_encode(array('attrs' => $attributes, 'start' => $start, 'end' => $end));
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.site', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -289,7 +296,8 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $json            = json_encode(array('attrs' => array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'), 'start' => $start, 'end' => $end));
+        $attributes      = array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time');
+        $json            = json_encode(array('attrs' => $attributes, 'start' => $start, 'end' => $end));
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -559,7 +567,8 @@ class unifiapi
      * List sites stats
      * ----------------
      * returns statistics for all sites hosted on this controller
-     * NOTE: this endpoint was introduced with controller version 5.2.9
+     *
+     * NOTES: this endpoint was introduced with controller version 5.2.9
      */
     public function stat_sites()
     {
@@ -573,7 +582,8 @@ class unifiapi
      * ----------
      * returns an array containing a single object with attributes of the new site ("_id", "desc", "name") on success
      * required parameter <description> = the long name for the new site
-     * NOTE: immediately after being added, the new site will be available in the output of the "list_sites" function
+     *
+     * NOTES: immediately after being added, the new site will be available in the output of the "list_sites" function
      */
     public function add_site($description)
     {
@@ -587,7 +597,7 @@ class unifiapi
      * Delete a site
      * -------------
      * return true on success
-     * required parameter <site_id> = _id (24 char string) of the site to delete
+     * required parameter <site_id> = 24 char string; _id of the site to delete
      */
     public function delete_site($site_id)
     {
@@ -733,10 +743,11 @@ class unifiapi
     /**
      * Create voucher(s)
      * -----------------
-     * returns an array of voucher codes (NOTE: without the "-" in the middle) by calling the stat_voucher method
+     * returns an array of voucher codes (without the dash "-" in the middle) by calling the stat_voucher method
      * required parameter <minutes> = minutes the voucher is valid after activation
      * optional parameter <count>   = number of vouchers to create, default value is 1
-     * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use, "n" is for multi-use n times
+     * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use,
+     *                                "n" is for multi-use n times
      * optional parameter <note>    = note text to add to voucher when printing
      * optional parameter <up>      = upload speed limit in kbps
      * optional parameter <down>    = download speed limit in kbps
@@ -750,10 +761,10 @@ class unifiapi
         /**
          * if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
          */
-        if (isset($note))    $json['note'] = trim($note);
-        if (isset($up))      $json['up'] = $up;
-        if (isset($down))    $json['down'] = $down;
-        if (isset($MBytes))  $json['bytes'] = $MBytes;
+        if (isset($note))   $json['note'] = trim($note);
+        if (isset($up))     $json['up'] = $up;
+        if (isset($down))   $json['down'] = $down;
+        if (isset($MBytes)) $json['bytes'] = $MBytes;
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json));
         return $this->process_response($content_decoded);
@@ -763,7 +774,7 @@ class unifiapi
      * Revoke voucher
      * --------------
      * return true on success
-     * required parameter <voucher_id> = _id (24 char string) of the voucher to revoke
+     * required parameter <voucher_id> = 24 char string; _id of the voucher to revoke
      */
     public function revoke_voucher($voucher_id)
     {
@@ -777,7 +788,7 @@ class unifiapi
      * Extend guest validity
      * ---------------------
      * return true on success
-     * required parameter <guest_id> = _id (24 char string) of the guest to extend validity
+     * required parameter <guest_id> = 24 char string; _id of the guest to extend validity
      */
     public function extend_guest_validity($guest_id)
     {
@@ -893,7 +904,7 @@ class unifiapi
      * Disable/enable an access point
      * ------------------------------
      * return true on success
-     * required parameter <ap_id>   = value of _id (24 char string) for the access point which can be obtained from the device list
+     * required parameter <ap_id>   = 24 char string; value of _id for the access point which can be obtained from the device list
      * required parameter <disable> = boolean; true will disable the device, false will enable the device
      *
      * NOTES:
@@ -905,7 +916,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json               = json_encode(array('disabled' => $disable));
+        $json               = json_encode(array('disabled' => (bool)$disable));
         $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.$ap_id, $json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -914,8 +925,8 @@ class unifiapi
      * Override LED mode for a device
      * ------------------------------
      * return true on success
-     * required parameter <device_id>     = value of _id (24 char string) for the device which can be obtained from the device list
-     * required parameter <override_mode> = off/on/default; "off" will disable the LED of the device, "on" will enable the LED of the device,
+     * required parameter <device_id>     = 24 char string; value of _id for the device which can be obtained from the device list
+     * required parameter <override_mode> = string, off/on/default; "off" will disable the LED of the device, "on" will enable the LED of the device,
      *                                      "default" will apply the site-wide setting for device LEDs
      *
      * NOTES:
@@ -936,57 +947,35 @@ class unifiapi
     }
 
     /**
-     * Start flashing LED of an access point for locating purposes
-     * -----------------------------------------------------------
+     * Toggle flashing LED of an access point for locating purposes
+     * ------------------------------------------------------------
      * return true on success
-     * required parameter <mac> = device MAC address
+     * required parameter <mac>    = device MAC address
+     * required parameter <enable> = boolean; true will enable flashing LED, false will disable
+     *
+     * NOTES:
+     * replaces the old set_locate_ap() and unset_locate_ap() methods/functions
      */
-    public function set_locate_ap($mac)
+    public function locate_ap($mac, $enable)
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'set-locate', 'mac' => $mac));
+        $cmd             = (($enable) ? 'set-locate' : 'unset-locate');
+        $json            = json_encode(array('cmd' => $cmd, 'mac' => $mac));
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
     /**
-     * Stop flashing LED of an access point for locating purposes
-     * ----------------------------------------------------------
+     * Toggle LEDs of all the access points ON or OFF
+     * ----------------------------------------------
      * return true on success
-     * required parameter <mac> = device MAC address
+     * required parameter <enable> = boolean; true will switch LEDs of all the access points ON, false will switch them OFF
      */
-    public function unset_locate_ap($mac)
+    public function site_leds($enable)
     {
         if (!$this->is_loggedin) return false;
-        $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'unset-locate', 'mac' => $mac));
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
-        return $this->process_response_boolean($content_decoded);
-    }
-
-    /**
-     * Switch LEDs of all the access points ON
-     * ---------------------------------------
-     * return true on success
-     */
-    public function site_ledson()
-    {
-        if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('led_enabled' => true));
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt', 'json='.$json));
-        return $this->process_response_boolean($content_decoded);
-    }
-
-    /**
-     * Switch LEDs of all the access points OFF
-     * ----------------------------------------
-     * return true on success
-     */
-    public function site_ledsoff()
-    {
-        if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('led_enabled' => false));
+        $json            = json_encode(array('led_enabled' => (bool)$enable));
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1027,8 +1016,16 @@ class unifiapi
      * NOTES:
      * - both portal parameters are set to the same value!
      */
-    public function set_guestlogin_settings($portal_enabled, $portal_customized, $redirect_enabled, $redirect_url, $x_password, $expire_number, $expire_unit, $site_id)
-    {
+    public function set_guestlogin_settings(
+        $portal_enabled,
+        $portal_customized,
+        $redirect_enabled,
+        $redirect_url,
+        $x_password,
+        $expire_number,
+        $expire_unit,
+        $site_id
+    ) {
         if (!$this->is_loggedin) return false;
         $json = json_encode(array('portal_enabled' => $portal_enabled, 'portal_customized' => $portal_customized,
                                   'redirect_enabled' => $redirect_enabled, 'redirect_url' => $redirect_url,
@@ -1057,27 +1054,41 @@ class unifiapi
      * Add a wlan
      * ----------
      * return true on success
-     * required parameter <name>             = SSID
-     * required parameter <x_passphrase>     = new pre-shared key, minimal length is 8 characters, maximum length is 63
-     * required parameter <usergroup_id>     = user group id that can be found using the list_usergroups() function
-     * required parameter <wlangroup_id>     = wlan group id that can be found using the list_wlan_groups() function
-     * optional parameter <enabled>          = enable/disable wlan
-     * optional parameter <hide_ssid>        = hide wlan SSID
-     * optional parameter <is_guest>         = apply guest policies
-     * optional parameter <security>         = security type
-     * optional parameter <wpa_mode>         = wpa mode (wpa, wpa2, ..)
-     * optional parameter <wpa_enc>          = encryption (auto, ccmp)
-     * optional parameter <vlan_enabled>     = enable vlan for this wlan
-     * optional parameter <vlan>             = vlan id
-     * optional parameter <uapsd_enabled>    = enable Unscheduled Automatic Power Save Delivery
-     * optional parameter <schedule_enabled> = enable wlan schedule
-     * optional parameter <schedule>         = schedule rules
+     * required parameter <name>             = string; SSID
+     * required parameter <x_passphrase>     = string; new pre-shared key, minimal length is 8 characters, maximum length is 63
+     * required parameter <usergroup_id>     = string; user group id that can be found using the list_usergroups() function
+     * required parameter <wlangroup_id>     = string; wlan group id that can be found using the list_wlan_groups() function
+     * optional parameter <enabled>          = boolean; enable/disable wlan
+     * optional parameter <hide_ssid>        = boolean; hide/unhide wlan SSID
+     * optional parameter <is_guest>         = boolean; apply guest policies or not
+     * optional parameter <security>         = string; security type
+     * optional parameter <wpa_mode>         = string; wpa mode (wpa, wpa2, ..)
+     * optional parameter <wpa_enc>          = string; encryption (auto, ccmp)
+     * optional parameter <vlan_enabled>     = boolean; enable/disable vlan for this wlan
+     * optional parameter <vlan>             = string; vlan id
+     * optional parameter <uapsd_enabled>    = boolean; enable/disable Unscheduled Automatic Power Save Delivery
+     * optional parameter <schedule_enabled> = boolean; enable/disable wlan schedule
+     * optional parameter <schedule>         = string; schedule rules
      * -----------------
      * TODO: Check parameter values
      */
-    public function create_wlan($name, $x_passphrase, $usergroup_id, $wlangroup_id, $enabled = null, $hide_ssid = null, $is_guest = null, $security = null,
-                                $wpa_mode = null, $wpa_enc = null, $vlan_enabled = null, $vlan = null, $uapsd_enabled = null, $schedule_enabled = null, $schedule = null)
-    {
+    public function create_wlan(
+        $name,
+        $x_passphrase,
+        $usergroup_id,
+        $wlangroup_id,
+        $enabled = null,
+        $hide_ssid = null,
+        $is_guest = null,
+        $security = null,
+        $wpa_mode = null,
+        $wpa_enc = null,
+        $vlan_enabled = null,
+        $vlan = null,
+        $uapsd_enabled = null,
+        $schedule_enabled = null,
+        $schedule = null
+    ) {
         if (!$this->is_loggedin) return false;
         $json                     = array('name' => $name, 'x_passphrase' => $x_passphrase, 'usergroup_id' => $usergroup_id, 'wlangroup_id' => $wlangroup_id);
         $json['enabled']          = (!is_null($enabled) ? $enabled : true);
@@ -1087,7 +1098,7 @@ class unifiapi
         $json['wpa_mode']         = (!is_null($wpa_mode) ? $wpa_mode : 'wpa2');
         $json['wpa_enc']          = (!is_null($wpa_enc) ? $wpa_enc : 'ccmp');
         $json['vlan_enabled']     = (!is_null($vlan_enabled) ? $vlan_enabled : false);
-        if (!is_null($vlan)) $json['vlan'] = $vlan_enabled;
+        if (!is_null($vlan) && !is_null($vlan_enabled)) $json['vlan'] = $vlan;
         $json['uapsd_enabled']    = (!is_null($uapsd_enabled) ? $uapsd_enabled : false);
         $json['schedule_enabled'] = (!is_null($schedule_enabled) ? $schedule_enabled : false);
         $json['schedule']         = (!is_null($schedule) ? $schedule : array());
@@ -1100,7 +1111,7 @@ class unifiapi
      * Delete a wlan
      * -------------
      * return true on success
-     * required parameter <wlan_id> = _id (24 char string) of the wlan that can be found with the list_wlanconf() function
+     * required parameter <wlan_id> = 24 char string; _id of the wlan that can be found with the list_wlanconf() function
      */
     public function delete_wlan($wlan_id)
     {
@@ -1135,13 +1146,13 @@ class unifiapi
      * -------------------
      * return true on success
      * required parameter <wlan_id>
-     * required parameter <disable> = true or false which determines the action to be done
+     * required parameter <disable> = boolean; true disables the wlan, false enables it
      */
     public function disable_wlan($wlan_id, $disable)
     {
         if (!$this->is_loggedin) return false;
-        if ($disable == 'false') {$disable = true;} else  {$disable = false;}
-        $json            = array('enabled' => (bool)$disable);
+        $action          = ($disable) ? false : true;
+        $json            = array('enabled' => (bool)$action);
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id, 'json='.$json));
         return $this->process_response_boolean($content_decoded);
@@ -1207,11 +1218,74 @@ class unifiapi
     }
 
     /****************************************************************
+     * "Aliases" for deprecated functions from here to support
+     * backward compatibility:
+     ****************************************************************/
+
+    /**
+     * Start flashing LED of an access point for locating purposes
+     * -----------------------------------------------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function set_locate_ap($mac)
+    {
+        trigger_error(
+            "Function set_locate_ap() has been deprecated, use locate_ap() instead.",
+            E_USER_DEPRECATED
+        );
+        return $this->locate_ap($mac, true);
+    }
+
+    /**
+     * Stop flashing LED of an access point for locating purposes
+     * ----------------------------------------------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function unset_locate_ap($mac)
+    {
+        trigger_error(
+            "Function unset_locate_ap() has been deprecated, use locate_ap() instead.",
+            E_USER_DEPRECATED
+        );
+        return $this->locate_ap($mac, false);
+    }
+
+    /**
+     * Switch LEDs of all the access points ON
+     * ---------------------------------------
+     * return true on success
+     */
+    public function site_ledson()
+    {
+        trigger_error(
+            "Function site_ledson() has been deprecated, use site_leds() instead.",
+            E_USER_DEPRECATED
+        );
+        return $this->site_leds(true);
+    }
+
+    /**
+     * Switch LEDs of all the access points OFF
+     * ----------------------------------------
+     * return true on success
+     */
+    public function site_ledsoff()
+    {
+        trigger_error(
+            "Function site_ledsoff() has been deprecated, use site_leds() instead.",
+            E_USER_DEPRECATED
+        );
+        return $this->site_leds(false);
+    }
+
+    /****************************************************************
      * Internal (private) functions from here:
      ****************************************************************/
 
     /**
-     * process regular responses where output is the content of the data array
+     * Process regular responses where output is the content of the data array
      */
     private function process_response($response)
     {
@@ -1237,7 +1311,7 @@ class unifiapi
     }
 
     /**
-     * process responses where output should be boolean (true/false)
+     * Process responses where output should be boolean (true/false)
      */
     private function process_response_boolean($response)
     {
@@ -1249,11 +1323,11 @@ class unifiapi
             }
         }
 
-        return $output;
+        return (bool)$output;
     }
 
     /**
-     * execute the cURL request
+     * Execute the cURL request
      */
     private function exec_curl($url, $data = '')
     {

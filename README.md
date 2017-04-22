@@ -78,7 +78,7 @@ Other included libraries:
 - Bootstrap (version 3.3.6) http://getbootstrap.com/
 - Font-awesome (version 4.5.0) https://fortawesome.github.io/Font-Awesome/
 - jQuery (version 2.2.0) https://jquery.com/
-- Highlight.js (version 9.0.0) https://highlightjs.org/
+- jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
