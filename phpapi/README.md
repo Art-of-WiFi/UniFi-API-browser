@@ -81,12 +81,12 @@ A basic example how to use the class:
 ```php
 /**
  * load the Unifi API connection class, log in to the controller and request the alarms collection
- * (this examples assumes you have already assigned the correct values to the variables used)
+ * (this example assumes you have already assigned the correct values to the variables used)
  */
 require_once('../phpapi/class.unifi.php');
-$unifidata    = new unifiapi($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
-$loginresults = $unifidata->login();
-$data         = $unifidata->list_alarms(); // returns the alarms in a PHP array
+$unifidata = new unifiapi($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
+$login     = $unifidata->login();
+$results   = $unifidata->list_alarms(); // returns the alarms in a PHP array
 ```
 
 Have a look at the files in the `examples` directory for more examples how to use this class.
