@@ -3,7 +3,7 @@ This tool is for browsing data that is exposed through Ubiquiti's UniFi Controll
 
 Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
-- currently supports versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.3.8 has been confirmed to work)
+- currently supports versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.4.12 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas.
 - please read the Security Notice below before installing this tool!
 
@@ -61,10 +61,13 @@ The UniFi API browser tool offers the following features:
   - list network configuration
   - list port configurations
   - list port forwarding rules
+  - list current channels
+  - list DPI stats
   - dynamic DNS configuration
 - Messages
   - list events
   - list alarms
+  - count alarms
 
 Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
@@ -72,7 +75,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.4.14/unifi_sh_api
 
 Other included libraries:
 - Bootstrap (version 3.3.6) http://getbootstrap.com/

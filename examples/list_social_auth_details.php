@@ -24,9 +24,10 @@ $site_id = '<enter your site id here>';
  * load the Unifi API connection class and log in to the controller and do our thing
  */
 require_once('../phpapi/class.unifi.php');
-$unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$loginresults = $unifidata->login();
-$data         = $unifidata->stat_payment();
+$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$set_debug_mode = $unifidata->set_debug($debug);
+$loginresults   = $unifidata->login();
+$data           = $unifidata->stat_payment();
 
 /**
  * cycle through the results and print social auth details if set,

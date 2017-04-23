@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.13
+ * VERSION: 1.0.14
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.13');
+define('API_BROWSER_VERSION', '1.0.14');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -52,12 +52,9 @@ $site_id       = '';
 $site_name     = '';
 $selection     = '';
 $output_format = 'json';
-$theme         = 'bootstrap';
 $data          = '';
 $objects_count = '';
 $alert_message = '';
-$cookietimeout = '1800';
-$debug         = false;
 
 /**
  * load the configuration file
@@ -227,9 +224,9 @@ if (isset($_SESSION['controller'])) {
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
      */
-    $unifidata        = new unifiapi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
-    $unifidata->debug = $debug;
-    $loginresults     = $unifidata->login();
+    $unifidata      = new unifiapi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
+    $set_debug_mode = $unifidata->set_debug(trim($debug));
+    $loginresults   = $unifidata->login();
 
     if($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
@@ -343,8 +340,16 @@ if (isset($unifidata)) {
             $data      = $unifidata->list_events();
             break;
         case 'list_alarms':
-            $selection = 'list alerts';
+            $selection = 'list alarms';
             $data      = $unifidata->list_alarms();
+            break;
+        case 'count_alarms':
+            $selection = 'count all alarms';
+            $data      = $unifidata->count_alarms();
+            break;
+        case 'count_active_alarms':
+            $selection = 'count active alarms';
+            $data      = $unifidata->count_alarms(false);
             break;
         case 'list_wlanconf':
             $selection = 'list wlan config';
@@ -382,6 +387,10 @@ if (isset($unifidata)) {
             $selection = 'dynamic dns configuration';
             $data      = $unifidata->list_dynamicdns();
             break;
+        case 'list_current_channels':
+            $selection = 'current channels';
+            $data      = $unifidata->list_current_channels();
+            break;
         case 'list_portforwarding':
             $selection = 'list port forwarding rules';
             $data      = $unifidata->list_portforwarding();
@@ -389,6 +398,10 @@ if (isset($unifidata)) {
         case 'list_portforward_stats':
             $selection = 'list port forwarding stats';
             $data      = $unifidata->list_portforward_stats();
+            break;
+        case 'list_dpi_stats':
+            $selection = 'list DPI stats';
+            $data      = $unifidata->list_dpi_stats();
             break;
         case 'stat_voucher':
             $selection = 'list hotspot vouchers';
@@ -432,7 +445,7 @@ if($action!=''){
 if ($theme === 'bootstrap') {
     $css_url = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
 } else {
-    $css_url = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . $theme . '/bootstrap.min.css';
+    $css_url = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . trim($theme) . '/bootstrap.min.css';
 }
 
 /**
@@ -488,13 +501,6 @@ function sites_sort($a, $b)
 {
     return strcmp($a->desc, $b->desc);
 }
-
-if (isset($_SESSION['controller'])) {
-    /**
-     * log off from the UniFi controller API
-     */
-    $logout_results = $unifidata->logout();
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -537,7 +543,7 @@ if (isset($_SESSION['controller'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand hidden-sm hidden-md" href="index.php">UniFi API browser</a>
+            <a class="navbar-brand hidden-sm hidden-md" href="index.php"><i class="fa fa-search fa-fw fa-lg" aria-hidden="true"></i> UniFi API browser</a>
         </div>
         <div id="navbar-main" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-left">
@@ -595,7 +601,7 @@ if (isset($_SESSION['controller'])) {
                 <?php } ?>
                 <!-- /sites dropdown -->
                 <!-- data collection dropdowns, only show when a site_id is selected -->
-                <?php if ($site_id) { ?>
+                <?php if ($site_id && isset($_SESSION['controller'])) { ?>
                     <li id="output-menu" class="dropdown">
                         <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             Output
@@ -667,6 +673,7 @@ if (isset($_SESSION['controller'])) {
                             <?php } ?>
                             <!-- /site dashboard metrics -->
                             <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
+                            <li id="list_dpi_stats"><a href="?action=list_dpi_stats">DPI stats</a></li>
                         </ul>
                     </li>
                     <li id="hotspot-menu" class="dropdown">
@@ -703,6 +710,7 @@ if (isset($_SESSION['controller'])) {
                             <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
                             <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
                             <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
+                            <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
                         </ul>
                     </li>
@@ -713,7 +721,9 @@ if (isset($_SESSION['controller'])) {
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-header">Select a data collection</li>
-                            <li id="list_alarms"><a href="?action=list_alarms">list alerts</a></li>
+                            <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
+                            <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
+                            <li id="count_active_alarms"><a href="?action=count_active_alarms">count active alarms</a></li>
                             <li id="list_events"><a href="?action=list_events">list events</a></li>
                         </ul>
                     </li>

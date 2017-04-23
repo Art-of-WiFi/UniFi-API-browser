@@ -5,7 +5,9 @@ This directory contains a PHP class, which is based off the work of @domwo and @
 The class currently supports the following functions/methods to get/set data through the UniFi controller API:
 - login()
 - logout()
+- set_debug()
 - get_last_results_raw()
+- get_last_error_message()
 - add_site()
 - adopt_device()
 - authorize_guest()
@@ -19,6 +21,7 @@ The class currently supports the following functions/methods to get/set data thr
 - led_override()
 - list_admins()
 - list_alarms()
+- count_alarms()
 - list_aps()
 - list_clients()
 - list_dashboard()
@@ -40,6 +43,8 @@ The class currently supports the following functions/methods to get/set data thr
 - list_users()
 - list_wlan_groups()
 - list_wlanconf()
+- list_current_channels()
+- list_dpi_stats()
 - reconnect_sta()
 - rename_ap()
 - restart_ap()
@@ -79,6 +84,7 @@ Please refer to the source code for more details on each function/method and it'
 A basic example how to use the class:
 
 ```php
+...
 /**
  * load the Unifi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
@@ -87,6 +93,7 @@ require_once('../phpapi/class.unifi.php');
 $unifidata = new unifiapi($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
 $login     = $unifidata->login();
 $results   = $unifidata->list_alarms(); // returns the alarms in a PHP array
+...
 ```
 
 Have a look at the files in the `examples` directory for more examples how to use this class.

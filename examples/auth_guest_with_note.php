@@ -38,8 +38,9 @@ $site_id = '<enter your site id here>';
  * load the Unifi API connection class and log in to the controller
  */
 require_once('../phpapi/class.unifi.php');
-$unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$loginresults = $unifidata->login();
+$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$set_debug_mode = $unifidata->set_debug($debug);
+$loginresults   = $unifidata->login();
 
 /**
  * To add note to a new device we need to do the following before authorizing the device:

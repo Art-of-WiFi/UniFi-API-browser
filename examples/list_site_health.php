@@ -25,9 +25,10 @@ $site_id = '<enter your site id here>';
  */
 require_once('../phpapi/class.unifi.php');
 
-$unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$loginresults = $unifidata->login();
-$result       = $unifidata->list_health();
+$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$set_debug_mode = $unifidata->set_debug($debug);
+$loginresults   = $unifidata->login();
+$result         = $unifidata->list_health();
 
 /**
  * output the results in correct json formatting

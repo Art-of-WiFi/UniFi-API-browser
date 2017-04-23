@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.2
+ * VERSION: 1.1.3
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -31,29 +31,36 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.2');
+define('API_CLASS_VERSION', '1.1.3');
 
 class unifiapi
 {
+    /**
+     * public properties
+     */
     public  $user         = '';
     public  $password     = '';
     public  $site         = 'default';
     public  $baseurl      = 'https://127.0.0.1:8443';
     public  $version      = '4.8.20';
-    public  $debug        = false;
 
+    /**
+     * private properties
+     */
+    private $debug        = false;
     private $is_loggedin  = false;
     private $cookies      = '';
     private $request_type = 'POST';
-    private $last_response;
+    private $last_results_raw;
+    private $last_error_message;
 
     function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '')
     {
-        if (!empty($user)) $this->user         = $user;
-        if (!empty($password)) $this->password = $password;
-        if (!empty($baseurl)) $this->baseurl   = $baseurl;
-        if (!empty($site)) $this->site         = $site;
-        if (!empty($version)) $this->version   = $version;
+        if (!empty($user)) $this->user         = trim($user);
+        if (!empty($password)) $this->password = trim($password);
+        if (!empty($baseurl)) $this->baseurl   = trim($baseurl);
+        if (!empty($site)) $this->site         = trim($site);
+        if (!empty($version)) $this->version   = trim($version);
     }
 
     function __destruct()
@@ -77,7 +84,7 @@ class unifiapi
         curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array('username' => $this->user, 'password' => $this->password)));
 
-        if ($this->debug === true) {
+        if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
         }
 
@@ -85,7 +92,7 @@ class unifiapi
             error_log('curl error: '.curl_error($ch));
         }
 
-        if ($this->debug === true) {
+        if ($this->debug) {
             print '<pre>';
             print PHP_EOL.'-----------LOGIN-------------'.PHP_EOL;
             print_r (curl_getinfo($ch));
@@ -110,6 +117,7 @@ class unifiapi
                         $this->is_loggedin = true;
                     }
                 }
+
                 if ($code === 400) {
                      error_log('we have received an HTTP response status: 400. Probably a controller login failure');
                      return $code;
@@ -131,6 +139,68 @@ class unifiapi
         $this->cookies     = '';
         return true;
     }
+
+    /****************************************************************
+     * setter/getter functions from here:
+     ****************************************************************/
+
+    /**
+     * Set debug mode
+     * --------------
+     * sets debug mode to true or false, returns false if a non-boolean parameter was passed
+     * required parameter <enable> = boolean; true will enable debug mode, false will disable it
+     */
+    public function set_debug($enable)
+    {
+        if ($enable) {
+            $this->debug = true;
+        } elseif ($enable === false) {
+            $this->debug = false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get last raw results
+     * --------------------
+     * returns the raw results of the last method called in PHP stdClass Object format by default, returns false if not set
+     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format
+     *
+     * NOTE:
+     * this method can be used to get the full error as returned by the controller
+     */
+    public function get_last_results_raw($return_json = false)
+    {
+        if ($this->last_results_raw != null) {
+            if ($return_json) {
+                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
+            } else {
+                return $this->last_results_raw;
+            }
+
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get last error message
+     * ----------------------
+     * returns the error message of the last method called in PHP stdClass Object format, returns false if not set
+     */
+    public function get_last_error_message()
+    {
+        if (isset($this->last_error_message)) {
+            return $this->last_error_message;
+        } else {
+            return false;
+        }
+    }
+
+    /****************************************************************
+     * Functions to access UniFi controller API routes from here:
+     ****************************************************************/
 
     /**
      * Authorize a client device
@@ -236,7 +306,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $noted           = (is_null($note)) || (empty($note)) ? false : true;
         $json            = json_encode(array('note' => $note, 'noted' => $noted));
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -254,7 +324,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $json            = json_encode(array('name' => $name));
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -411,7 +481,7 @@ class unifiapi
      *
      * NOTES:
      * - <historyhours> is only used to select clients that were online within that period,
-     *    the returned stats per client are all-time totals, irrespective of the value of <historyhours>
+     *   the returned stats per client are all-time totals, irrespective of the value of <historyhours>
      */
     public function stat_allusers($historyhours = 8760)
     {
@@ -444,7 +514,7 @@ class unifiapi
     public function list_clients($client_mac = null)
     {
         if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sta/'.$client_mac));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/sta/'.trim($client_mac)));
         return $this->process_response($content_decoded);
     }
 
@@ -457,7 +527,7 @@ class unifiapi
     public function stat_client($client_mac)
     {
         if (!$this->is_loggedin) return false;
-	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/user/'.$client_mac));
+	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/user/'.trim($client_mac)));
         return $this->process_response($content_decoded);
     }
 
@@ -484,7 +554,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $json            = json_encode(array('usergroup_id' => $group_id));
-	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.$user_id, 'json='.$json));
+	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -811,6 +881,30 @@ class unifiapi
     }
 
     /**
+     * List DPI stats
+     * --------------
+     * returns an array of DPI stats
+     */
+    public function list_dpi_stats()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dpi'));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * List current channels
+     * ---------------------
+     * returns an array of currently allowed channels
+     */
+    public function list_current_channels()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/current-channel'));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
      * List port forwarding settings
      * -----------------------------
      * returns an array of port forwarding settings
@@ -917,7 +1011,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
         $json               = json_encode(array('disabled' => (bool)$disable));
-        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.$ap_id, $json));
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.trim($ap_id), $json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -926,7 +1020,8 @@ class unifiapi
      * ------------------------------
      * return true on success
      * required parameter <device_id>     = 24 char string; value of _id for the device which can be obtained from the device list
-     * required parameter <override_mode> = string, off/on/default; "off" will disable the LED of the device, "on" will enable the LED of the device,
+     * required parameter <override_mode> = string, off/on/default; "off" will disable the LED of the device,
+     *                                      "on" will enable the LED of the device,
      *                                      "default" will apply the site-wide setting for device LEDs
      *
      * NOTES:
@@ -939,7 +1034,7 @@ class unifiapi
         $override_mode_options = array("off", "on", "default");
         if (in_array($override_mode, $override_mode_options)) {
             $json            = json_encode(array('led_override' => $override_mode));
-            $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.$device_id, $json));
+            $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.trim($device_id), $json));
             return $this->process_response_boolean($content_decoded);
         } else {
             return false;
@@ -996,7 +1091,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $jsonsettings    = json_encode(array('radio' => $radio, 'channel' => $channel, 'ht' => $ht, 'tx_power_mode' => $tx_power_mode, 'tx_power' =>$tx_power));
         $json            = '{"radio_table": ['.$jsonsettings.']}';
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.$ap_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1046,7 +1141,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $json            = json_encode(array('name' => $apname));
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.$ap_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1117,7 +1212,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $json            = array();
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.$wlan_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1134,10 +1229,10 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $json            = array();
-        if (!is_null($x_passphrase)) $json['x_passphrase'] = $x_passphrase;
-        if (!is_null($name)) $json['name'] = $name;
+        if (!is_null($x_passphrase)) $json['x_passphrase'] = trim($x_passphrase);
+        if (!is_null($name)) $json['name'] = trim($name);
         $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1154,7 +1249,7 @@ class unifiapi
         $action          = ($disable) ? false : true;
         $json            = array('enabled' => (bool)$action);
         $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.$wlan_id, 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1195,26 +1290,17 @@ class unifiapi
     }
 
     /**
-     * Get last raw results
-     * --------------------
-     * returns the raw results of the last method called, in PHP stdClass Object format, if not set returns false
-     * optional parameter <return_json> = true will return results in "pretty printed" json format
-     *
-     * NOTES:
-     * for example this method can be used to get the original error message when the last used method returns false
+     * Count alarms
+     * ------------
+     * returns an array containing the alarm count
+     * optional parameter <archived> = boolean; if true all alarms will be counted, if false only non-archived (active) alarms will be counted
      */
-    public function get_last_results_raw($return_json = false)
+    public function count_alarms($archived = null)
     {
-        if ($this->last_response != null) {
-            if ($return_json) {
-                return json_encode($this->last_response, JSON_PRETTY_PRINT);
-            } else {
-                return $this->last_response;
-            }
-
-        } else {
-            return false;
-        }
+        if (!$this->is_loggedin) return false;
+        $url_suffix      = ($archived === false) ? '?archived=false' : null;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cnt/alarm'.$url_suffix));
+        return $this->process_response($content_decoded);
     }
 
     /****************************************************************
@@ -1289,25 +1375,34 @@ class unifiapi
      */
     private function process_response($response)
     {
-        $this->last_response = $response;
+        $this->last_results_raw = $response;
         if (isset($response->meta->rc)) {
             if ($response->meta->rc == 'ok') {
+                $this->last_error_message = null;
                 if (is_array($response->data)) {
-                    $output = array();
-                    foreach ($response->data as $item) {
-                        $output[]= $item;
-                    }
+                    return $response->data;
                 } else {
-                    $output = true;
+                    return true;
                 }
+            } elseif ($response->meta->rc == 'error') {
+                /**
+                 * we have an error; set latest_error_message if we have a message
+                 */
+                if (isset($response->meta->msg)) {
+                    $this->last_error_message = $response->meta->msg;
+                }
+
+                if ($this->debug) {
+                    error_log('last error message: ' . $this->last_error_message);
+                }
+
+                return false;
             } else {
-                $output = false;
+                return false;
             }
         } else {
-            $output = false;
+            return false;
         }
-
-        return $output;
     }
 
     /**
@@ -1315,15 +1410,31 @@ class unifiapi
      */
     private function process_response_boolean($response)
     {
-        $this->last_response = $response;
-        $output = false;
+        $this->last_results_raw = $response;
         if (isset($response->meta->rc)) {
             if ($response->meta->rc == 'ok') {
-                $output = true;
-            }
-        }
+                $this->last_error_message = null;
+                return true;
+            } elseif ($response->meta->rc == 'error') {
+                /**
+                 * we have an error:
+                 * set latest_error_message if the returned error message is available
+                 */
+                if (isset($response->meta->msg)) {
+                    $this->last_error_message = $response->meta->msg;
+                }
 
-        return (bool)$output;
+                if ($this->debug) {
+                    error_log('last error message: ' . $this->last_error_message);
+                }
+
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1351,7 +1462,7 @@ class unifiapi
             error_log('curl error: '.curl_error($ch));
         }
 
-        if ($this->debug === true) {
+        if ($this->debug) {
             print '<pre>';
             print PHP_EOL.'---------cURL INFO-----------'.PHP_EOL;
             print_r (curl_getinfo($ch));
@@ -1379,7 +1490,7 @@ class unifiapi
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        if ($this->debug === true) {
+        if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
         }
 

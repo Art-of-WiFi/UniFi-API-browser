@@ -29,11 +29,21 @@ $mac = '<enter MAC address of your AP here>';
  * load the Unifi API connection class and log in to the controller to do our thing
  */
 require_once('../phpapi/class.unifi.php');
-$unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion); // initialize the class instance
-$loginresults = $unifidata->login(); // log into the controller
+$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion); // initialize the class instance
+$set_debug_mode = $unifidata->set_debug($debug);
+$loginresults   = $unifidata->login(); // log into the controller
 
-$data         = $unifidata->set_locate_ap($mac); // uncomment to switch locating on
-//$data         = $unifidata->unset_locate_ap($mac); // uncomment to switch locating off (choose either of these two lines!)
+/**
+ * using the "old" deprecated methods/functions
+ */
+//$data = $unifidata->set_locate_ap($mac); // uncomment to switch locating on
+//$data = $unifidata->unset_locate_ap($mac); // uncomment to switch locating off (choose either of these two lines!)
+
+/**
+ * using the new method/function
+ */
+$data = $unifidata->locate_ap($mac, true); // uncomment to switch locating on
+//$data = $unifidata->locate_ap($mac, false); // uncomment to switch locating off (choose either of these two lines!)
 
 if ($data) {
     /**

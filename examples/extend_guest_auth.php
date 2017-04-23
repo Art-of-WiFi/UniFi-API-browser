@@ -13,9 +13,9 @@ require_once ("../config.php");
 $site_id = "default";
 $site_name = "*enter your site name*";
 
-$unifidata = new unifiapi ($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$unifidata->debug = false;
-$loginresults = $unifidata->login();
+$unifidata      = new unifiapi ($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$set_debug_mode = $unifidata->set_debug($debug);
+$loginresults   = $unifidata->login();
 
 if ($loginresults === 400) {
 	print "UniFi controller login failure, please check your credentials in config.php.\n";
