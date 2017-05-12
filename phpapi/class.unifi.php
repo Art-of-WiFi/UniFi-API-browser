@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.3
+ * VERSION: 1.1.4
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -31,18 +31,18 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.3');
+define('API_CLASS_VERSION', '1.1.4');
 
 class unifiapi
 {
     /**
      * public properties
      */
-    public  $user         = '';
-    public  $password     = '';
-    public  $site         = 'default';
-    public  $baseurl      = 'https://127.0.0.1:8443';
-    public  $version      = '4.8.20';
+    public $user          = '';
+    public $password      = '';
+    public $site          = 'default';
+    public $baseurl       = 'https://127.0.0.1:8443';
+    public $version       = '5.4.12';
 
     /**
      * private properties
@@ -1303,8 +1303,75 @@ class unifiapi
         return $this->process_response($content_decoded);
     }
 
+    /**
+     * Upgrade a device to the latest firmware
+     * ---------------------------------------
+     * return true on success
+     * required parameter <device_mac> = MAC address of the device to upgrade
+     *
+     * NOTES:
+     * - updates the device to the latest firmware known to the controller
+     */
+    public function upgrade_device($device_mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json            = array('mac' => $device_mac);
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Upgrade a device to a specific firmware file
+     * --------------------------------------------
+     * return true on success
+     * required parameter <firmware_url> = URL for the firmware file to upgrade the device to
+     * required parameter <device_mac>   = MAC address of the device to upgrade
+     *
+     * NOTES:
+     * - updates the device to the firmware file at the given URL
+     * - please take great care to select a valid firmware file for the device!
+     */
+    public function upgrade_device_external($firmware_url, $device_mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json            = array('url' => $firmware_url, 'mac' => $device_mac);
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr/upgrade-external', 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Trigger an RF scan by an AP
+     * ---------------------------
+     * return true on success
+     * required parameter <ap_mac> = MAC address of the AP
+     */
+    public function spectrum_scan($ap_mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json            = array('cmd' => 'spectrum-scan', 'mac' => $ap_mac);
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Check the RF scanning state of an AP
+     * ------------------------------------
+     * returns an object with relevant information (results if available) regarding the RF scanning state of the AP
+     * required parameter <ap_mac> = MAC address of the AP
+     */
+    public function spectrum_scan_state($ap_mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/spectrum-scan/'.trim($ap_mac)));
+        return $this->process_response($content_decoded);
+    }
+
     /****************************************************************
-     * "Aliases" for deprecated functions from here to support
+     * "Aliases" for deprecated functions from here, to support
      * backward compatibility:
      ****************************************************************/
 

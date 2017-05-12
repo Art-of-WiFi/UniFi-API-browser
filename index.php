@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.14
+ * VERSION: 1.0.15
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.14');
+define('API_BROWSER_VERSION', '1.0.15');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -511,11 +511,15 @@ function sites_sort($a, $b)
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
     <!-- Load the appropriate Bootstrap CSS file from CDN -->
     <link rel="stylesheet" href="<?php echo $css_url ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Load the base64 encoded favicon file  -->
+    <link rel="icon"  type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAADgpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gown/4KQL/+CkDP/enQD/8NOK///////y2Zr/358A/9+fAP/fnwD/358A/9+gAP/foAH/36EB/9+gAP/fnwD/36AA/9+gAv/dmQD/79CB/////////v3//vz4/9+gAP/foAD/36ED/9+hA//engD/3ZsA/92bAP/enAD/36EC/9+hBP/dmgD/8dSM///////+/Pj///////Pbnv/foAD/36EC/96dAf/dmwD/46sc/+i6Rf/ovEr/5bAr/9+fBP/dmgD/8deS///////+/Pb///////LYlf/enAD/36ED/92bAP/jrSf/9eKw//779v/////////////////36MH/9N+q///////+/fn///////HXkv/dmwD/36AD/92bAP/mtj///vv0//////////7////////////////////////////+/fv///////DUiv/dmgD/36AD/9+hAf/iqBv/+/Ti///////+/fr/8tiX/+e3Pf/mszT/7cpx//z36P///v3///////Pbn//cmAD/36EF/9+gAf/foAD/8dWR////////////68Vi/9yWAP/enAL/3pwC/9yXAP/krij//Pbn///////36MP/358A/9+gAf/foAD/36AA//ry2///////9uW7/92aAP/gogX/36ED/9+hA//gowj/3JcA/+3Jc/////////77/+SwK//enAD/36EC/9+gAP/+/Pf//////+7Of//dmgD/4KIE/9+gAP/foAD/36EC/96cAP/lszf////////////ou0n/3ZsA/9+hA//foAD//frz///////w0or/3ZkA/+CiBf/foAD/36AA/9+hA//enAD/5rZA////////////57lE/92bAP/foQP/36AA//jry///////+u/U/9+fB//engD/4KIF/+CiBf/gogX/3JYA//HWk////////frx/+OrHv/enQD/36EC/9+gAP/syG3////////////z253/358C/92ZAP/dmgL/3ZoA/+vEYP/+/fv///////Xgrv/dmwD/36EC/9+gAP/foAD/358C//fmvP////////////rw1v/w0ob/7s16//bluv///v3///////368f/krir/3p0A/9+hAv/foAD/36AA/96eAP/hpRP/9+jA/////////v3///////////////7///////z36f/mtj7/3ZsA/9+hAv/foAD/36AA/9+gAP/foQH/3p4B/96eBf/tyWz/+e3Q//779f/+/fn/+/Pg//HXkv/iqBr/3ZsA/9+hA//foAD/36AA/9+gAP/foAD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
+
     <!-- custom CSS styling -->
     <style>
         body {
@@ -531,7 +535,16 @@ function sites_sort($a, $b)
         #output_panel_loading {
             color: rgba(0,0,0,.4);
         }
+
+        .back-to-top {
+            cursor: pointer;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display:none;
+        }
     </style>
+    <!-- /custom CSS styling -->
 </head>
 <body>
 <!-- top navbar -->
@@ -755,7 +768,9 @@ function sites_sort($a, $b)
                         <li id="united"><a href="?theme=united">United</a></li>
                         <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)"><a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a></li>
+                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)">
+                            <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
+                        </li>
                         <li role="separator" class="divider"></li>
                         <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
                     </ul>
@@ -817,6 +832,9 @@ function sites_sort($a, $b)
     <?php } ?>
     <!-- /data-panel -->
 </div>
+<!-- Back to Top button element -->
+<a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" title="Back to top" data-toggle="tooltip" data-placement="left"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+<!-- /Back to Top button element -->
 <!-- Modal -->
 <div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -877,7 +895,6 @@ function sites_sort($a, $b)
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha256-yB+xHoEi5PoOnEAgHNbRMIbN4cNtOXAmBzkhNE/tQlI=" crossorigin="anonymous"></script>
-
 <script>
 $(document).ready(function() {
     /**
@@ -1032,6 +1049,30 @@ $(document).ready(function() {
         $('#span_api_browser_update').html('<i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span>');
         $('#span_api_browser_update').removeClass('label-warning').removeClass('label-danger').addClass('label-success');
     })
+
+    /**
+     * manage display of the "back to top" button element
+     */
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 50) {
+            $('#back-to-top').fadeIn();
+        } else {
+            $('#back-to-top').fadeOut();
+        }
+    });
+
+    /**
+     * scroll body to 0px (top) on click on the "back to top" button
+     */
+    $('#back-to-top').click(function () {
+        $('#back-to-top').tooltip('hide');
+        $('body,html').animate({
+            scrollTop: 0
+        }, 500);
+        return false;
+    });
+
+    $('#back-to-top').tooltip('show');
 });
 </script>
 </body>

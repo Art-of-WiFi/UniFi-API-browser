@@ -8,7 +8,7 @@
  */
 
 /**
- * include the config file (place you credentials etc. there if not already present)
+ * include the config file (place your credentials etc. there if not already present)
  *
  * NOTE:
  * this example will only work out of the box with a single controller config file!

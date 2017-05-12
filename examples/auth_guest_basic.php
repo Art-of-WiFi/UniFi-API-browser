@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: slooffmaster
- * description: example basic PHP script to pull current alarms from the UniFi controller and output in json format
+ * description: example basic PHP script to perform a basic auth of a guest device
  */
 
 /**
@@ -15,20 +15,34 @@
 require_once('../config.php');
 
 /**
- * the site to use
+ * the MAC address of the device to authorize
+ */
+$mac = '<enter MAC address of guest device to auth>';
+
+/**
+ * the duration to authorize the device for in minutes
+ */
+$duration = 2000;
+
+/**
+ * The site to authorize the device with
  */
 $site_id = '<enter your site id here>';
 
 /**
- * load the Unifi API connection class and log in to the controller and do our thing
+ * load the Unifi API connection class and log in to the controller
  */
 require_once('../phpapi/class.unifi.php');
 $unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $set_debug_mode = $unifidata->set_debug($debug);
 $loginresults   = $unifidata->login();
-$data           = $unifidata->list_alarms();
+
+/**
+ * then we authorize the device for the requested duration
+ */
+$auth_result = $unifidata->authorize_guest($mac, $duration);
 
 /**
  * provide feedback in json format
  */
-echo json_encode($data, JSON_PRETTY_PRINT);
+echo json_encode($auth_result, JSON_PRETTY_PRINT);

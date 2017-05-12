@@ -3,11 +3,11 @@
  * PHP API usage example
  *
  * contributed by: slooffmaster
- * description: example basic PHP script to auth a guest device and attach a note to it
+ * description: example basic PHP script to auth a guest device and attach a note to it, this method would normally be used for offline authorization only!
  */
 
 /**
- * include the config file (place you credentials etc. there if not already present)
+ * include the config file (place your credentials etc. there if not already present)
  *
  * NOTE:
  * this example will only work out of the box with a single controller config file!
