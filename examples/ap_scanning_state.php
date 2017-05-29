@@ -12,7 +12,7 @@
  * NOTE:
  * this example will only work out of the box with a single controller config file!
  */
-require_once('config-local.php');
+require_once('../config.php');
 
 /**
  * site id and MAC address of AP to query
@@ -25,7 +25,7 @@ $ap_mac  = '<enter MAC address of Access Point to check>';
  * spectrum_scan_state()
  */
 require_once('phpapi/class.unifi.php');
-$unifidata    = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$unifidata    = new UnifiApi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $loginresults = $unifidata->login();
 $data         = $unifidata->spectrum_scan_state($ap_mac);
 

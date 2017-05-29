@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.4
+ * VERSION: 1.1.5
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -22,6 +22,9 @@
  *   by locate_ap(), but are still available as alias.
  * - functions/methods site_ledson() and site_ledsoff() have deprecated and replaced
  *   by site_leds(), but are still available as alias.
+ * as of version 1.1.5:
+ * - list_devices() function/method replaces list_aps which is still available as alias
+ * - changed class name from unifiapi to UnifiApi (StudlyCaps)
  *
  * ------------------------------------------------------------------------------------
  *
@@ -31,9 +34,9 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.4');
+define('API_CLASS_VERSION', '1.1.5');
 
-class unifiapi
+class UnifiApi
 {
     /**
      * public properties
@@ -42,7 +45,7 @@ class unifiapi
     public $password      = '';
     public $site          = 'default';
     public $baseurl       = 'https://127.0.0.1:8443';
-    public $version       = '5.4.12';
+    public $version       = '5.4.16';
 
     /**
      * private properties
@@ -75,24 +78,16 @@ class unifiapi
      */
     public function login()
     {
-        $this->cookies = '';
-
         $ch = $this->get_curl_obj();
 
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_REFERER, $this->baseurl.'/login');
         curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array('username' => $this->user, 'password' => $this->password)));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
-        }
 
-        if (($content = curl_exec($ch)) === false) {
-            error_log('curl error: '.curl_error($ch));
-        }
-
-        if ($this->debug) {
             print '<pre>';
             print PHP_EOL.'-----------LOGIN-------------'.PHP_EOL;
             print_r (curl_getinfo($ch));
@@ -100,6 +95,10 @@ class unifiapi
             print $content;
             print PHP_EOL.'-----------------------------'.PHP_EOL;
             print '</pre>';
+        }
+
+        if (($content = curl_exec($ch)) === false) {
+            error_log('cURL error: '.curl_error($ch));
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -119,7 +118,7 @@ class unifiapi
                 }
 
                 if ($code === 400) {
-                     error_log('we have received an HTTP response status: 400. Probably a controller login failure');
+                     error_log('We have received an HTTP response status: 400. Probably a controller login failure');
                      return $code;
                 }
             }
@@ -134,7 +133,7 @@ class unifiapi
     public function logout()
     {
         if (!$this->is_loggedin) return false;
-        $content           = $this->exec_curl($this->baseurl.'/logout');
+        $this->exec_curl($this->baseurl.'/logout');
         $this->is_loggedin = false;
         $this->cookies     = '';
         return true;
@@ -175,13 +174,12 @@ class unifiapi
         if ($this->last_results_raw != null) {
             if ($return_json) {
                 return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
-            } else {
-                return $this->last_results_raw;
             }
 
-        } else {
-            return false;
+            return $this->last_results_raw;
         }
+
+        return false;
     }
 
     /**
@@ -193,9 +191,9 @@ class unifiapi
     {
         if (isset($this->last_error_message)) {
             return $this->last_error_message;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /****************************************************************
@@ -217,7 +215,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac  = strtolower($mac);
-        $json = array('cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes);
+        $json = ['cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes];
 
         /**
          * if we have received values for up/down/MBytes we append them to the payload array to be submitted
@@ -241,7 +239,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'unauthorize-guest', 'mac' => $mac));
+        $json            = json_encode(['cmd' => 'unauthorize-guest', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
      }
@@ -256,7 +254,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'kick-sta', 'mac' => $mac));
+        $json            = json_encode(['cmd' => 'kick-sta', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -271,7 +269,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'block-sta', 'mac' => $mac));
+        $json            = json_encode(['cmd' => 'block-sta', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -286,7 +284,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'unblock-sta', 'mac' => $mac));
+        $json            = json_encode(['cmd' => 'unblock-sta', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -305,7 +303,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $noted           = (is_null($note)) || (empty($note)) ? false : true;
-        $json            = json_encode(array('note' => $note, 'noted' => $noted));
+        $json            = json_encode(['note' => $note, 'noted' => $noted]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -323,7 +321,7 @@ class unifiapi
     public function set_sta_name($user_id, $name = null)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('name' => $name));
+        $json            = json_encode(['name' => $name]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -344,8 +342,8 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time()-(time() % 3600))*1000) : $end;
         $start           = is_null($start) ? $end-(52*7*24*3600*1000) : $start;
-        $attributes      = array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time');
-        $json            = json_encode(array('attrs' => $attributes, 'start' => $start, 'end' => $end));
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.site', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -366,8 +364,8 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $attributes      = array('bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time');
-        $json            = json_encode(array('attrs' => $attributes, 'start' => $start, 'end' => $end));
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -388,7 +386,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $json            = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
+        $json            = json_encode(['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -409,7 +407,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $json            = json_encode(array('attrs' => array('bytes', 'num_sta', 'time'), 'start' => $start, 'end' => $end));
+        $json            = json_encode(['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -430,7 +428,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? time() : $end;
         $start           = is_null($start) ? $end-(7*24*3600) : $start;
-        $json            = array('type'=> 'all', 'start' => $start, 'end' => $end);
+        $json            = ['type'=> 'all', 'start' => $start, 'end' => $end];
         if (!is_null($mac)) $json['mac'] = $mac;
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/session', 'json='.$json));
@@ -438,8 +436,8 @@ class unifiapi
     }
 
     /**
-     * Show latest 'n' login sessions for a single device
-     * --------------------------------------------------
+     * Show latest 'n' login sessions for a single client device
+     * ---------------------------------------------------------
      * returns an array of latest login session objects for given client device
      * required parameter <mac>   = client MAC address
      * optional parameter <limit> = maximum number of sessions to get (defaults to 5)
@@ -448,7 +446,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $limit           = is_null($limit) ? 5 : $limit;
-        $json            = json_encode(array('mac' => $mac, '_limit' => $limit, '_sort'=> '-assoc_time'));
+        $json            = json_encode(['mac' => $mac, '_limit' => $limit, '_sort'=> '-assoc_time']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/session', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -468,7 +466,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? time() : $end;
         $start           = is_null($start) ? $end-(7*24*3600) : $start;
-        $json            = json_encode(array('start' => $start, 'end' => $end));
+        $json            = json_encode(['start' => $start, 'end' => $end]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/authorization', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -486,7 +484,7 @@ class unifiapi
     public function stat_allusers($historyhours = 8760)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('type' => 'all', 'conn' => 'all', 'within' => $historyhours));
+        $json            = json_encode(['type' => 'all', 'conn' => 'all', 'within' => $historyhours]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/alluser', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -500,7 +498,7 @@ class unifiapi
     public function list_guests($within = 8760)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('within' => $within));
+        $json            = json_encode(['within' => $within]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/guest', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -553,7 +551,7 @@ class unifiapi
     public function set_usergroup($user_id, $group_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('usergroup_id' => $group_id));
+        $json            = json_encode(['usergroup_id' => $group_id]);
 	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -600,7 +598,7 @@ class unifiapi
      * returns an array of known device objects (or a single device when using the <device_mac> parameter)
      * optional parameter <device_mac> = the MAC address of a single device for which the call must be made
      */
-    public function list_aps($device_mac = null)
+    public function list_devices($device_mac = null)
     {
         if (!$this->is_loggedin) return false;
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/device/'.$device_mac));
@@ -616,7 +614,7 @@ class unifiapi
     public function list_rogueaps($within = '24')
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('within' => $within));
+        $json            = json_encode(['within' => $within]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/rogueap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -658,7 +656,7 @@ class unifiapi
     public function add_site($description)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('desc' => $description, 'cmd' => 'add-site'));
+        $json            = json_encode(['desc' => $description, 'cmd' => 'add-site']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -672,7 +670,7 @@ class unifiapi
     public function delete_site($site_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('site' => $site_id, 'cmd' => 'delete-site'));
+        $json            = json_encode(['site' => $site_id, 'cmd' => 'delete-site']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -682,10 +680,10 @@ class unifiapi
      * -----------
      * returns an array containing administrator objects for selected site
      */
-    public function list_admins($description)
+    public function list_admins()
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('cmd' => 'get-admins'));
+        $json            = json_encode(['cmd' => 'get-admins']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -748,9 +746,9 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         if (trim($create_time) != null) {
-            $json = json_encode(array('create_time' => $create_time));
+            $json = json_encode(['create_time' => $create_time]);
         } else {
-            $json = json_encode(array());
+            $json = json_encode([]);
         }
 
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher', 'json='.$json));
@@ -787,7 +785,7 @@ class unifiapi
     public function create_hotspotop($name, $x_password, $note = null)
     {
         if (!$this->is_loggedin) return false;
-        $json = array('name' => $name, 'x_password' => $x_password);
+        $json = ['name' => $name, 'x_password' => $x_password];
 
         /**
          * if we have received a value for note, we append it to the payload array to be submitted
@@ -826,7 +824,7 @@ class unifiapi
     public function create_voucher($minutes, $count = 1, $quota = '0', $note = null, $up = null, $down = null, $MBytes = null)
     {
         if (!$this->is_loggedin) return false;
-        $json = array('cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $count, 'quota' => $quota);
+        $json = ['cmd' => 'create-voucher', 'expire' => $minutes, 'n' => $count, 'quota' => $quota];
 
         /**
          * if we have received values for note/up/down/MBytes we append them to the payload array to be submitted
@@ -849,7 +847,7 @@ class unifiapi
     public function revoke_voucher($voucher_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('_id' => $voucher_id, 'cmd' => 'delete-voucher'));
+        $json            = json_encode(['_id' => $voucher_id, 'cmd' => 'delete-voucher']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -863,7 +861,7 @@ class unifiapi
     public function extend_guest_validity($guest_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('_id' => $guest_id, 'cmd' => 'extend'));
+        $json            = json_encode(['_id' => $guest_id, 'cmd' => 'extend']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -965,8 +963,8 @@ class unifiapi
     }
 
     /**
-     * Adopt a device
-     * --------------
+     * Adopt a device to the selected site
+     * -----------------------------------
      * return true on success
      * required parameter <mac> = device MAC address
      */
@@ -974,7 +972,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('mac' => $mac, 'cmd' => 'adopt'));
+        $json            = json_encode(['mac' => $mac, 'cmd' => 'adopt']);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -989,7 +987,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
-        $json            = json_encode(array('cmd' => 'restart', 'mac' => $mac));
+        $json            = json_encode(['cmd' => 'restart', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1010,7 +1008,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json               = json_encode(array('disabled' => (bool)$disable));
+        $json               = json_encode(['disabled' => (bool)$disable]);
         $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.trim($ap_id), $json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1031,14 +1029,14 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $this->request_type    = 'PUT';
-        $override_mode_options = array("off", "on", "default");
+        $override_mode_options = ['off', 'on', 'default'];
         if (in_array($override_mode, $override_mode_options)) {
-            $json            = json_encode(array('led_override' => $override_mode));
+            $json            = json_encode(['led_override' => $override_mode]);
             $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/device/'.trim($device_id), $json));
             return $this->process_response_boolean($content_decoded);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -1056,7 +1054,7 @@ class unifiapi
         if (!$this->is_loggedin) return false;
         $mac             = strtolower($mac);
         $cmd             = (($enable) ? 'set-locate' : 'unset-locate');
-        $json            = json_encode(array('cmd' => $cmd, 'mac' => $mac));
+        $json            = json_encode(['cmd' => $cmd, 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1070,7 +1068,7 @@ class unifiapi
     public function site_leds($enable)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('led_enabled' => (bool)$enable));
+        $json            = json_encode(['led_enabled' => (bool)$enable]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/mgmt', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1089,8 +1087,7 @@ class unifiapi
     public function set_ap_radiosettings($ap_id, $radio, $channel, $ht, $tx_power_mode, $tx_power)
     {
         if (!$this->is_loggedin) return false;
-        $jsonsettings    = json_encode(array('radio' => $radio, 'channel' => $channel, 'ht' => $ht, 'tx_power_mode' => $tx_power_mode, 'tx_power' =>$tx_power));
-        $json            = '{"radio_table": ['.$jsonsettings.']}';
+        $json            = json_encode(['radio_table' => ['radio' => $radio, 'channel' => $channel, 'ht' => $ht, 'tx_power_mode' => $tx_power_mode, 'tx_power' =>$tx_power]]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1122,10 +1119,17 @@ class unifiapi
         $site_id
     ) {
         if (!$this->is_loggedin) return false;
-        $json = json_encode(array('portal_enabled' => $portal_enabled, 'portal_customized' => $portal_customized,
-                                  'redirect_enabled' => $redirect_enabled, 'redirect_url' => $redirect_url,
-                                  'x_password' => $x_password, 'expire_number' => $expire_number,
-                                  'expire_unit' => $expire_unit, 'site_id' => $site_id), JSON_UNESCAPED_SLASHES);
+        $json = [
+            'portal_enabled'    => $portal_enabled,
+            'portal_customized' => $portal_customized,
+            'redirect_enabled'  => $redirect_enabled,
+            'redirect_url'      => $redirect_url,
+            'x_password'        => $x_password,
+            'expire_number'     => $expire_number,
+            'expire_unit'       => $expire_unit,
+            'site_id'           => $site_id
+        ];
+        $json            = json_encode($json, JSON_UNESCAPED_SLASHES);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1140,7 +1144,7 @@ class unifiapi
     public function rename_ap($ap_id, $apname)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode(array('name' => $apname));
+        $json            = json_encode(['name' => $apname]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1172,33 +1176,38 @@ class unifiapi
         $x_passphrase,
         $usergroup_id,
         $wlangroup_id,
-        $enabled = null,
-        $hide_ssid = null,
-        $is_guest = null,
-        $security = null,
-        $wpa_mode = null,
-        $wpa_enc = null,
-        $vlan_enabled = null,
+        $enabled = true,
+        $hide_ssid = false,
+        $is_guest = false,
+        $security = 'open',
+        $wpa_mode = 'wpa2',
+        $wpa_enc = 'ccmp',
+        $vlan_enabled = false,
         $vlan = null,
-        $uapsd_enabled = null,
-        $schedule_enabled = null,
-        $schedule = null
+        $uapsd_enabled = false,
+        $schedule_enabled = false,
+        $schedule = []
     ) {
         if (!$this->is_loggedin) return false;
-        $json                     = array('name' => $name, 'x_passphrase' => $x_passphrase, 'usergroup_id' => $usergroup_id, 'wlangroup_id' => $wlangroup_id);
-        $json['enabled']          = (!is_null($enabled) ? $enabled : true);
-        $json['hide_ssid']        = (!is_null($hide_ssid) ? $hide_ssid : false);
-        $json['is_guest']         = (!is_null($is_guest) ? $is_guest : false);
-        $json['security']         = (!is_null($security) ? $security : 'open');
-        $json['wpa_mode']         = (!is_null($wpa_mode) ? $wpa_mode : 'wpa2');
-        $json['wpa_enc']          = (!is_null($wpa_enc) ? $wpa_enc : 'ccmp');
-        $json['vlan_enabled']     = (!is_null($vlan_enabled) ? $vlan_enabled : false);
-        if (!is_null($vlan) && !is_null($vlan_enabled)) $json['vlan'] = $vlan;
-        $json['uapsd_enabled']    = (!is_null($uapsd_enabled) ? $uapsd_enabled : false);
-        $json['schedule_enabled'] = (!is_null($schedule_enabled) ? $schedule_enabled : false);
-        $json['schedule']         = (!is_null($schedule) ? $schedule : array());
-        $json                     = json_encode($json);
-        $content_decoded          = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/add/wlanconf', 'json='.$json));
+        $json = [
+            'name'             => $name,
+            'x_passphrase'     => $x_passphrase,
+            'usergroup_id'     => $usergroup_id,
+            'wlangroup_id'     => $wlangroup_id,
+            'enabled'          => $enabled,
+            'hide_ssid'        => $hide_ssid,
+            'is_guest'         => $is_guest,
+            'security'         => $security,
+            'wpa_mode'         => $wpa_mode,
+            'wpa_enc'          => $wpa_enc,
+            'vlan_enabled'     => $vlan_enabled,
+            'uapsd_enabled'    => $uapsd_enabled,
+            'schedule_enabled' => $schedule_enabled,
+            'schedule'         => $schedule,
+        ];
+        if (!is_null($vlan) && $vlan_enabled) $json['vlan'] = $vlan;
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/add/wlanconf', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
@@ -1211,7 +1220,7 @@ class unifiapi
     public function delete_wlan($wlan_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = array();
+        $json            = [];
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1228,7 +1237,7 @@ class unifiapi
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
         if (!$this->is_loggedin) return false;
-        $json            = array();
+        $json            = [];
         if (!is_null($x_passphrase)) $json['x_passphrase'] = trim($x_passphrase);
         if (!is_null($name)) $json['name'] = trim($name);
         $json            = json_encode($json);
@@ -1247,7 +1256,7 @@ class unifiapi
     {
         if (!$this->is_loggedin) return false;
         $action          = ($disable) ? false : true;
-        $json            = array('enabled' => (bool)$action);
+        $json            = ['enabled' => (bool)$action];
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
@@ -1257,11 +1266,16 @@ class unifiapi
      * List events
      * -----------
      * returns an array of known events
+     * optional parameter <historyhours> = hours to go back, default value is 720 hours
+     * optional parameter <start>        = which event number to start with (useful for paging of results), default value is 0
+     * optional parameter <limit>        = number of events to return, default value is 3000
      */
-    public function list_events()
+    public function list_events($historyhours = 720, $start = 0, $limit = 3000)
     {
         if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/event'));
+        $json            = ['_sort' => '-time', 'within' => $historyhours, 'type' => null, '_start' => $start, '_limit' => $limit];
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/event', 'json='.$json));
         return $this->process_response($content_decoded);
     }
 
@@ -1315,7 +1329,7 @@ class unifiapi
     public function upgrade_device($device_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json            = array('mac' => $device_mac);
+        $json            = ['mac' => $device_mac];
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
@@ -1335,8 +1349,8 @@ class unifiapi
     public function upgrade_device_external($firmware_url, $device_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json            = array('url' => $firmware_url, 'mac' => $device_mac);
-        $json            = json_encode($json);
+        $json            = ['url' => $firmware_url, 'mac' => $device_mac];
+        $json            = json_encode($json, JSON_UNESCAPED_SLASHES);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr/upgrade-external', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1350,7 +1364,7 @@ class unifiapi
     public function spectrum_scan($ap_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json            = array('cmd' => 'spectrum-scan', 'mac' => $ap_mac);
+        $json            = ['cmd' => 'spectrum-scan', 'mac' => $ap_mac];
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
@@ -1376,6 +1390,20 @@ class unifiapi
      ****************************************************************/
 
     /**
+     * List access points and other devices under management of the controller (USW and/or USG devices)
+     * ------------------------------------------------------------------------------------------------
+     * returns an array of known device objects (or a single device when using the <device_mac> parameter)
+     * optional parameter <device_mac> = the MAC address of a single device for which the call must be made
+     *
+     * NOTE:
+     * changed function/method name to fit it's purpose
+     */
+    public function list_aps($device_mac = null)
+    {
+        return $this->list_devices($device_mac);
+    }
+
+    /**
      * Start flashing LED of an access point for locating purposes
      * -----------------------------------------------------------
      * return true on success
@@ -1384,7 +1412,7 @@ class unifiapi
     public function set_locate_ap($mac)
     {
         trigger_error(
-            "Function set_locate_ap() has been deprecated, use locate_ap() instead.",
+            'Function set_locate_ap() has been deprecated, use locate_ap() instead.',
             E_USER_DEPRECATED
         );
         return $this->locate_ap($mac, true);
@@ -1399,7 +1427,7 @@ class unifiapi
     public function unset_locate_ap($mac)
     {
         trigger_error(
-            "Function unset_locate_ap() has been deprecated, use locate_ap() instead.",
+            'Function unset_locate_ap() has been deprecated, use locate_ap() instead.',
             E_USER_DEPRECATED
         );
         return $this->locate_ap($mac, false);
@@ -1413,7 +1441,7 @@ class unifiapi
     public function site_ledson()
     {
         trigger_error(
-            "Function site_ledson() has been deprecated, use site_leds() instead.",
+            'Function site_ledson() has been deprecated, use site_leds() instead.',
             E_USER_DEPRECATED
         );
         return $this->site_leds(true);
@@ -1427,7 +1455,7 @@ class unifiapi
     public function site_ledsoff()
     {
         trigger_error(
-            "Function site_ledsoff() has been deprecated, use site_leds() instead.",
+            'Function site_ledsoff() has been deprecated, use site_leds() instead.',
             E_USER_DEPRECATED
         );
         return $this->site_leds(false);
@@ -1448,9 +1476,9 @@ class unifiapi
                 $this->last_error_message = null;
                 if (is_array($response->data)) {
                     return $response->data;
-                } else {
-                    return true;
                 }
+
+                return true;
             } elseif ($response->meta->rc == 'error') {
                 /**
                  * we have an error; set latest_error_message if we have a message
@@ -1460,16 +1488,16 @@ class unifiapi
                 }
 
                 if ($this->debug) {
-                    error_log('last error message: ' . $this->last_error_message);
+                    error_log('Last error message: ' . $this->last_error_message);
                 }
 
                 return false;
-            } else {
-                return false;
             }
-        } else {
+
             return false;
         }
+
+        return false;
     }
 
     /**
@@ -1492,16 +1520,16 @@ class unifiapi
                 }
 
                 if ($this->debug) {
-                    error_log('last error message: ' . $this->last_error_message);
+                    error_log('Last error message: ' . $this->last_error_message);
                 }
 
                 return false;
-            } else {
-                return false;
             }
-        } else {
+
             return false;
         }
+
+        return false;
     }
 
     /**
@@ -1515,10 +1543,10 @@ class unifiapi
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             if ($this->request_type == 'PUT') {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: '.strlen($data)));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json','Content-Length: '.strlen($data)]);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             } else {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             }
 
         } else {
@@ -1526,7 +1554,7 @@ class unifiapi
         }
 
         if (($content = curl_exec($ch)) === false) {
-            error_log('curl error: '.curl_error($ch));
+            error_log('cURL error: '.curl_error($ch));
         }
 
         if ($this->debug) {

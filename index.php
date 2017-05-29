@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.15
+ * VERSION: 1.0.16
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.15');
+define('API_BROWSER_VERSION', '1.0.16');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -32,7 +32,7 @@ session_start();
  * - this function can be useful when login errors occur, mostly after upgrades or incorrect credential changes
  */
 if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
-    $_SESSION = array();
+    $_SESSION = [];
     session_unset();
     session_destroy();
     session_start();
@@ -137,13 +137,13 @@ if (isset($_GET['controller_id'])) {
              * if the user has configured a single controller, we push it's details
              * to the $_SESSION and $controller arrays
              */
-            $_SESSION['controller'] = array(
+            $_SESSION['controller'] = [
                 'user'     => $controlleruser,
                 'password' => $controllerpassword,
                 'url'      => $controllerurl,
                 'name'     => 'Controller',
                 'version'  => $controllerversion
-            );
+            ];
             $controller = $_SESSION['controller'];
         }
     }
@@ -224,7 +224,7 @@ if (isset($_SESSION['controller'])) {
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
      */
-    $unifidata      = new unifiapi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
+    $unifidata      = new UnifiApi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
     $set_debug_mode = $unifidata->set_debug(trim($debug));
     $loginresults   = $unifidata->login();
 
@@ -317,7 +317,7 @@ if (isset($unifidata)) {
             break;
         case 'list_devices':
             $selection = 'list devices';
-            $data      = $unifidata->list_aps();
+            $data      = $unifidata->list_devices();
             break;
         case 'list_wlan_groups':
             $selection = 'list wlan groups';
@@ -497,9 +497,9 @@ function print_output($output_format, $data)
 /**
  * function to sort the sites collection alpabetically by description
  */
-function sites_sort($a, $b)
+function sites_sort($site_a, $site_b)
 {
-    return strcmp($a->desc, $b->desc);
+    return strcmp($site_a->desc, $site_b->desc);
 }
 ?>
 <!DOCTYPE html>
@@ -928,9 +928,9 @@ $(document).ready(function() {
     var os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>';
     var api_browser_version = '<?php echo API_BROWSER_VERSION ?>';
     var api_class_version   = '<?php echo API_CLASS_VERSION ?>';
-    var controller_user     = '<?php if (isset($_SESSION['controller'])) { echo $controller['user']; } ?>';
-    var controller_url      = '<?php if (isset($_SESSION['controller'])) { echo $controller['url']; } ?>';
-    var controller_version  = '<?php if (isset($_SESSION['controller'])) { echo $detected_controller_version; } ?>';
+    var controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>';
+    var controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>';
+    var controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
 
     /**
      * update dynamic elements in the DOM using some of the above variables

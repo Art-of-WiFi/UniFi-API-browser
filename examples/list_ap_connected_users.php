@@ -24,7 +24,7 @@ $site_id = '<enter your site id here>';
  * load the Unifi API connection class and log in to the controller and pull the requested data
  */
 require_once('../phpapi/class.unifi.php');
-$unifidata      = new unifiapi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$unifidata      = new UnifiApi($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $set_debug_mode = $unifidata->set_debug($debug);
 $loginresults   = $unifidata->login();
 $aps_array      = $unifidata->list_aps();

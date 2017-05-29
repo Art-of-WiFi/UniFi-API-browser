@@ -6,14 +6,14 @@
  * description: example of how to extend validity of guest authorizations
  */
 
-require_once ("../phpapi/class.unifi.php");
-require_once ("../config.php");
+require_once("../phpapi/class.unifi.php");
+require_once("../config.php");
 
 // must be adapted to your site!
-$site_id = "default";
+$site_id   = "default";
 $site_name = "*enter your site name*";
 
-$unifidata      = new unifiapi ($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$unifidata      = new UnifiApi ($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $set_debug_mode = $unifidata->set_debug($debug);
 $loginresults   = $unifidata->login();
 
