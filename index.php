@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.16
+ * VERSION: 1.0.17
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.16');
+define('API_BROWSER_VERSION', '1.0.17');
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -435,7 +435,7 @@ if (isset($unifidata)) {
 /**
  * count the number of objects collected from the UniFi controller
  */
-if($action!=''){
+if ($action != '') {
     $objects_count = count($data);
 }
 
@@ -856,14 +856,14 @@ function sites_sort($site_a, $site_b)
                     target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
                 </div>
                 <hr>
-                <dl class="dl-horizontal col-sm-offset-1">
+                <dl class="dl-horizontal col-sm-offset-2">
                     <dt>API browser version</dt>
                     <dd><span id="span_api_browser_version" class="label label-primary"></span> <span id="span_api_browser_update" class="label label-success"><i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span></dd>
-                    <dt>API Class version</dt>
+                    <dt>API client version</dt>
                     <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
                 </dl>
                 <hr>
-                <dl class="dl-horizontal col-sm-offset-1">
+                <dl class="dl-horizontal col-sm-offset-2">
                     <dt>controller user</dt>
                     <dd><span id="span_controller_user" class="label label-primary"></span></dd>
                     <dt>controller url</dt>
@@ -872,7 +872,7 @@ function sites_sort($site_a, $site_b)
                     <dd><span id="span_controller_version" class="label label-primary"></span></dd>
                 </dl>
                 <hr>
-                <dl class="dl-horizontal col-sm-offset-1">
+                <dl class="dl-horizontal col-sm-offset-2">
                     <dt>PHP version</dt>
                     <dd><span id="span_php_version" class="label label-primary"></span></dd>
                     <dt>PHP memory_limit</dt>

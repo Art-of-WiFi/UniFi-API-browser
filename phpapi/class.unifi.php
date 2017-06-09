@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.5
+ * VERSION: 1.1.6
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -34,7 +34,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.5');
+define('API_CLASS_VERSION', '1.1.6');
 
 class UnifiApi
 {
@@ -85,6 +85,10 @@ class UnifiApi
         curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
+        if (($content = curl_exec($ch)) === false) {
+            error_log('cURL error: '.curl_error($ch));
+        }
+
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
 
@@ -95,10 +99,6 @@ class UnifiApi
             print $content;
             print PHP_EOL.'-----------------------------'.PHP_EOL;
             print '</pre>';
-        }
-
-        if (($content = curl_exec($ch)) === false) {
-            error_log('cURL error: '.curl_error($ch));
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -556,23 +556,22 @@ class UnifiApi
         return $this->process_response_boolean($content_decoded);
     }
 
-
     /**
      * Edit user group
      * ---------------
-     * 
-     * required parameter <group_id> = id of the user group
-     * required parameter <site_id> = id of the site
+     * returns an array containing a single object with attributes of the updated usergroup on success
+     * required parameter <group_id>   = id of the user group
+     * required parameter <site_id>    = id of the site
      * required parameter <group_name> = name of the user group
-     * optional parameter <group_dn> = limit download bandwidth in Kbps (default = -1)
-     * optional parameter <group_up> = limit upload bandwidth in Kbps (default = -1)
-     * 
+     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     *
      */
     public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json               = json_encode(array('_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up, 'site_id' => $site_id));
+        $json               = json_encode(['_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up, 'site_id' => $site_id]);
         $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id), $json));
         return $this->process_response($content_decoded);
     }
@@ -582,8 +581,8 @@ class UnifiApi
      * --------------
      * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
      * required parameter <group_name> = name of the user group
-     * optional parameter <group_dn> = limit download bandwidth in Kbps (default = -1)
-     * optional parameter <group_up> = limit upload bandwidth in Kbps (default = -1)
+     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      */
     public function add_usergroup($group_name, $group_dn = -1, $group_up = -1)
     {
@@ -595,8 +594,8 @@ class UnifiApi
 
     /**
      * Delete user group
-     * --------------
-     * returns true on success 
+     * -----------------
+     * returns true on success
      * required parameter <group_id> = id of the user group
      */
     public function delete_usergroup($group_id)
@@ -796,10 +795,9 @@ class UnifiApi
     public function stat_voucher($create_time = null)
     {
         if (!$this->is_loggedin) return false;
+        $json = json_encode([]);
         if (trim($create_time) != null) {
             $json = json_encode(['create_time' => $create_time]);
-        } else {
-            $json = json_encode([]);
         }
 
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/voucher', 'json='.$json));
@@ -815,10 +813,9 @@ class UnifiApi
     public function stat_payment($within = null)
     {
         if (!$this->is_loggedin) return false;
+        $url_suffix = '';
         if ($within != null) {
             $url_suffix = '?within='.$within;
-        } else {
-            $url_suffix = '';
         }
 
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/payment'.$url_suffix));
@@ -1271,7 +1268,7 @@ class UnifiApi
     public function delete_wlan($wlan_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = [];
+        $json            = json_encode([]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
@@ -1523,14 +1520,14 @@ class UnifiApi
     {
         $this->last_results_raw = $response;
         if (isset($response->meta->rc)) {
-            if ($response->meta->rc == 'ok') {
+            if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
                 if (is_array($response->data)) {
                     return $response->data;
                 }
 
                 return true;
-            } elseif ($response->meta->rc == 'error') {
+            } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error; set latest_error_message if we have a message
                  */
@@ -1541,11 +1538,7 @@ class UnifiApi
                 if ($this->debug) {
                     error_log('Last error message: ' . $this->last_error_message);
                 }
-
-                return false;
             }
-
-            return false;
         }
 
         return false;
@@ -1558,10 +1551,10 @@ class UnifiApi
     {
         $this->last_results_raw = $response;
         if (isset($response->meta->rc)) {
-            if ($response->meta->rc == 'ok') {
+            if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
                 return true;
-            } elseif ($response->meta->rc == 'error') {
+            } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
                  * set latest_error_message if the returned error message is available
@@ -1573,11 +1566,7 @@ class UnifiApi
                 if ($this->debug) {
                     error_log('Last error message: ' . $this->last_error_message);
                 }
-
-                return false;
             }
-
-            return false;
         }
 
         return false;
@@ -1593,7 +1582,7 @@ class UnifiApi
 
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            if ($this->request_type == 'PUT') {
+            if ($this->request_type === 'PUT') {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json','Content-Length: '.strlen($data)]);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             } else {
@@ -1602,7 +1591,7 @@ class UnifiApi
 
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
-            if ($this->request_type == 'DELETE') {
+            if ($this->request_type === 'DELETE') {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             }
         }
