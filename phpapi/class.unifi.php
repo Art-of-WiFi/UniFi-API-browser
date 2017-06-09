@@ -589,8 +589,22 @@ class UnifiApi
     {
         if (!$this->is_loggedin) return false;
         $json               = json_encode(['name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up]);
-        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup';
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup', $json));
         return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Delete user group
+     * --------------
+     * returns true on success 
+     * required parameter <group_id> = id of the user group
+     */
+    public function delete_usergroup($group_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'DELETE';
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id)));
+        return $this->process_response_boolean($content_decoded);
     }
 
     /**
@@ -1588,6 +1602,9 @@ class UnifiApi
 
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
+            if ($this->request_type == 'DELETE') {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            }
         }
 
         if (($content = curl_exec($ch)) === false) {
