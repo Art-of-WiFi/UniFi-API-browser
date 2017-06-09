@@ -578,6 +578,22 @@ class UnifiApi
     }
 
     /**
+     * Add user group
+     * --------------
+     * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
+     * required parameter <group_name> = name of the user group
+     * optional parameter <group_dn> = limit download bandwidth in Kbps (default = -1)
+     * optional parameter <group_up> = limit upload bandwidth in Kbps (default = -1)
+     */
+    public function add_usergroup($group_name, $group_dn = -1, $group_up = -1)
+    {
+        if (!$this->is_loggedin) return false;
+        $json               = json_encode(['name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up]);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup';
+        return $this->process_response($content_decoded);
+    }
+
+    /**
      * List health metrics
      * -------------------
      * returns an array of health metric objects
