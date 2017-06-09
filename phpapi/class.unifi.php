@@ -556,6 +556,57 @@ class UnifiApi
         return $this->process_response_boolean($content_decoded);
     }
 
+
+    /**
+     * Edit user group
+     * ---------------
+     * 
+     * required parameter <group_id> = id of the user group
+     * required parameter <site_id> = id of the site
+     * required parameter <group_name> = name of the user group
+     * optional parameter <group_dn> = limit download bandwidth in Kbps (default = -1)
+     * optional parameter <group_up> = limit upload bandwidth in Kbps (default = -1)
+     * 
+     */
+    public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode(array('_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up, 'site_id' => $site_id));
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id), $json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Add user group
+     * --------------
+     * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
+     * required parameter <group_name> = name of the user group
+     * optional parameter <group_dn> = limit download bandwidth in Kbps (default = -1)
+     * optional parameter <group_up> = limit upload bandwidth in Kbps (default = -1)
+     */
+    public function add_usergroup($group_name, $group_dn = -1, $group_up = -1)
+    {
+        if (!$this->is_loggedin) return false;
+        $json               = json_encode(['name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up]);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup', $json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Delete user group
+     * --------------
+     * returns true on success 
+     * required parameter <group_id> = id of the user group
+     */
+    public function delete_usergroup($group_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'DELETE';
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id)));
+        return $this->process_response_boolean($content_decoded);
+    }
+
     /**
      * List health metrics
      * -------------------
@@ -1551,6 +1602,9 @@ class UnifiApi
 
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
+            if ($this->request_type == 'DELETE') {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            }
         }
 
         if (($content = curl_exec($ch)) === false) {
