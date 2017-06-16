@@ -238,7 +238,7 @@ if (isset($_SESSION['controller'])) {
     /**
      * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
      */
-    if (!isset($_SESSION['sites']) || $_SESSION['sites'] === '') {
+    if (!isset($_SESSION['sites']) || empty($_SESSION['sites'])) {
         $sites  = $unifidata->list_sites();
         $_SESSION['sites'] = $sites;
     } else {
