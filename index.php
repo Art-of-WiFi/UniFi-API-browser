@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.17
+ * VERSION: 1.0.18
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,14 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.17');
+define('API_BROWSER_VERSION', '1.0.18');
+
+/**
+ * check whether the PHP curl module is available
+ */
+if (!function_exists('curl_version')) {
+    exit('The <b>PHP curl</b> module is not installed! Please correct this before you proceed!<br>');
+}
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
@@ -61,7 +68,7 @@ $alert_message = '';
  * - allows override of several of the previously declared variables
  * - if the config.php file is unreadable or does not exist, an alert is displayed on the page
  */
-if(!is_readable('config.php')) {
+if (!is_readable('config.php')) {
     $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.'
                    . '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and follow '
                    . 'the instructions inside to enter your credentials and controller details.</div>';
@@ -228,39 +235,55 @@ if (isset($_SESSION['controller'])) {
     $set_debug_mode = $unifidata->set_debug(trim($debug));
     $loginresults   = $unifidata->login();
 
-    if($loginresults === 400) {
+    if ($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
                        . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
                        . 'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function in the dropdown '
                        . 'menu on the right, before attempting to use the API browser tool again.</div>';
-    }
 
-    /**
-     * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
-     */
-    if (!isset($_SESSION['sites']) || empty($_SESSION['sites'])) {
-        $sites  = $unifidata->list_sites();
-        $_SESSION['sites'] = $sites;
+        /**
+         * to prevent unwanted errors we assign empty values to the following variables
+         */
+        $sites                       = [];
+        $detected_controller_version = 'undetected';
     } else {
-        $sites = $_SESSION['sites'];
-    }
+        /**
+         * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
+         */
+        if (!isset($_SESSION['sites']) || empty($_SESSION['sites'])) {
+            $sites = $unifidata->list_sites();
+            if (is_array($sites)) {
+                $_SESSION['sites'] = $sites;
+            } else {
+                $sites = [];
 
-    /**
-     * Get the version of the UniFi controller (if not already stored in the $_SESSION array or when 'undetected')
-     */
-    if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === 'undetected') {
-        $site_info = $unifidata->stat_sysinfo();
+                $alert_message = '<div class="alert alert-danger" role="alert">No sites available'
+                               . '<br>This is probably caused by incorrect access rights in the UniFi controller for the credentials provided in '
+                               . 'config.php. After updating your credentials, please restart your browser or use the <b>Reset PHP session</b> function in the dropdown '
+                               . 'menu on the right, before attempting to use the API browser tool again.</div>';
+            }
 
-        if (isset($site_info[0]->version)) {
-            $detected_controller_version             = $site_info[0]->version;
-            $_SESSION['detected_controller_version'] = $detected_controller_version;
         } else {
-            $detected_controller_version             = 'undetected';
-            $_SESSION['detected_controller_version'] = 'undetected';
+            $sites = $_SESSION['sites'];
         }
 
-    } else {
-        $detected_controller_version = $_SESSION['detected_controller_version'];
+        /**
+         * Get the version of the UniFi controller (if not already stored in the $_SESSION array or when 'undetected')
+         */
+        if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === 'undetected') {
+            $site_info = $unifidata->stat_sysinfo();
+
+            if (isset($site_info[0]->version)) {
+                $detected_controller_version             = $site_info[0]->version;
+                $_SESSION['detected_controller_version'] = $detected_controller_version;
+            } else {
+                $detected_controller_version             = 'undetected';
+                $_SESSION['detected_controller_version'] = 'undetected';
+            }
+
+        } else {
+            $detected_controller_version = $_SESSION['detected_controller_version'];
+        }
     }
 }
 
@@ -427,6 +450,10 @@ if (isset($unifidata)) {
             $selection = 'list_admins';
             $data      = $unifidata->list_admins();
             break;
+        case 'list_radius_accounts':
+            $selection = 'list_radius_accounts';
+            $data      = $unifidata->list_radius_accounts();
+            break;
         default:
             break;
     }
@@ -518,7 +545,7 @@ function sites_sort($site_a, $site_b)
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Load the base64 encoded favicon file  -->
-    <link rel="icon"  type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAADgpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gown/4KQL/+CkDP/enQD/8NOK///////y2Zr/358A/9+fAP/fnwD/358A/9+gAP/foAH/36EB/9+gAP/fnwD/36AA/9+gAv/dmQD/79CB/////////v3//vz4/9+gAP/foAD/36ED/9+hA//engD/3ZsA/92bAP/enAD/36EC/9+hBP/dmgD/8dSM///////+/Pj///////Pbnv/foAD/36EC/96dAf/dmwD/46sc/+i6Rf/ovEr/5bAr/9+fBP/dmgD/8deS///////+/Pb///////LYlf/enAD/36ED/92bAP/jrSf/9eKw//779v/////////////////36MH/9N+q///////+/fn///////HXkv/dmwD/36AD/92bAP/mtj///vv0//////////7////////////////////////////+/fv///////DUiv/dmgD/36AD/9+hAf/iqBv/+/Ti///////+/fr/8tiX/+e3Pf/mszT/7cpx//z36P///v3///////Pbn//cmAD/36EF/9+gAf/foAD/8dWR////////////68Vi/9yWAP/enAL/3pwC/9yXAP/krij//Pbn///////36MP/358A/9+gAf/foAD/36AA//ry2///////9uW7/92aAP/gogX/36ED/9+hA//gowj/3JcA/+3Jc/////////77/+SwK//enAD/36EC/9+gAP/+/Pf//////+7Of//dmgD/4KIE/9+gAP/foAD/36EC/96cAP/lszf////////////ou0n/3ZsA/9+hA//foAD//frz///////w0or/3ZkA/+CiBf/foAD/36AA/9+hA//enAD/5rZA////////////57lE/92bAP/foQP/36AA//jry///////+u/U/9+fB//engD/4KIF/+CiBf/gogX/3JYA//HWk////////frx/+OrHv/enQD/36EC/9+gAP/syG3////////////z253/358C/92ZAP/dmgL/3ZoA/+vEYP/+/fv///////Xgrv/dmwD/36EC/9+gAP/foAD/358C//fmvP////////////rw1v/w0ob/7s16//bluv///v3///////368f/krir/3p0A/9+hAv/foAD/36AA/96eAP/hpRP/9+jA/////////v3///////////////7///////z36f/mtj7/3ZsA/9+hAv/foAD/36AA/9+gAP/foQH/3p4B/96eBf/tyWz/+e3Q//779f/+/fn/+/Pg//HXkv/iqBr/3ZsA/9+hA//foAD/36AA/9+gAP/foAD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAADgpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gown/4KQL/+CkDP/enQD/8NOK///////y2Zr/358A/9+fAP/fnwD/358A/9+gAP/foAH/36EB/9+gAP/fnwD/36AA/9+gAv/dmQD/79CB/////////v3//vz4/9+gAP/foAD/36ED/9+hA//engD/3ZsA/92bAP/enAD/36EC/9+hBP/dmgD/8dSM///////+/Pj///////Pbnv/foAD/36EC/96dAf/dmwD/46sc/+i6Rf/ovEr/5bAr/9+fBP/dmgD/8deS///////+/Pb///////LYlf/enAD/36ED/92bAP/jrSf/9eKw//779v/////////////////36MH/9N+q///////+/fn///////HXkv/dmwD/36AD/92bAP/mtj///vv0//////////7////////////////////////////+/fv///////DUiv/dmgD/36AD/9+hAf/iqBv/+/Ti///////+/fr/8tiX/+e3Pf/mszT/7cpx//z36P///v3///////Pbn//cmAD/36EF/9+gAf/foAD/8dWR////////////68Vi/9yWAP/enAL/3pwC/9yXAP/krij//Pbn///////36MP/358A/9+gAf/foAD/36AA//ry2///////9uW7/92aAP/gogX/36ED/9+hA//gowj/3JcA/+3Jc/////////77/+SwK//enAD/36EC/9+gAP/+/Pf//////+7Of//dmgD/4KIE/9+gAP/foAD/36EC/96cAP/lszf////////////ou0n/3ZsA/9+hA//foAD//frz///////w0or/3ZkA/+CiBf/foAD/36AA/9+hA//enAD/5rZA////////////57lE/92bAP/foQP/36AA//jry///////+u/U/9+fB//engD/4KIF/+CiBf/gogX/3JYA//HWk////////frx/+OrHv/enQD/36EC/9+gAP/syG3////////////z253/358C/92ZAP/dmgL/3ZoA/+vEYP/+/fv///////Xgrv/dmwD/36EC/9+gAP/foAD/358C//fmvP////////////rw1v/w0ob/7s16//bluv///v3///////368f/krir/3p0A/9+hAv/foAD/36AA/96eAP/hpRP/9+jA/////////v3///////////////7///////z36f/mtj7/3ZsA/9+hAv/foAD/36AA/9+gAP/foQH/3p4B/96eBf/tyWz/+e3Q//779f/+/fn/+/Pg//HXkv/iqBr/3ZsA/9+hA//foAD/36AA/9+gAP/foAD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
 
     <!-- custom CSS styling -->
     <style>
@@ -530,6 +557,7 @@ function sites_sort($site_a, $site_b)
             height: auto;
             max-height: 600px;
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
         #output_panel_loading {
@@ -725,6 +753,8 @@ function sites_sort($site_a, $site_b)
                             <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
                             <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
                         </ul>
                     </li>
                     <li id="msg-menu" class="dropdown">

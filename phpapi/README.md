@@ -40,6 +40,7 @@ The class currently supports the following functions/methods to get/set data thr
 - list_portconf()
 - list_portforward_stats()
 - list_portforwarding()
+- list_radius_accounts() (supported on controller version 5.5.19 and higher)
 - list_rogueaps()
 - list_self()
 - list_settings()
@@ -106,6 +107,14 @@ $login     = $unifidata->login();
 $results   = $unifidata->list_alarms(); // returns the alarms in a PHP array
 ...
 ```
+
+NOTE: $site_id is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi controller:
+
+```
+https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard
+```
+
+Here `jl3z2shm` is the value required for $site_id.
 
 Have a look at the files in the `examples` directory for more examples how to use this class.
 

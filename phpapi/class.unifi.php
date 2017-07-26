@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.6
+ * VERSION: 1.1.7
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -34,7 +34,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.6');
+define('API_CLASS_VERSION', '1.1.7');
 
 class UnifiApi
 {
@@ -242,7 +242,7 @@ class UnifiApi
         $json            = json_encode(['cmd' => 'unauthorize-guest', 'mac' => $mac]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json));
         return $this->process_response_boolean($content_decoded);
-     }
+    }
 
     /**
      * Reconnect a client device
@@ -860,7 +860,7 @@ class UnifiApi
      * Create voucher(s)
      * -----------------
      * returns an array of voucher codes (without the dash "-" in the middle) by calling the stat_voucher method
-     * required parameter <minutes> = minutes the voucher is valid after activation
+     * required parameter <minutes> = minutes the voucher is valid after activation (expiration time)
      * optional parameter <count>   = number of vouchers to create, default value is 1
      * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use,
      *                                "n" is for multi-use n times
@@ -1427,8 +1427,22 @@ class UnifiApi
     public function spectrum_scan_state($ap_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/spectrum-scan/'.trim($ap_mac)));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * List Radius user accounts
+     * -------------------------
+     * returns an array of objects containing all Radius accounts for the current site
+	 *
+     * NOTES:
+     * - this function/method is only supported on controller versions 5.5.19 and later
+     */
+    public function list_radius_accounts()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/account'));
         return $this->process_response($content_decoded);
     }
 
