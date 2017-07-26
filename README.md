@@ -67,6 +67,7 @@ The UniFi API browser tool offers the following features:
   - list current channels
   - list DPI stats
   - dynamic DNS configuration
+  - list Radius accounts (supported on controller version 5.5.19 and higher)
 - Messages
   - list events
   - list alarms
