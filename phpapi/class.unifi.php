@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.7
+ * VERSION: 1.1.8
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -34,7 +34,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.7');
+define('API_CLASS_VERSION', '1.1.8');
 
 class UnifiApi
 {
@@ -71,10 +71,14 @@ class UnifiApi
 
     function __destruct()
     {
-        /* if user has $_SESSION['unificookie'] set, do not logout here */
+        /**
+         * if user has $_SESSION['unificookie'] set, do not logout here
+         */
         if (isset($_SESSION['unificookie'])) return;
 
-        /* logout, if needed */
+        /**
+         * logout, if needed
+         */
         if ($this->is_loggedin) {
             $this->logout();
         }
@@ -85,7 +89,9 @@ class UnifiApi
      */
     public function login()
     {
-        /* if user has $_SESSION['unificookie'] set, skip the login ;) */
+        /**
+         * if user has $_SESSION['unificookie'] set, skip the login ;)
+         */
         if (isset($_SESSION['unificookie'])) {
             $this->is_loggedin = true;
             return $this->is_loggedin;
@@ -99,7 +105,7 @@ class UnifiApi
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
         if (($content = curl_exec($ch)) === false) {
-            error_log('cURL error: '.curl_error($ch));
+            trigger_error('cURL error: '.curl_error($ch));
         }
 
         if ($this->debug) {
@@ -131,7 +137,7 @@ class UnifiApi
                 }
 
                 if ($code === 400) {
-                     error_log('We have received an HTTP response status: 400. Probably a controller login failure');
+                     trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
                      return $code;
                 }
             }
@@ -150,15 +156,6 @@ class UnifiApi
         $this->is_loggedin = false;
         $this->cookies     = '';
         return true;
-    }
-
-    /**
-     * GetCookie from UniFi Controller
-     */
-    public function getcookie()
-    {
-        if (!$this->is_loggedin) return false;
-        return $this->cookies;
     }
 
     /****************************************************************
@@ -216,6 +213,17 @@ class UnifiApi
         }
 
         return false;
+    }
+
+    /**
+     * Get Cookie from UniFi Controller
+     * --------------------------------
+     * returns the UniFi controller cookie
+     */
+    public function getcookie()
+    {
+        if (!$this->is_loggedin) return false;
+        return $this->cookies;
     }
 
     /****************************************************************
@@ -1565,14 +1573,15 @@ class UnifiApi
                 return true;
             } elseif ($response->meta->rc === 'error') {
                 /**
-                 * we have an error; set latest_error_message if we have a message
+                 * we have an error:
+                 * set $this->set last_error_message if the returned error message is available
                  */
                 if (isset($response->meta->msg)) {
                     $this->last_error_message = $response->meta->msg;
                 }
 
                 if ($this->debug) {
-                    error_log('Last error message: ' . $this->last_error_message);
+                    trigger_error('Last error message: ' . $this->last_error_message);
                 }
             }
         }
@@ -1593,14 +1602,14 @@ class UnifiApi
             } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
-                 * set latest_error_message if the returned error message is available
+                 * set $this->last_error_message if the returned error message is available
                  */
                 if (isset($response->meta->msg)) {
                     $this->last_error_message = $response->meta->msg;
                 }
 
                 if ($this->debug) {
-                    error_log('Last error message: ' . $this->last_error_message);
+                    trigger_error('Last error message: ' . $this->last_error_message);
                 }
             }
         }
@@ -1633,31 +1642,41 @@ class UnifiApi
         }
 
         if (($content = curl_exec($ch)) === false) {
-            error_log('cURL error: '.curl_error($ch));
+            trigger_error('cURL error: '.curl_error($ch));
         }
 
-        /* has the session timed out ?! */
+        /**
+         * has the session timed out?
+         */
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $strerr = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
         if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
-            trigger_error("cURL: Needed reconnect to UniFi Controller.");
+            trigger_error("cURL: Needed reconnect to UniFi Controller");
 
-            /* explicit unset the old cookie now */
+            /**
+             * explicit unset the old cookie now
+             */
             if (isset($_SESSION['unificookie'])) {
                 unset($_SESSION['unificookie']);
                 $have_cookie_in_use = 1;
             }
+
             $this->login();
 
-            /* when login was okay, exec the same command again */
+            /**
+             * when login was okay, exec the same command again
+             */
             if ($this->is_loggedin) {
                 curl_close ($ch);
 
-                /* setup the cookie for the user within $_SESSION */
+                /**
+                 * setup the cookie for the user within $_SESSION
+                 */
                 if (isset($have_cookie_in_use)) {
                     $_SESSION['unificookie'] = $this->cookies;
                     unset($have_cookie_in_use);
                 }
+
                 return $this->exec_curl($url, $data);
             }
         }

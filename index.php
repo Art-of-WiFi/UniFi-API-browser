@@ -127,13 +127,14 @@ if (isset($_GET['controller_id'])) {
     $_SESSION['controller_id'] = $_GET['controller_id'];
 
     /**
-     * clear the variables from the $_SESSION array that are associated with the previous controller
+     * clear the variables from the $_SESSION array that are associated with the previous controller session
      */
     unset($_SESSION['site_id']);
     unset($_SESSION['site_name']);
     unset($_SESSION['sites']);
     unset($_SESSION['action']);
     unset($_SESSION['detected_controller_version']);
+    unset($_SESSION['unificookie']);
 } else {
     if (isset($_SESSION['controller']) && isset($controllers)) {
         $controller    = $_SESSION['controller'];
@@ -238,8 +239,8 @@ if (isset($_SESSION['controller'])) {
     if ($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
                        . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
-                       . 'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function in the dropdown '
-                       . 'menu on the right, before attempting to use the API browser tool again.</div>';
+                       . 'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function '
+                       . 'in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
 
         /**
          * to prevent unwanted errors we assign empty values to the following variables
@@ -247,7 +248,6 @@ if (isset($_SESSION['controller'])) {
         $sites                       = [];
         $detected_controller_version = 'undetected';
     } else {
-
         /**
          * Remember authentication cookie to the controller.
          */
@@ -265,8 +265,8 @@ if (isset($_SESSION['controller'])) {
 
                 $alert_message = '<div class="alert alert-danger" role="alert">No sites available'
                                . '<br>This is probably caused by incorrect access rights in the UniFi controller for the credentials provided in '
-                               . 'config.php. After updating your credentials, please restart your browser or use the <b>Reset PHP session</b> function in the dropdown '
-                               . 'menu on the right, before attempting to use the API browser tool again.</div>';
+                               . 'config.php. After updating your credentials, please restart your browser or use the <b>Reset PHP session</b> '
+                               . 'function in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
             }
 
         } else {
