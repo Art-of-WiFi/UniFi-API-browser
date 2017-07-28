@@ -64,10 +64,17 @@ class UnifiApi
         if (!empty($baseurl)) $this->baseurl   = trim($baseurl);
         if (!empty($site)) $this->site         = trim($site);
         if (!empty($version)) $this->version   = trim($version);
+        if (isset($_SESSION['unificookie'])) {
+            $this->cookies = $_SESSION['unificookie'];
+        }
     }
 
     function __destruct()
     {
+        /* if user has $_SESSION['unificookie'] set, do not logout here */
+        if (isset($_SESSION['unificookie'])) return;
+
+        /* logout, if needed */
         if ($this->is_loggedin) {
             $this->logout();
         }
@@ -78,6 +85,12 @@ class UnifiApi
      */
     public function login()
     {
+        /* if user has $_SESSION['unificookie'] set, skip the login ;) */
+        if (isset($_SESSION['unificookie'])) {
+            $this->is_loggedin = true;
+            return $this->is_loggedin;
+        }
+
         $ch = $this->get_curl_obj();
 
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -137,6 +150,15 @@ class UnifiApi
         $this->is_loggedin = false;
         $this->cookies     = '';
         return true;
+    }
+
+    /**
+     * GetCookie from UniFi Controller
+     */
+    public function getcookie()
+    {
+        if (!$this->is_loggedin) return false;
+        return $this->cookies;
     }
 
     /****************************************************************
@@ -1612,6 +1634,32 @@ class UnifiApi
 
         if (($content = curl_exec($ch)) === false) {
             error_log('cURL error: '.curl_error($ch));
+        }
+
+        /* has the session timed out ?! */
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $strerr = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
+        if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
+            trigger_error("cURL: Needed reconnect to UniFi Controller.");
+
+            /* explicit unset the old cookie now */
+            if (isset($_SESSION['unificookie'])) {
+                unset($_SESSION['unificookie']);
+                $have_cookie_in_use = 1;
+            }
+            $this->login();
+
+            /* when login was okay, exec the same command again */
+            if ($this->is_loggedin) {
+                curl_close ($ch);
+
+                /* setup the cookie for the user within $_SESSION */
+                if (isset($have_cookie_in_use)) {
+                    $_SESSION['unificookie'] = $this->cookies;
+                    unset($have_cookie_in_use);
+                }
+                return $this->exec_curl($url, $data);
+            }
         }
 
         if ($this->debug) {

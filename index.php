@@ -247,6 +247,12 @@ if (isset($_SESSION['controller'])) {
         $sites                       = [];
         $detected_controller_version = 'undetected';
     } else {
+
+        /**
+         * Remember authentication cookie to the controller.
+         */
+        $_SESSION['unificookie'] = $unifidata->getcookie();
+
         /**
          * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
          */
