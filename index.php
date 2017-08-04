@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.18
+ * VERSION: 1.0.19
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.18');
+define('API_BROWSER_VERSION', '1.0.19');
 
 /**
  * check whether the PHP curl module is available
@@ -35,7 +35,8 @@ if (!function_exists('curl_version')) {
 session_start();
 
 /**
- * check whether user has requested to clear the PHP session
+ * check whether user has requested to clear (force expiry
+ * ) the PHP session
  * - this function can be useful when login errors occur, mostly after upgrades or incorrect credential changes
  */
 if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
@@ -902,7 +903,7 @@ function sites_sort($site_a, $site_b)
                 <dl class="dl-horizontal col-sm-offset-2">
                     <dt>controller user</dt>
                     <dd><span id="span_controller_user" class="label label-primary"></span></dd>
-                    <dt>controller url</dt>
+                    <dt>controller URL</dt>
                     <dd><span id="span_controller_url" class="label label-primary"></span></dd>
                     <dt>version detected</dt>
                     <dd><span id="span_controller_version" class="label label-primary"></span></dd>
