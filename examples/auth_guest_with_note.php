@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: slooffmaster
- * description: example basic PHP script to auth a guest device and attach a note to it, this method would normally be used for offline authorization only!
+ * description: example basic PHP script to auth a guest device and attach a note to it
  */
 
 /**
@@ -25,14 +25,14 @@ $mac = '<enter MAC address of guest device to auth>';
 $duration = 2000;
 
 /**
- * the note to attach to the device
- */
-$note = 'Note to attach to newly authorized device';
-
-/**
  * The site to authorize the device with
  */
 $site_id = '<enter your site id here>';
+
+/**
+ * the note to attach to the device
+ */
+$note = 'Note to attach to newly authorized device';
 
 /**
  * load the Unifi API connection class and log in to the controller
@@ -43,22 +43,27 @@ $set_debug_mode = $unifidata->set_debug($debug);
 $loginresults   = $unifidata->login();
 
 /**
- * To add note to a new device we need to do the following before authorizing the device:
- * - first block the device to get an entry in the user collection
- * - get the device id from the user collection
- * - add note to the device
- * - then unblock the device again
+ * we authorize the device for the requested duration and attach the note to it's object
  */
-$block_result   = $unifidata->block_sta($mac);
-$getid_result   = $unifidata->stat_client($mac);
-$user_id        = $getid_result[0]->_id;
-$note_result    = $unifidata->set_sta_note($user_id, $note);
-$unblock_result = $unifidata->unblock_sta($mac);
+$auth_result  = $unifidata->authorize_guest($mac, $duration);
+$getid_result = $unifidata->stat_client($mac);
+$user_id      = $getid_result[0]->_id;
+$note_result  = $unifidata->set_sta_note($user_id, $note);
 
 /**
- * then we authorize the device for the requested duration
+ * When using older Controller versions (< 5.5.x) to attach a note to a new (unconnected) device, we instead need to take the
+ * following steps before authorizing the device:
+ * - first block the device to get an entry in the user collection
+ * - get the device id from the user collection
+ * - attach note to the device
+ * - then unblock the device again **after the authorization has taken place**
  */
-$auth_result = $unifidata->authorize_guest($mac, $duration);
+//$block_result   = $unifidata->block_sta($mac);
+//$getid_result   = $unifidata->stat_client($mac);
+//$user_id        = $getid_result[0]->_id;
+//$note_result    = $unifidata->set_sta_note($user_id, $note);
+//$unblock_result = $unifidata->unblock_sta($mac);
+//$auth_result    = $unifidata->authorize_guest($mac, $duration);
 
 /**
  * provide feedback in json format

@@ -45,6 +45,7 @@ The class currently supports the following functions/methods to get/set data thr
 - list_self()
 - list_settings()
 - list_sites()
+- list_tags() (supported on controller version 5.5.19 and higher)
 - list_usergroups()
 - list_users()
 - list_wlan_groups()

@@ -9,7 +9,7 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
  *
- * VERSION: 1.1.8
+ * VERSION: 1.1.9
  *
  * NOTES:
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
@@ -34,7 +34,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.8');
+define('API_CLASS_VERSION', '1.1.9');
 
 class UnifiApi
 {
@@ -401,43 +401,49 @@ class UnifiApi
     }
 
     /**
-     * Hourly stats method for all access points
-     * -----------------------------------------
+     * Hourly stats method for a single access point or all access points
+     * ------------------------------------------------------------------
      * returns an array of hourly stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - UniFi controller does not keep these stats longer than 5 hours with versions < 4.6.6
      */
-    public function stat_hourly_aps($start = null, $end = null)
+    public function stat_hourly_aps($start = null, $end = null, $mac = null)
     {
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $json            = json_encode(['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end]);
+        $json            = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = $mac;
+        $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
 
     /**
-     * Daily stats method for all access points
-     * ----------------------------------------
+     * Daily stats method for a single access point or all access points
+     * -----------------------------------------------------------------
      * returns an array of daily stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - UniFi controller does not keep these stats longer than 5 hours with versions < 4.6.6
      */
-    public function stat_daily_aps($start = null, $end = null)
+    public function stat_daily_aps($start = null, $end = null, $mac = null)
     {
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
         $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $json            = json_encode(['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end]);
+        $json            = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = $mac;
+        $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
@@ -682,6 +688,20 @@ class UnifiApi
     {
         if (!$this->is_loggedin) return false;
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/device/'.$device_mac));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * List (device) tags
+     * ------------------
+     * returns an array of known device tag objects
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     */
+    public function list_tags()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/tag'));
         return $this->process_response($content_decoded);
     }
 
@@ -1649,9 +1669,10 @@ class UnifiApi
          * has the session timed out?
          */
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $strerr = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
+        $strerr   = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
+
         if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
-            trigger_error("cURL: Needed reconnect to UniFi Controller");
+            error_log('cURL: Needed reconnect to UniFi Controller');
 
             /**
              * explicit unset the old cookie now
@@ -1672,7 +1693,7 @@ class UnifiApi
                 /**
                  * setup the cookie for the user within $_SESSION
                  */
-                if (isset($have_cookie_in_use)) {
+                if (isset($have_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
                     $_SESSION['unificookie'] = $this->cookies;
                     unset($have_cookie_in_use);
                 }

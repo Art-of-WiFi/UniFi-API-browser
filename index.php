@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.19
+ * VERSION: 1.0.20
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.19');
+define('API_BROWSER_VERSION', '1.0.20');
 
 /**
  * check whether the PHP curl module is available
@@ -348,6 +348,10 @@ if (isset($unifidata)) {
         case 'list_devices':
             $selection = 'list devices';
             $data      = $unifidata->list_devices();
+            break;
+        case 'list_tags':
+            $selection = 'list tags';
+            $data      = $unifidata->list_tags();
             break;
         case 'list_wlan_groups':
             $selection = 'list wlan groups';
@@ -694,6 +698,11 @@ function sites_sort($site_a, $site_b)
                             <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
                             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
+                            <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
+                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.0') >= 0) { ?>
+                                <li role="separator" class="divider"></li>
+                                <li id="list_tags"><a href="?action=list_tags">list tags</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <li id="stats-menu" class="dropdown">
