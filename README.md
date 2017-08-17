@@ -1,3 +1,10 @@
+>**NOTICE**
+>This repository has been transferred to a new GitHub organisation account, the project maintainer remains the same and will continue to actively maintin it.
+> If you have installed the API browser tool using git, you may consider updating the repository URL from the command within the the directory of your clone using the following command:
+>```bash
+>$ git remote set-url origin new_url
+>```
+
 ## UniFi API browser
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
 
