@@ -1,9 +1,9 @@
 >**NOTICE**
 >
 >This repository has been transferred to a new GitHub organisation account, the project maintainer will remain the same and will continue to actively maintain it.
-> If you have previously installed the API Browser tool using `git clone`, you may consider updating the repository URL from the command within the the directory of your clone using the following command:
+> If you have previously installed the API Browser tool using `git clone`, you may consider pointing the clone to the new repository URL. You can do this with the following command from within the the directory of your clone:
 >```bash
->$ git remote set-url origin new_url
+>$ git remote set-url origin https://github.com/Art-of-WiFi/UniFi-API-browser.git
 >```
 
 ## UniFi API browser
