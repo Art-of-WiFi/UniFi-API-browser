@@ -2,7 +2,7 @@
 /**
  * PHP API usage example
  *
- * contributed by: slooffmaster
+ * contributed by: Art of WiFi
  * description: example to pull connected user numbers for Access Points from the Unifi controller and output the results
  *              in raw HTML format
  */

@@ -2,7 +2,7 @@
 /**
  * PHP API usage example
  *
- * contributed by: slooffmaster
+ * contributed by: Art of WiFi
  * description: example basic PHP script to pull Facebook social auth details from the UniFi controller and output
  *              them in basic HTML format
  */

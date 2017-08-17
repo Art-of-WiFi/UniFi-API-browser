@@ -28,7 +28,7 @@
  *
  * ------------------------------------------------------------------------------------
  *
- * Copyright (c) 2016, Slooffmaster
+ * Copyright (c) 2017, Art of WiFi
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
@@ -476,7 +476,7 @@ class UnifiApi
      * ---------------------------------------------------------
      * returns an array of latest login session objects for given client device
      * required parameter <mac>   = client MAC address
-     * optional parameter <limit> = maximum number of sessions to get (defaults to 5)
+     * optional parameter <limit> = maximum number of sessions to get (default value is 5)
      */
     public function stat_sta_sessions_latest($mac, $limit = null)
     {
@@ -553,8 +553,8 @@ class UnifiApi
     }
 
     /**
-     * Get data for a single client device
-     * -----------------------------------
+     * Get details for a single client device
+     * --------------------------------------
      * returns an object with the client device information
      * required parameter <client_mac> = client device MAC address
      */

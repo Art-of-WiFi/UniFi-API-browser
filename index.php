@@ -14,7 +14,7 @@
  *
  * ------------------------------------------------------------------------------------
  *
- * Copyright (c) 2016, Slooffmaster
+ * Copyright (c) 2017, Art of WiFi
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
@@ -896,7 +896,7 @@ function sites_sort($site_a, $site_b)
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/malle-pietje/UniFi-API-browser"
+                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-browser"
                     target="_blank">UniFi API browser on Github</a></div>
                     <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
                     target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
@@ -1072,7 +1072,7 @@ $(document).ready(function() {
      * but only when the "about" modal is opened
      */
     $('#about_modal').on('shown.bs.modal', function (e) {
-        $.getJSON('https://api.github.com/repos/malle-pietje/UniFi-API-browser/releases/latest', function(external) {
+        $.getJSON('https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest', function(external) {
             if (api_browser_version != '' && typeof(external.tag_name) !== 'undefined') {
                 if (api_browser_version < external.tag_name.substring(1)) {
                     $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));

@@ -2,7 +2,7 @@
 /**
  * PHP API usage example
  *
- * contributed by: slooffmaster
+ * contributed by: Art of WiFi
  * description: example to toggle the locate function (flashing LED) on an Access Point and
  *              output the response in json format
  */

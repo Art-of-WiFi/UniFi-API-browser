@@ -2,7 +2,7 @@
 /**
  * PHP API usage example
  *
- * contributed by: slooffmaster
+ * contributed by: Art of WiFi
  * description: example basic PHP script to auth a guest device and attach a note to it
  */
 
