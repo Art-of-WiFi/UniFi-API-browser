@@ -124,14 +124,24 @@ If you have installed the tool using the `git clone` command, you can install up
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the UniFi Controller!
 
 ### Screenshots
-Here's a screenshot of the tool in action showing the site's health metrics using the default Bootstrap theme:
+Here are a couple of screenshots of the tool in action.
 
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/12074555/f0ec7c08-b15a-11e5-9f9c-bb5662ec47ba.JPG "Sample screenshot")
+The controller selection dropdown menu:
 
-and here with one of the Bootswatch themes selected:
+![alt tag](https://user-images.githubusercontent.com/12016131/29446799-7081ad00-83ee-11e7-93df-37f31fb28391.PNG "Controller selection")
 
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/12074556/f3f03944-b15a-11e5-8299-b63d55dbd3ed.JPG "Sample screenshot with theme selected")
+The site selection dropdown menu:
 
-this is the "About" modal:
+![alt tag](https://user-images.githubusercontent.com/12016131/29446798-707f17a2-83ee-11e7-8ea7-c273862787f4.PNG "Site selection")
 
-![alt tag](https://cloud.githubusercontent.com/assets/12016131/12512141/bc82ead0-c116-11e5-9bb2-f037e3f26a5f.JPG "Screenshot of the About modal")
+Showing the online device data collection using the default Bootstrap theme:
+
+![alt tag](https://user-images.githubusercontent.com/12016131/29446796-7077a76a-83ee-11e7-9b96-aa58209e572d.PNG "Online device collection")
+
+With one of the Bootswatch themes selected:
+
+![alt tag](https://user-images.githubusercontent.com/12016131/29446800-708476d4-83ee-11e7-9cfd-c6e18f02a217.PNG "Dark theme selected")
+
+The "About" modal:
+
+![alt tag](https://user-images.githubusercontent.com/12016131/29446797-707d1e02-83ee-11e7-8c4a-a80ad08a72a0.PNG "About modal")
