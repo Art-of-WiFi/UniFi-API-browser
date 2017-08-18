@@ -91,11 +91,11 @@ The PHP API client that comes bundled with this tool is based on the work done b
 - and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
 
 Other included libraries:
-- Bootstrap (version 3.3.7) http://getbootstrap.com/
-- Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome/
-- jQuery (version 2.2.4) https://jquery.com/
+- Bootstrap (version 3.3.7) http://getbootstrap.com
+- Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome
+- jQuery (version 2.2.4) https://jquery.com
 - jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
-- Kint (version 2.1.2) http://kint-php.github.io/kint/
+- Kint (version 2.1.2) http://kint-php.github.io/kint
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
