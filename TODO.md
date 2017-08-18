@@ -14,3 +14,7 @@
 3. Add simple user/password login
     - consider setting user name/password in the config file, though not very secure
     - avoid dependencies such as MySQL etc. as much as possible
+
+### Call for suggestions
+
+If you have any suggestions on how to further improve this tool, please open an issue on GitHub. All feedback is welcome!
