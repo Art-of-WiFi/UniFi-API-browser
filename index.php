@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.20
+ * VERSION: 1.0.21
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.20');
+define('API_BROWSER_VERSION', '1.0.21');
 
 /**
  * check whether the PHP curl module is available
@@ -81,6 +81,13 @@ if (!is_readable('config.php')) {
  * load the UniFi API client class
  */
 require_once('phpapi/class.unifi.php');
+
+/**
+ * load the Kint class
+ * more info on Kint usage: http://kint-php.github.io/kint/
+ */
+require_once('kint/kint.php');
+Kint::$display_called_from = false;
 
 /**
  * determine whether we have reached the cookie timeout, if so, refresh the PHP session
@@ -520,6 +527,9 @@ function print_output($output_format, $data)
         case 'php_array':
             print_r($data);
             break;
+        case 'php_array_kint':
+            +d($data);
+            break;
         case 'php_var_dump':
             var_dump($data);
             break;
@@ -669,6 +679,7 @@ function sites_sort($site_a, $site_b)
                             <li role="separator" class="divider"></li>
                             <li class="dropdown-header">Nice but slow with large collections</li>
                             <li id="json_color"><a href="?output_format=json_color">json highlighted</a></li>
+                            <li id="php_array_kint"><a href="?output_format=php_array_kint">PHP array using Kint</a></li>
                         </ul>
                     </li>
                     <li id="user-menu" class="dropdown">

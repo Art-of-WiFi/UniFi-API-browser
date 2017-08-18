@@ -26,7 +26,7 @@ If you'd like to support further development of the API browser tool and the PHP
 The UniFi API browser tool offers the following features:
 - browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
 - switch between sites managed by the connected controller
-- switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export` and `json highlighted` have been implemented)
+- switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export`, `json highlighted` and `PHP array using Kint` have been implemented)
 - switch between default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the UniFi Controller
 - very easy setup with minimal dependencies
@@ -95,6 +95,7 @@ Other included libraries:
 - Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome/
 - jQuery (version 2.2.4) https://jquery.com/
 - jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
+- Kint (version 2.1.2) http://kint-php.github.io/kint/
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
