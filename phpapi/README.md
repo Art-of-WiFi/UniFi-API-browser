@@ -119,9 +119,7 @@ $results   = $unifidata->list_alarms(); // returns the alarms in a PHP array
 >
 >Here `jl3z2shm` is the value required for $site_id.
 >
->The $controller_url parameter is the **full** URL to the controller, including the `https://` prefix and port number suffix
->
-> For example:
+>The $controller_url parameter is the **full** URL to the controller, including the `https://` prefix and port number suffix, for example:
 > ```
 >https://mycontroller.mydomain.com:8443
 >```
