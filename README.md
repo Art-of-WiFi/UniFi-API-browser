@@ -9,7 +9,7 @@
 ## UniFi API browser
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
 
-It comes bundled with **an extensive PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/malle-pietje/UniFi-API-browser/tree/master/phpapi) than the UniFi API browser tool does. Please refer to the code samples in the `examples` directory for a starting point if you wish to develop your own PHP code.
+It comes bundled with **an extensive PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-browser/tree/master/phpapi) than the UniFi API browser tool does. Please refer to the code samples in the `examples` directory for a starting point if you wish to develop your own PHP code.
 
 Please keep the following in mind:
 - not all data collections/API endpoints are supported (yet), see the list below of currently supported data collections/API endpoints
@@ -99,14 +99,14 @@ Other included libraries:
 
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/malle-pietje/UniFi-API-browser/issues/4))
+- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
 ### Installation
 Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
 - open up a terminal window on your server and cd to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```bash
-git clone https://github.com/malle-pietje/UniFi-API-browser.git
+git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 ```
 - when git is done cloning, follow the configuration steps below to configure the settings for access to your UniFi Controller's API
 
