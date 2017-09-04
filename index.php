@@ -24,8 +24,13 @@ define('API_BROWSER_VERSION', '1.0.21');
 
 /**
  * check whether the PHP curl module is available
+ * if yes, collect cURL version details for the info modal
+ * if not, stop and display an error message
  */
-if (!function_exists('curl_version')) {
+if (function_exists('curl_version')) {
+    $curl_info    = curl_version();
+    $curl_version = $curl_info['version'];
+} else {
     exit('The <b>PHP curl</b> module is not installed! Please correct this before you proceed!<br>');
 }
 
@@ -83,7 +88,7 @@ if (!is_readable('config.php')) {
 require_once('phpapi/class.unifi.php');
 
 /**
- * load the Kint class
+ * load the Kint class and set relevant options
  * more info on Kint usage: http://kint-php.github.io/kint/
  */
 require_once('kint/kint.php');
@@ -105,12 +110,6 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 }
 
 $_SESSION['last_activity'] = time();
-
-/**
- * collect cURL version details for the info modal
- */
-$curl_info    = curl_version();
-$curl_version = $curl_info['version'];
 
 /**
  * process the GET variables and store them in the $_SESSION array
@@ -837,7 +836,7 @@ function sites_sort($site_a, $site_b)
     </div><!-- /.container-fluid -->
 </nav><!-- /top navbar -->
 <div class="container-fluid">
-    <div id="alert_placeholder"></div>
+    <div id="alert_placeholder" style="display: none"></div>
     <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
     <?php if (isset($_SESSION['controller']) && $action) { ?>
     <div id="output_panel_loading" class="text-center">
@@ -993,6 +992,7 @@ $(document).ready(function() {
      * update dynamic elements in the DOM using some of the above variables
      */
     $('#alert_placeholder').html(alert_message);
+    $('#alert_placeholder').fadeIn(1000);
     $('#span_site_id').html(site_id);
     $('#span_site_name').html(site_name);
     $('#span_output_format').html(output_format);
