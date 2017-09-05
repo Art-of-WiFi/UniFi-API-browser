@@ -9,7 +9,7 @@
 ## UniFi API browser
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
 
-It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-browser/tree/master/phpapi) than the UniFi API browser tool does.
+It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports more API endpoints than the UniFi API browser tool does.
 
 If you plan to create your own PHP code levering the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
 
