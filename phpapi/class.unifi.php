@@ -7,11 +7,13 @@
  *    domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
  *    fbagnol: https://github.com/fbagnol/class.unifi.php
  * and the API as published by Ubiquiti:
- *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
+ *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
- * VERSION: 1.1.9
+ * VERSION: 1.1.15
  *
  * NOTES:
+ * - a version of this class is available as an independant package which can be installed using composer:
+ *   https://github.com/Art-of-WiFi/UniFi-API-client
  * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
  *   you from trying to use it with other versions of the UniFi Controller.
  *
@@ -25,6 +27,12 @@
  * as of version 1.1.5:
  * - list_devices() function/method replaces list_aps which is still available as alias
  * - changed class name from unifiapi to UnifiApi (StudlyCaps)
+ * as of version 1.1.13:
+ * - all public properties have changed to public properties, please use the appropriate
+ *   getter and setter methods instead.
+ * - getcookie() method/function has been renamed to get_cookie() for consistency
+ * as of version 1.1.15:
+ * - renamed all functions/methods named add_*() to create_*()
  *
  * ------------------------------------------------------------------------------------
  *
@@ -34,38 +42,49 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_CLASS_VERSION', '1.1.9');
+define('API_CLASS_VERSION', '1.1.15');
 
 class UnifiApi
 {
     /**
-     * public properties
-     */
-    public $user          = '';
-    public $password      = '';
-    public $site          = 'default';
-    public $baseurl       = 'https://127.0.0.1:8443';
-    public $version       = '5.4.16';
-
-    /**
      * private properties
      */
-    private $debug        = false;
-    private $is_loggedin  = false;
-    private $cookies      = '';
-    private $request_type = 'POST';
-    private $last_results_raw;
-    private $last_error_message;
+    private $baseurl            = 'https://127.0.0.1:8443';
+    private $site               = 'default';
+    private $version            = '5.4.16';
+    private $debug              = false;
+    private $is_loggedin        = false;
+    private $cookies            = '';
+    private $request_type       = 'POST';
+    private $connect_timeout    = 10;
+    private $last_results_raw   = null;
+    private $last_error_message = null;
 
-    function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '')
+    function __construct($user, $password, $baseurl = '', $site = '', $version = '')
     {
-        if (!empty($user)) $this->user         = trim($user);
-        if (!empty($password)) $this->password = trim($password);
-        if (!empty($baseurl)) $this->baseurl   = trim($baseurl);
-        if (!empty($site)) $this->site         = trim($site);
-        if (!empty($version)) $this->version   = trim($version);
+        if (!extension_loaded('curl')) {
+            trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
+        }
+
+        $this->user     = trim($user);
+        $this->password = trim($password);
+
+        if (!empty($baseurl)) $this->baseurl = trim($baseurl);
+        if (!empty($site)) $this->site       = trim($site);
+        if (!empty($version)) $this->version = trim($version);
+
         if (isset($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
+        }
+
+        $base_url_components = parse_url($this->baseurl);
+
+        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
+            trigger_error('The URL provided is incomplete!');
+        }
+
+        if (strlen($this->site) !== 8 && $this->site !== 'default' && $this->debug) {
+            error_log('The provided (short) site name is probably incorrect');
         }
     }
 
@@ -79,9 +98,7 @@ class UnifiApi
         /**
          * logout, if needed
          */
-        if ($this->is_loggedin) {
-            $this->logout();
-        }
+        if ($this->is_loggedin) $this->logout();
     }
 
     /**
@@ -104,7 +121,12 @@ class UnifiApi
         curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
-        if (($content = curl_exec($ch)) === false) {
+        /**
+         * execute the cURL request
+         */
+        $content = curl_exec($ch);
+
+        if (curl_errno($ch)) {
             trigger_error('cURL error: '.curl_error($ch));
         }
 
@@ -163,6 +185,38 @@ class UnifiApi
      ****************************************************************/
 
     /**
+     * Set site
+     * --------
+     * modify the private property site, returns the new (short) site name
+     * required parameter <site> = string; must be the short site name of a site to which the
+     *                             provided credentials have access
+     *
+     * NOTE:
+     * this method can be useful when switching between sites
+     */
+    public function set_site($site)
+    {
+
+        if (strlen($site) === 8 || $site === 'default') {
+            error_log('The provided (short) site name is probably incorrect');
+        }
+
+        $this->site = $site;
+
+        return $this->site;
+    }
+
+    /**
+     * Get site
+     * --------
+     * get the value of private property site, returns the current (short) site name
+     */
+    public function get_site()
+    {
+        return $this->site;
+    }
+
+    /**
      * Set debug mode
      * --------------
      * sets debug mode to true or false, returns false if a non-boolean parameter was passed
@@ -170,10 +224,12 @@ class UnifiApi
      */
     public function set_debug($enable)
     {
-        if ($enable) {
+        if ($enable === true) {
             $this->debug = true;
+            return true;
         } elseif ($enable === false) {
             $this->debug = false;
+            return true;
         }
 
         return false;
@@ -182,15 +238,13 @@ class UnifiApi
     /**
      * Get last raw results
      * --------------------
-     * returns the raw results of the last method called in PHP stdClass Object format by default, returns false if not set
-     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format
-     *
-     * NOTE:
-     * this method can be used to get the full error as returned by the controller
+     * returns the raw results of the last method called, returns false if unavailable
+     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format,
+     *                                    PHP stdClass Object format is returned by default
      */
     public function get_last_results_raw($return_json = false)
     {
-        if ($this->last_results_raw != null) {
+        if ($this->last_results_raw !== null) {
             if ($return_json) {
                 return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             }
@@ -204,11 +258,11 @@ class UnifiApi
     /**
      * Get last error message
      * ----------------------
-     * returns the error message of the last method called in PHP stdClass Object format, returns false if not set
+     * returns the error message of the last method called in PHP stdClass Object format, returns false if unavailable
      */
     public function get_last_error_message()
     {
-        if (isset($this->last_error_message)) {
+        if ($this->last_error_message  !== null) {
             return $this->last_error_message;
         }
 
@@ -220,7 +274,7 @@ class UnifiApi
      * --------------------------------
      * returns the UniFi controller cookie
      */
-    public function getcookie()
+    public function get_cookie()
     {
         if (!$this->is_loggedin) return false;
         return $this->cookies;
@@ -561,7 +615,7 @@ class UnifiApi
     public function stat_client($client_mac)
     {
         if (!$this->is_loggedin) return false;
-	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/user/'.trim($client_mac)));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/user/'.trim($client_mac)));
         return $this->process_response($content_decoded);
     }
 
@@ -588,13 +642,13 @@ class UnifiApi
     {
         if (!$this->is_loggedin) return false;
         $json            = json_encode(['usergroup_id' => $group_id]);
-	    $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
     /**
-     * Edit user group
-     * ---------------
+     * Update user group (using REST)
+     * ------------------------------
      * returns an array containing a single object with attributes of the updated usergroup on success
      * required parameter <group_id>   = id of the user group
      * required parameter <site_id>    = id of the site
@@ -613,14 +667,14 @@ class UnifiApi
     }
 
     /**
-     * Add user group
-     * --------------
+     * Create user group (using REST)
+     * ---------------------------
      * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
      * required parameter <group_name> = name of the user group
      * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      */
-    public function add_usergroup($group_name, $group_dn = -1, $group_up = -1)
+    public function create_usergroup($group_name, $group_dn = -1, $group_up = -1)
     {
         if (!$this->is_loggedin) return false;
         $json               = json_encode(['name' => $group_name, 'qos_rate_max_down' => $group_dn, 'qos_rate_max_up' => $group_up]);
@@ -629,8 +683,8 @@ class UnifiApi
     }
 
     /**
-     * Delete user group
-     * -----------------
+     * Delete user group (using REST)
+     * ------------------------------
      * returns true on success
      * required parameter <group_id> = id of the user group
      */
@@ -692,8 +746,8 @@ class UnifiApi
     }
 
     /**
-     * List (device) tags
-     * ------------------
+     * List (device) tags (using REST)
+     * -------------------------------
      * returns an array of known device tag objects
      *
      * NOTES: this endpoint was introduced with controller versions 5.5.X
@@ -746,14 +800,14 @@ class UnifiApi
     }
 
     /**
-     * Add a site
-     * ----------
+     * Create a site
+     * -------------
      * returns an array containing a single object with attributes of the new site ("_id", "desc", "name") on success
      * required parameter <description> = the long name for the new site
      *
      * NOTES: immediately after being added, the new site will be available in the output of the "list_sites" function
      */
-    public function add_site($description)
+    public function create_site($description)
     {
         if (!$this->is_loggedin) return false;
         $json            = json_encode(['desc' => $description, 'cmd' => 'add-site']);
@@ -825,18 +879,6 @@ class UnifiApi
     }
 
     /**
-     * List networkconf
-     * ----------------
-     * returns an array of network configuration data
-     */
-    public function list_networkconf()
-    {
-        if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/networkconf'));
-        return $this->process_response($content_decoded);
-    }
-
-    /**
      * List vouchers
      * -------------
      * returns an array of hotspot voucher objects
@@ -873,8 +915,8 @@ class UnifiApi
     }
 
     /**
-     * Create hotspot operator
-     * -----------------------
+     * Create hotspot operator (using REST)
+     * ------------------------------------
      * return true upon success
      * required parameter <name>       = name for the hotspot operator
      * required parameter <x_password> = clear text password for the hotspot operator
@@ -895,14 +937,14 @@ class UnifiApi
     }
 
     /**
-     * List hotspot operators
-     * ----------------------
+     * List hotspot operators (using REST)
+     * -----------------------------------
      * returns an array of hotspot operators
      */
     public function list_hotspotop()
     {
         if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/hotspotop'));
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/hotspotop'));
         return $this->process_response($content_decoded);
     }
 
@@ -1091,8 +1133,8 @@ class UnifiApi
     }
 
     /**
-     * Disable/enable an access point
-     * ------------------------------
+     * Disable/enable an access point (using REST)
+     * -------------------------------------------
      * return true on success
      * required parameter <ap_id>   = 24 char string; value of _id for the access point which can be obtained from the device list
      * required parameter <disable> = boolean; true will disable the device, false will enable the device
@@ -1112,8 +1154,8 @@ class UnifiApi
     }
 
     /**
-     * Override LED mode for a device
-     * ------------------------------
+     * Override LED mode for a device (using REST)
+     * -------------------------------------------
      * return true on success
      * required parameter <device_id>     = 24 char string; value of _id for the device which can be obtained from the device list
      * required parameter <override_mode> = string, off/on/default; "off" will disable the LED of the device,
@@ -1172,8 +1214,8 @@ class UnifiApi
     }
 
     /**
-     * Set access point radio settings
-     * -------------------------------
+     * Update access point radio settings
+     * ----------------------------------
      * return true on success
      * required parameter <ap_id>
      * required parameter <radio>(default=ng)
@@ -1191,8 +1233,8 @@ class UnifiApi
     }
 
     /**
-     * Set guest login settings
-     * ------------------------
+     * Update guest login settings
+     * ---------------------------
      * return true on success
      * required parameter <portal_enabled>
      * required parameter <portal_customized>
@@ -1248,8 +1290,82 @@ class UnifiApi
     }
 
     /**
-     * Add a wlan
-     * ----------
+     * List network settings (using REST)
+     * ----------------------------------
+     * returns an array of (non-wireless) networks and their settings
+     */
+    public function list_networkconf()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/networkconf'));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Create a network (using REST)
+     * -----------------------------
+     * return an array with a single object containing details of the new network on success, else return false
+     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     */
+    public function create_network($network_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode($network_settings);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/networkconf/', 'json='.$json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Update network settings, base (using REST)
+     * ------------------------------------------
+     * return true on success
+     * required parameter <network_id>
+     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object/array structured in the same manner as is returned by list_networkconf() for the network.
+     */
+    public function set_networksettings_base($network_id, $network_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($network_settings);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id), 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Delete a network (using REST)
+     * -----------------------------
+     * return true on success
+     * required parameter <network_id> = 24 char string; _id of the network which can be found with the list_networkconf() function
+     */
+    public function delete_network($network_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'DELETE';
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id)));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * List wlan settings (using REST)
+     * -------------------------------
+     * returns an array of wireless networks and their settings, or an array containing a single wireless network when using
+     * the <wlan_id> parameter
+     * optional parameter <wlan_id> = 24 char string; _id of the wlan to fetch the settings for
+     */
+    public function list_wlanconf($wlan_id = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id)));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Create a wlan
+     * -------------
      * return true on success
      * required parameter <name>             = string; SSID
      * required parameter <x_passphrase>     = string; new pre-shared key, minimal length is 8 characters, maximum length is 63
@@ -1274,17 +1390,17 @@ class UnifiApi
         $x_passphrase,
         $usergroup_id,
         $wlangroup_id,
-        $enabled = true,
-        $hide_ssid = false,
-        $is_guest = false,
-        $security = 'open',
-        $wpa_mode = 'wpa2',
-        $wpa_enc = 'ccmp',
-        $vlan_enabled = false,
-        $vlan = null,
-        $uapsd_enabled = false,
+        $enabled          = true,
+        $hide_ssid        = false,
+        $is_guest         = false,
+        $security         = 'open',
+        $wpa_mode         = 'wpa2',
+        $wpa_enc          = 'ccmp',
+        $vlan_enabled     = false,
+        $vlan             = null,
+        $uapsd_enabled    = false,
         $schedule_enabled = false,
-        $schedule = []
+        $schedule         = []
     ) {
         if (!$this->is_loggedin) return false;
         $json = [
@@ -1310,22 +1426,25 @@ class UnifiApi
     }
 
     /**
-     * Delete a wlan
-     * -------------
+     * Update wlan settings, base (using REST)
+     * ---------------------------------------
      * return true on success
-     * required parameter <wlan_id> = 24 char string; _id of the wlan that can be found with the list_wlanconf() function
+     * required parameter <wlan_id>
+     * required parameter <wlan_settings> = stdClass object or associative array containing the configuration to apply to the wlan, must be a
+     *                                      (partial) object/array structured in the same manner as is returned by list_wlanconf() for the wlan.
      */
-    public function delete_wlan($wlan_id)
+    public function set_wlansettings_base($wlan_id, $wlan_settings)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode([]);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.trim($wlan_id), 'json='.$json));
+        $this->request_type = 'PUT';
+        $json               = json_encode($wlan_settings);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
     }
 
     /**
-     * Set wlan settings
-     * -----------------
+     * Update basic wlan settings
+     * --------------------------
      * return true on success
      * required parameter <wlan_id>
      * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63,
@@ -1334,13 +1453,10 @@ class UnifiApi
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
-        if (!$this->is_loggedin) return false;
-        $json            = [];
-        if (!is_null($x_passphrase)) $json['x_passphrase'] = trim($x_passphrase);
-        if (!is_null($name)) $json['name'] = trim($name);
-        $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
-        return $this->process_response_boolean($content_decoded);
+        $payload = new \stdClass();
+        if (!is_null($x_passphrase)) $payload->x_passphrase = trim($x_passphrase);
+        if (!is_null($name)) $payload->name = trim($name);
+        return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
     /**
@@ -1352,12 +1468,44 @@ class UnifiApi
      */
     public function disable_wlan($wlan_id, $disable)
     {
+        $payload          = new \stdClass();
+        $action           = ($disable) ? false : true;
+        $payload->enabled = (bool)$action;
+        return $this->set_wlansettings_base($wlan_id, $payload);
+    }
+
+    /**
+     * Delete a wlan (using REST)
+     * --------------------------
+     * return true on success
+     * required parameter <wlan_id> = 24 char string; _id of the wlan which can be found with the list_wlanconf() function
+     */
+    public function delete_wlan($wlan_id)
+    {
         if (!$this->is_loggedin) return false;
-        $action          = ($disable) ? false : true;
-        $json            = ['enabled' => (bool)$action];
-        $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
+        $this->request_type = 'DELETE';
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id)));
         return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Update MAC filter for a wlan
+     * ----------------------------
+     * return true on success
+     * required parameter <wlan_id>
+     * required parameter <mac_filter_policy>  = string, "allow" or "deny"; default MAC policy to apply
+     * required parameter <mac_filter_enabled> = boolean; true enables the policy, false disables it
+     * required parameter <macs>               = array; must contain MAC strings to be placed in the MAC filter list,
+     *                                           replacing existing values. Existing MAC filter list can be obtained
+     *                                           through list_wlanconf().
+     */
+    public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
+    {
+        $payload                     = new \stdClass();
+        $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
+        $payload->mac_filter_policy  = $mac_filter_policy;
+        $payload->mac_filter_list    = $macs;
+        return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
     /**
@@ -1374,18 +1522,6 @@ class UnifiApi
         $json            = ['_sort' => '-time', 'within' => $historyhours, 'type' => null, '_start' => $start, '_limit' => $limit];
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/event', 'json='.$json));
-        return $this->process_response($content_decoded);
-    }
-
-    /**
-     * List wireless settings
-     * ----------------------
-     * returns an array of wireless networks and settings
-     */
-    public function list_wlanconf()
-    {
-        if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/wlanconf'));
         return $this->process_response($content_decoded);
     }
 
@@ -1482,10 +1618,25 @@ class UnifiApi
     }
 
     /**
-     * List Radius user accounts
-     * -------------------------
+     * List Radius profiles (using REST)
+     * --------------------------------------
+     * returns an array of objects containing all Radius profiles for the current site
+     *
+     * NOTES:
+     * - this function/method is only supported on controller versions 5.5.19 and later
+     */
+    public function list_radius_profiles()
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/radiusprofile'));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * List Radius user accounts (using REST)
+     * --------------------------------------
      * returns an array of objects containing all Radius accounts for the current site
-	 *
+     *
      * NOTES:
      * - this function/method is only supported on controller versions 5.5.19 and later
      */
@@ -1494,6 +1645,100 @@ class UnifiApi
         if (!$this->is_loggedin) return false;
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/account'));
         return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Create a Radius user account (using REST)
+     * -----------------------------------------
+     * returns an array containing a single object for the newly created account upon success, else returns false
+     * required parameter <name>               = string; name for the new account
+     * required parameter <x_password>         = string; password for the new account
+     * required parameter <tunnel_type>        = integer; must be one of the following values:
+     *                                              1      Point-to-Point Tunneling Protocol (PPTP)
+     *                                              2      Layer Two Forwarding (L2F)
+     *                                              3      Layer Two Tunneling Protocol (L2TP)
+     *                                              4      Ascend Tunnel Management Protocol (ATMP)
+     *                                              5      Virtual Tunneling Protocol (VTP)
+     *                                              6      IP Authentication Header in the Tunnel-mode (AH)
+     *                                              7      IP-in-IP Encapsulation (IP-IP)
+     *                                              8      Minimal IP-in-IP Encapsulation (MIN-IP-IP)
+     *                                              9      IP Encapsulating Security Payload in the Tunnel-mode (ESP)
+     *                                              10     Generic Route Encapsulation (GRE)
+     *                                              11     Bay Dial Virtual Services (DVS)
+     *                                              12     IP-in-IP Tunneling
+     *                                              13     Virtual LANs (VLAN)
+     * required parameter <tunnel_medium_type> = integer; must be one of the following values:
+     *                                              1      IPv4 (IP version 4)
+     *                                              2      IPv6 (IP version 6)
+     *                                              3      NSAP
+     *                                              4      HDLC (8-bit multidrop)
+     *                                              5      BBN 1822
+     *                                              6      802 (includes all 802 media plus Ethernet "canonical format")
+     *                                              7      E.163 (POTS)
+     *                                              8      E.164 (SMDS, Frame Relay, ATM)
+     *                                              9      F.69 (Telex)
+     *                                              10     X.121 (X.25, Frame Relay)
+     *                                              11     IPX
+     *                                              12     Appletalk
+     *                                              13     Decnet IV
+     *                                              14     Banyan Vines
+     *                                              15     E.164 with NSAP format subaddress
+     * optional parameter <vlan>               = integer; VLAN to assign to the account
+     *
+     * NOTES:
+     * - this function/method is only supported on controller versions 5.5.19 and later
+     */
+    public function create_radius_account($name, $x_password, $tunnel_type, $tunnel_medium_type, $vlan = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $account_details    = [
+            'name'               => $name,
+            'x_password'         => $x_password,
+            'tunnel_type'        => (int) $tunnel_type,
+            'tunnel_medium_type' => (int) $tunnel_medium_type
+        ];
+        if (isset($vlan)) $account_details['vlan'] = (int) $vlan;
+        $json               = json_encode($account_details);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/account', 'json='.$json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Update Radius account, base (using REST)
+     * ----------------------------------------
+     * return true on success
+     * required parameter <account_id>      = 24 char string; _id of the account which can be found with the list_radius_accounts() function
+     * required parameter <account_details> = stdClass object or associative array containing the new profile to apply to the account, must be a (partial)
+     *                                         object/array structured in the same manner as is returned by list_radius_accounts() for the account.
+     *
+     * NOTES:
+     * - this function/method is only supported on controller versions 5.5.19 and later
+     */
+    public function set_radius_account_base($account_id, $account_details)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($account_details);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/account/'.trim($account_id), 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Delete a Radius account (using REST)
+     * ------------------------------------
+     * return true on success
+     * required parameter <account_id> = 24 char string; _id of the account which can be found with the list_radius_accounts() function
+     *
+     * NOTES:
+     * - this function/method is only supported on controller versions 5.5.19 and later
+     */
+    public function delete_radius_account($account_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'DELETE';
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/account/'.trim($account_id)));
+        return $this->process_response_boolean($content_decoded);
     }
 
     /****************************************************************
@@ -1527,6 +1772,7 @@ class UnifiApi
             'Function set_locate_ap() has been deprecated, use locate_ap() instead.',
             E_USER_DEPRECATED
         );
+
         return $this->locate_ap($mac, true);
     }
 
@@ -1542,6 +1788,7 @@ class UnifiApi
             'Function unset_locate_ap() has been deprecated, use locate_ap() instead.',
             E_USER_DEPRECATED
         );
+
         return $this->locate_ap($mac, false);
     }
 
@@ -1556,6 +1803,7 @@ class UnifiApi
             'Function site_ledson() has been deprecated, use site_leds() instead.',
             E_USER_DEPRECATED
         );
+
         return $this->site_leds(true);
     }
 
@@ -1570,6 +1818,7 @@ class UnifiApi
             'Function site_ledsoff() has been deprecated, use site_leds() instead.',
             E_USER_DEPRECATED
         );
+
         return $this->site_leds(false);
     }
 
@@ -1601,7 +1850,7 @@ class UnifiApi
                 }
 
                 if ($this->debug) {
-                    trigger_error('Last error message: ' . $this->last_error_message);
+                    trigger_error('Debug: Last error message: '.$this->last_error_message);
                 }
             }
         }
@@ -1629,7 +1878,7 @@ class UnifiApi
                 }
 
                 if ($this->debug) {
-                    trigger_error('Last error message: ' . $this->last_error_message);
+                    trigger_error('Debug: Last error message: '.$this->last_error_message);
                 }
             }
         }
@@ -1644,6 +1893,7 @@ class UnifiApi
     {
         $ch = $this->get_curl_obj();
         curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -1661,7 +1911,12 @@ class UnifiApi
             }
         }
 
-        if (($content = curl_exec($ch)) === false) {
+        /**
+         * execute the cURL request
+         */
+        $content = curl_exec($ch);
+
+        if (curl_errno($ch)) {
             trigger_error('cURL error: '.curl_error($ch));
         }
 
@@ -1669,13 +1924,16 @@ class UnifiApi
          * has the session timed out?
          */
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $strerr   = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
 
-        if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
-            error_log('cURL: Needed reconnect to UniFi Controller');
+        $json_decoded_content = json_decode($content, true);
+
+        if ($httpcode == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
+            if ($this->debug) {
+                error_log('cURL debug: Needed reconnect to UniFi Controller');
+            }
 
             /**
-             * explicit unset the old cookie now
+             * explicitly unset the old cookie now
              */
             if (isset($_SESSION['unificookie'])) {
                 unset($_SESSION['unificookie']);
@@ -1688,7 +1946,7 @@ class UnifiApi
              * when login was okay, exec the same command again
              */
             if ($this->is_loggedin) {
-                curl_close ($ch);
+                curl_close($ch);
 
                 /**
                  * setup the cookie for the user within $_SESSION
@@ -1715,7 +1973,13 @@ class UnifiApi
             print '</pre>';
         }
 
-        curl_close ($ch);
+        curl_close($ch);
+
+        /**
+         * set request_type value back to default, just in case
+         */
+        $this->request_type = 'POST';
+
         return $content;
     }
 
@@ -1729,6 +1993,7 @@ class UnifiApi
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);

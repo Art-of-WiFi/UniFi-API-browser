@@ -16,7 +16,6 @@
 $controlleruser     = ''; // the user name for access to the UniFi Controller
 $controllerpassword = ''; // the password for access to the UniFi Controller
 $controllerurl      = ''; // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-$controllerversion  = ''; // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
 
 /**
  * Multi controller configuration
@@ -32,24 +31,21 @@ $controllers[0] = [
    'user'     => '', // the user name for access to the UniFi Controller
    'password' => '', // the password for access to the UniFi Controller
    'url'      => '', // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-   'name'     => '',
-   'version'  => ''  // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
+   'name'     => ''  // name for this controller which will be used in the dropdown menu
 ];
 
 $controllers[1] = [
    'user'     => '', // the user name for access to the UniFi Controller
    'password' => '', // the password for access to the UniFi Controller
    'url'      => '', // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-   'name'     => '',
-   'version'  => ''  // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
+   'name'     => ''  // name for this controller which will be used in the dropdown menu
 ];
 
 $controllers[2] = [
    'user'     => '', // the user name for access to the UniFi Controller
    'password' => '', // the password for access to the UniFi Controller
    'url'      => '', // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-   'name'     => '',
-   'version'  => ''  // the version of the Controller software, eg. '4.6.6' (must be at least 4.0.0)
+   'name'     => ''  // name for this controller which will be used in the dropdown menu
 ];
 */
 

@@ -57,17 +57,17 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
 $time_start = microtime(true);
 
 /**
- * assign variables which are required later on together with their default values
+ * Declare variables which are required later on together with their default values
  */
 $controller_id = '';
 $action        = '';
 $site_id       = '';
 $site_name     = '';
 $selection     = '';
-$output_format = 'json';
 $data          = '';
 $objects_count = '';
 $alert_message = '';
+$output_format = 'json';
 
 /**
  * load the configuration file
@@ -75,9 +75,9 @@ $alert_message = '';
  * - if the config.php file is unreadable or does not exist, an alert is displayed on the page
  */
 if (!is_readable('config.php')) {
-    $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.'
-                   . '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and follow '
-                   . 'the instructions inside to enter your credentials and controller details.</div>';
+    $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.' .
+                     '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and follow ' .
+                     'the instructions inside to enter your credentials and controller details.</div>';
 } else {
     require_once('config.php');
 }
@@ -156,8 +156,7 @@ if (isset($_GET['controller_id'])) {
                 'user'     => $controlleruser,
                 'password' => $controllerpassword,
                 'url'      => $controllerurl,
-                'name'     => 'Controller',
-                'version'  => $controllerversion
+                'name'     => 'Controller'
             ];
             $controller = $_SESSION['controller'];
         }
@@ -217,18 +216,18 @@ if (isset($_GET['action'])) {
  * placed here so they can be overwritten by more "severe" error messages later on
  */
 if ($action === '') {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus'
-                   . ' <i class="fa fa-arrow-circle-up"></i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus' .
+                     ' <i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 if ($site_id === '' && isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu <i class="fa fa-arrow-circle-up">'
-                   . '</i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu <i class="fa fa-arrow-circle-up">' .
+                     '</i></div>';
 }
 
 if (!isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu <i class="fa fa-arrow-circle-up">'
-                   . '</i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu <i class="fa fa-arrow-circle-up">' .
+                     '</i></div>';
 }
 
 /**
@@ -239,15 +238,15 @@ if (isset($_SESSION['controller'])) {
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
      */
-    $unifidata      = new UnifiApi($controller['user'], $controller['password'], $controller['url'], $site_id, $controller['version']);
+    $unifidata      = new UnifiApi($controller['user'], $controller['password'], $controller['url'], $site_id);
     $set_debug_mode = $unifidata->set_debug(trim($debug));
     $loginresults   = $unifidata->login();
 
     if ($loginresults === 400) {
-        $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400'
-                       . '<br>This is probably caused by a UniFi controller login failure, please check your credentials in '
-                       . 'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function '
-                       . 'in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
+        $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400' .
+                         '<br>This is probably caused by a UniFi controller login failure, please check your credentials in ' .
+                         'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function ' .
+                         'in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
 
         /**
          * to prevent unwanted errors we assign empty values to the following variables
@@ -258,7 +257,7 @@ if (isset($_SESSION['controller'])) {
         /**
          * Remember authentication cookie to the controller.
          */
-        $_SESSION['unificookie'] = $unifidata->getcookie();
+        $_SESSION['unificookie'] = $unifidata->get_cookie();
 
         /**
          * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
@@ -270,10 +269,11 @@ if (isset($_SESSION['controller'])) {
             } else {
                 $sites = [];
 
-                $alert_message = '<div class="alert alert-danger" role="alert">No sites available'
-                               . '<br>This is probably caused by incorrect access rights in the UniFi controller for the credentials provided in '
-                               . 'config.php. After updating your credentials, please restart your browser or use the <b>Reset PHP session</b> '
-                               . 'function in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
+                $alert_message = '<div class="alert alert-danger" role="alert">No sites available' .
+                                 '<br>This is probably caused by incorrect access rights in the UniFi controller for the credentials provided in ' .
+                                 'config.php, or else check your web server error logs. After updating your credentials, please restart your ' .
+                                 'browser or use the <b>Reset PHP session</b> function in the dropdown menu on the right, before attempting to use ' .
+                                 'the API browser tool again.</div>';
             }
 
         } else {
@@ -468,8 +468,12 @@ if (isset($unifidata)) {
             $data      = $unifidata->list_admins();
             break;
         case 'list_radius_accounts':
-            $selection = 'list_radius_accounts';
+            $selection = 'list radius accounts';
             $data      = $unifidata->list_radius_accounts();
+            break;
+        case 'list_radius_profiles':
+            $selection = 'list radius profiles';
+            $data      = $unifidata->list_radius_profiles();
             break;
         default:
             break;
@@ -642,14 +646,24 @@ function sites_sort($site_a, $site_b)
                 <?php if (isset($_SESSION['controller'])) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Sites
+
+                            <?php
+                            /**
+                             * here we display the site name, if selected, else just label it
+                             */
+                            if (!empty($site_name)) {
+                                echo $site_name;
+                            } else {
+                                echo 'Sites';
+                            }
+                            ?>
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu scrollable-menu" id="siteslist">
                             <li class="dropdown-header">Select a site</li>
                             <?php
                             /**
-                             * here we loop through the available sites, after we have sorted the sites collection
+                             * here we loop through the available sites, after we've sorted the sites collection
                              */
                             usort($sites, "sites_sort");
 
@@ -771,16 +785,20 @@ function sites_sort($site_a, $site_b)
                             <li id="list_admins"><a href="?action=list_admins">list admins for current site</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
+                            <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_extension"><a href="?action=list_extension">list VoIP extensions</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
                             <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
                             <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
-                            <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
+                            <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
+                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
+                                <li role="separator" class="divider"></li>
+                                <li id="list_radius_profiles"><a href="?action=list_radius_profiles">list Radius profiles</a></li>
+                                <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <li id="msg-menu" class="dropdown">

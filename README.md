@@ -16,15 +16,15 @@ If you plan to create your own PHP code levering the UniFi controller API, it is
 You will find examples and detailed instructions there.
 
 Please keep the following in mind:
-- the API Browser tool doesn't support all available data collections/API endpoints, see the list below of currently supported data collections/API endpoints
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.5.20 has been confirmed to work) are supported
-- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github issue list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas.
+- the API Browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
+- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.5.20 has been confirmed to work)
+- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
 ### Donations
 If you'd like to support further development of the API browser tool and the PHP API client class, please use the donate button below. All donations go to the project maintainer.
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
 
 ### Features
 The UniFi API browser tool offers the following features:
@@ -88,19 +88,6 @@ The UniFi API browser tool offers the following features:
 
 Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
-### Credits
-The PHP API client that comes bundled with this tool is based on the work done by the following developers:
-- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
-- fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
-
-Other included libraries:
-- Bootstrap (version 3.3.7) http://getbootstrap.com
-- Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome
-- jQuery (version 2.2.4) https://jquery.com
-- jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
-- Kint (version 2.1.2) http://kint-php.github.io/kint
-
 ### Requirements
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
@@ -125,6 +112,19 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 ### Updates
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
 
+### Credits
+The PHP API client that comes bundled with this tool is based on the work done by the following developers:
+- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
+- fbagnol: https://github.com/fbagnol/class.unifi.php
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
+
+Other included libraries:
+- Bootstrap (version 3.3.7) http://getbootstrap.com
+- Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome
+- jQuery (version 2.2.4) https://jquery.com
+- jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
+- Kint (version 2.1.2) http://kint-php.github.io/kint
+
 ### Security notice
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the UniFi Controller!
 
@@ -133,20 +133,20 @@ Here are a couple of screenshots of the tool in action.
 
 The controller selection dropdown menu:
 
-![alt tag](https://user-images.githubusercontent.com/12016131/29446799-7081ad00-83ee-11e7-93df-37f31fb28391.PNG "Controller selection")
+![alt text](https://user-images.githubusercontent.com/12016131/29446799-7081ad00-83ee-11e7-93df-37f31fb28391.PNG "Controller selection")
 
 The site selection dropdown menu:
 
-![alt tag](https://user-images.githubusercontent.com/12016131/29446798-707f17a2-83ee-11e7-8ea7-c273862787f4.PNG "Site selection")
+![alt text](https://user-images.githubusercontent.com/12016131/29446798-707f17a2-83ee-11e7-8ea7-c273862787f4.PNG "Site selection")
 
 Showing the online device data collection using the default Bootstrap theme:
 
-![alt tag](https://user-images.githubusercontent.com/12016131/29446796-7077a76a-83ee-11e7-9b96-aa58209e572d.PNG "Online device collection")
+![alt text](https://user-images.githubusercontent.com/12016131/29446796-7077a76a-83ee-11e7-9b96-aa58209e572d.PNG "Online device collection")
 
 With one of the Bootswatch themes selected:
 
-![alt tag](https://user-images.githubusercontent.com/12016131/29446800-708476d4-83ee-11e7-9cfd-c6e18f02a217.PNG "Dark theme selected")
+![alt text](https://user-images.githubusercontent.com/12016131/29446800-708476d4-83ee-11e7-9cfd-c6e18f02a217.PNG "Dark theme selected")
 
 The "About" modal:
 
-![alt tag](https://user-images.githubusercontent.com/12016131/29446797-707d1e02-83ee-11e7-8c4a-a80ad08a72a0.PNG "About modal")
+![alt text](https://user-images.githubusercontent.com/12016131/29446797-707d1e02-83ee-11e7-8c4a-a80ad08a72a0.PNG "About modal")
