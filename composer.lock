@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4c8dabe994dc86394e2893cf347639ca",
-    "content-hash": "fd05e8c81881169ac60bffe337500634",
+    "content-hash": "97497a9312d7158e0ccd8ce5c7358d63",
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
@@ -52,7 +51,7 @@
                 "ubiquiti",
                 "unifi"
             ],
-            "time": "2017-09-14 10:15:21"
+            "time": "2017-09-14T10:15:21+00:00"
         },
         {
             "name": "kint-php/kint",
@@ -110,7 +109,7 @@
                 "kint",
                 "php"
             ],
-            "time": "2017-09-06 17:46:03"
+            "time": "2017-09-06T17:46:03+00:00"
         }
     ],
     "packages-dev": [],

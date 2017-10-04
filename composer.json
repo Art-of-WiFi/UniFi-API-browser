@@ -1,6 +1,6 @@
 {
-    "require": {
-        "art-of-wifi/unifi-api-client": "^1.1",
-        "kint-php/kint": "2.2"
-    }
+	"require": {
+		"art-of-wifi/unifi-api-client": "^1.1",
+		"kint-php/kint": "^2.2"
+	}
 }
