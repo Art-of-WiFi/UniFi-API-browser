@@ -1,0 +1,73 @@
+{
+    "name": "kint-php/kint",
+    "description": "Kint - debugging tool for PHP developers",
+    "keywords": ["kint", "php", "debug"],
+    "type": "library",
+    "homepage": "https://kint-php.github.io/kint/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonathan Vollebregt",
+            "homepage": "https://github.com/jnvsor"
+        },
+        {
+            "name": "Rokas Šleinius",
+            "homepage": "https://github.com/raveren"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://github.com/kint-php/kint/graphs/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.1.2"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.0",
+        "phpunit/phpunit": "^4.0",
+        "symfony/finder": "^2.6"
+    },
+    "autoload": {
+        "files": ["init.php"],
+        "classmap": ["src/"]
+    },
+    "autoload-dev": {
+        "classmap": ["tests/"]
+    },
+    "config": {
+        "platform": {
+            "php": "5.3.6"
+        }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "npm install",
+            "bundler install --deployment"
+        ],
+        "post-install-cmd": "@post-update-cmd",
+        "clean": [
+            "rm -rf resources/compiled/",
+            "rm -rf build/"
+        ],
+        "format": [
+            "@format:php",
+            "@format:js",
+            "@format:sass"
+        ],
+        "format:php": "php-cs-fixer fix",
+        "format:js": "npm run format:js",
+        "format:sass": "bundler exec sass-convert -RiF scss -T scss resources/sass/",
+        "build": [
+            "@build:sass",
+            "@build:js",
+            "@build:php"
+        ],
+        "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
+        "build:js": "npm run build:js",
+        "build:php": "php ./build.php"
+    },
+    "suggests": {
+        "kint-php/kint-twig": "Provides d() and s() functions in twig templates",
+        "kint-php/kint-js": "Provides a simplified dump to console.log()"
+    }
+}

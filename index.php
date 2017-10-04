@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.21
+ * VERSION: 1.0.23
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,8 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.21');
+define('API_BROWSER_VERSION', '1.0.23');
+define('API_CLASS_VERSION', get_client_version());
 
 /**
  * check whether the PHP curl module is available
@@ -83,15 +84,14 @@ if (!is_readable('config.php')) {
 }
 
 /**
- * load the UniFi API client class
+ * load the UniFi API client and Kint classes using composer autoloader
  */
-require_once('phpapi/class.unifi.php');
+require('vendor/autoload.php');
 
 /**
- * load the Kint class and set relevant options
+ * set relevant Kint options
  * more info on Kint usage: http://kint-php.github.io/kint/
  */
-require_once('kint/kint.php');
 Kint::$display_called_from = false;
 
 /**
@@ -238,7 +238,7 @@ if (isset($_SESSION['controller'])) {
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
      */
-    $unifidata      = new UnifiApi($controller['user'], $controller['password'], $controller['url'], $site_id);
+    $unifidata      = new UniFi_API\Client($controller['user'], $controller['password'], $controller['url'], $site_id);
     $set_debug_mode = $unifidata->set_debug(trim($debug));
     $loginresults   = $unifidata->login();
 
@@ -551,6 +551,28 @@ function print_output($output_format, $data)
 function sites_sort($site_a, $site_b)
 {
     return strcmp($site_a->desc, $site_b->desc);
+}
+
+/**
+ * function which returns the version of the included API client class by
+ * extracting it from the composer.lock file
+ */
+function get_client_version()
+{
+    if (is_readable('composer.lock')) {
+        $composer_lock = file_get_contents('composer.lock');
+        $json_decoded = json_decode($composer_lock, true);
+
+        if (isset($json_decoded['packages'])) {
+            foreach ($json_decoded['packages'] as $package) {
+                if($package['name'] === 'art-of-wifi/unifi-api-client') {
+                   return substr($package['version'], 1);
+                }
+            }
+        }
+    }
+
+    return 'unknown';
 }
 ?>
 <!DOCTYPE html>

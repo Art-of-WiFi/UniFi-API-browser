@@ -1,50 +1,25 @@
 <?php
 /**
- * UniFi PHP API client
+ * This file is part of the art-of-wifi/unifi-api-client package
  *
- * This UniFi API client comes bundled with the UniFi API Browser tool and is based on the work done by
- * the following developers:
+ * This UniFi API client is based on the work done by the following developers:
  *    domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
  *    fbagnol: https://github.com/fbagnol/class.unifi.php
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
- * VERSION: 1.1.15
- *
- * NOTES:
- * - a version of this class is available as an independant package which can be installed using composer:
- *   https://github.com/Art-of-WiFi/UniFi-API-client
- * - this class will only work with UniFi Controller versions 4.x and 5.x. There are no checks to prevent
- *   you from trying to use it with other versions of the UniFi Controller.
- *
- * IMPORTANT CHANGES:
- * - function/method get_vouchers() has been removed and has been replaced by stat_voucher()
- * as of version 1.1.2:
- * - functions/methods unset_locate_ap() and set_locate_ap() have deprecated and replaced
- *   by locate_ap(), but are still available as alias.
- * - functions/methods site_ledson() and site_ledsoff() have deprecated and replaced
- *   by site_leds(), but are still available as alias.
- * as of version 1.1.5:
- * - list_devices() function/method replaces list_aps which is still available as alias
- * - changed class name from unifiapi to UnifiApi (StudlyCaps)
- * as of version 1.1.13:
- * - all public properties have changed to public properties, please use the appropriate
- *   getter and setter methods instead.
- * - getcookie() method/function has been renamed to get_cookie() for consistency
- * as of version 1.1.15:
- * - renamed all functions/methods named add_*() to create_*()
- *
- * ------------------------------------------------------------------------------------
- *
- * Copyright (c) 2017, Art of WiFi
+ * Copyright (c) 2017, Art of WiFi <info@artofwifi.net>
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
- *
  */
-define('API_CLASS_VERSION', '1.1.15');
 
-class UnifiApi
+namespace UniFi_API;
+
+/**
+ * the UniFi API client class
+ */
+class Client
 {
     /**
      * private properties
@@ -196,13 +171,11 @@ class UnifiApi
      */
     public function set_site($site)
     {
-
-        if (strlen($site) === 8 || $site === 'default') {
+        if (strlen($site) !== 8 && $site !== 'default' && $this->debug) {
             error_log('The provided (short) site name is probably incorrect');
         }
 
         $this->site = $site;
-
         return $this->site;
     }
 
