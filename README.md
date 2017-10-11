@@ -17,7 +17,7 @@ You will find examples and detailed instructions there.
 
 Please keep the following in mind:
 - the API Browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.5.20 has been confirmed to work)
+- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
@@ -116,7 +116,7 @@ If you have installed the tool using the `git clone` command, you can install up
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
+- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.6.18-8261dc5066/unifi_sh_api
 
 Other included libraries:
 - Bootstrap (version 3.3.7) http://getbootstrap.com

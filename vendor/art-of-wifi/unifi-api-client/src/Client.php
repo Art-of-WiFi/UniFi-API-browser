@@ -24,18 +24,33 @@ class Client
     /**
      * private properties
      */
-    private $baseurl            = 'https://127.0.0.1:8443';
-    private $site               = 'default';
-    private $version            = '5.4.16';
-    private $debug              = false;
-    private $is_loggedin        = false;
-    private $cookies            = '';
-    private $request_type       = 'POST';
-    private $connect_timeout    = 10;
-    private $last_results_raw   = null;
-    private $last_error_message = null;
+    private $baseurl              = 'https://127.0.0.1:8443';
+    private $site                 = 'default';
+    private $version              = '5.4.16';
+    private $debug                = false;
+    private $is_loggedin          = false;
+    private $cookies              = '';
+    private $request_type         = 'POST';
+    private $connect_timeout      = 10;
+    private $last_results_raw     = null;
+    private $last_error_message   = null;
+    private $curl_ssl_verify_peer = false;
+    private $curl_ssl_verify_host = false;
 
-    function __construct($user, $password, $baseurl = '', $site = '', $version = '')
+    /**
+     * Construct an instance of the UniFi API client class
+     * ---------------------------------------------------
+     * return a new class instance
+     * required parameter <user>       = string; user name to use when connecting to the UniFi controller
+     * required parameter <password>   = string; password to use when connecting to the UniFi controller
+     * optional parameter <baseurl>    = string; base URL of the UniFi controller, must include "https://" prefix and port suffix (:8443)
+     * optional parameter <site>       = string; short site name to access, defaults to "default"
+     * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
+     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, true is recommended for
+     *                                   production environments to prevent potential MitM attacks, default is to not validate the
+     *                                   controller certificate
+     */
+    function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -47,20 +62,14 @@ class Client
         if (!empty($baseurl)) $this->baseurl = trim($baseurl);
         if (!empty($site)) $this->site       = trim($site);
         if (!empty($version)) $this->version = trim($version);
-
-        if (isset($_SESSION['unificookie'])) {
-            $this->cookies = $_SESSION['unificookie'];
+        if ($ssl_verify === true) {
+            $this->curl_ssl_verify_peer = true;
+            $this->curl_ssl_verify_host = 2;
         }
 
-        $base_url_components = parse_url($this->baseurl);
-
-        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
-            trigger_error('The URL provided is incomplete!');
-        }
-
-        if (strlen($this->site) !== 8 && $this->site !== 'default' && $this->debug) {
-            error_log('The provided (short) site name is probably incorrect');
-        }
+        $this->check_base_url();
+        $this->check_site($this->site);
+        $this->update_unificookie();
     }
 
     function __destruct()
@@ -82,12 +91,9 @@ class Client
     public function login()
     {
         /**
-         * if user has $_SESSION['unificookie'] set, skip the login ;)
+         * if user has $_SESSION['unificookie'] set, skip the login
          */
-        if (isset($_SESSION['unificookie'])) {
-            $this->is_loggedin = true;
-            return $this->is_loggedin;
-        }
+        if (isset($_SESSION['unificookie'])) return $this->is_loggedin = true;
 
         $ch = $this->get_curl_obj();
 
@@ -101,9 +107,7 @@ class Client
          */
         $content = curl_exec($ch);
 
-        if (curl_errno($ch)) {
-            trigger_error('cURL error: '.curl_error($ch));
-        }
+        if (curl_errno($ch)) trigger_error('cURL error: '.curl_error($ch));
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -124,13 +128,12 @@ class Client
         curl_close ($ch);
 
         preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
+
         if (isset($results[1])) {
             $this->cookies = implode(';', $results[1]);
             if (!empty($body)) {
                 if (($code >= 200) && ($code < 400)) {
-                    if (strpos($this->cookies, 'unifises') !== false) {
-                        $this->is_loggedin = true;
-                    }
+                    if (strpos($this->cookies, 'unifises') !== false) return $this->is_loggedin = true;
                 }
 
                 if ($code === 400) {
@@ -140,7 +143,7 @@ class Client
             }
         }
 
-        return $this->is_loggedin;
+        return false;
     }
 
     /**
@@ -171,11 +174,8 @@ class Client
      */
     public function set_site($site)
     {
-        if (strlen($site) !== 8 && $site !== 'default' && $this->debug) {
-            error_log('The provided (short) site name is probably incorrect');
-        }
-
         $this->site = $site;
+        $this->check_site($this->site);
         return $this->site;
     }
 
@@ -218,10 +218,7 @@ class Client
     public function get_last_results_raw($return_json = false)
     {
         if ($this->last_results_raw !== null) {
-            if ($return_json) {
-                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
-            }
-
+            if ($return_json) return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             return $this->last_results_raw;
         }
 
@@ -235,10 +232,7 @@ class Client
      */
     public function get_last_error_message()
     {
-        if ($this->last_error_message  !== null) {
-            return $this->last_error_message;
-        }
-
+        if ($this->last_error_message !== null) return $this->last_error_message;
         return false;
     }
 
@@ -275,7 +269,7 @@ class Client
         $json = ['cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes];
 
         /**
-         * if we have received values for up/down/MBytes we append them to the payload array to be submitted
+         * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
         if (isset($up))     $json['up']     = $up;
         if (isset($down))   $json['down']   = $down;
@@ -347,8 +341,8 @@ class Client
     }
 
     /**
-     * Add/modify a client device note
-     * -------------------------------
+     * Add/modify/remove a client device note
+     * --------------------------------------
      * return true on success
      * required parameter <user_id> = id of the user device to be modified
      * optional parameter <note>    = note to be applied to the user device
@@ -366,14 +360,14 @@ class Client
     }
 
     /**
-     * Add/modify a client device name
-     * -------------------------------
+     * Add/modify/remove a client device name
+     * --------------------------------------
      * return true on success
-     * required parameter <user_id> = id of the user device to be modified
-     * optional parameter <name>    = name to be applied to the user device
+     * required parameter <user_id> = id of the client device to be modified
+     * optional parameter <name>    = name to be applied to the client device
      *
      * NOTES:
-     * - when name is empty or not set, the existing name for the user will be removed
+     * - when name is empty or not set, the existing name for the client device will be removed
      */
     public function set_sta_name($user_id, $name = null)
     {
@@ -381,6 +375,52 @@ class Client
         $json            = json_encode(['name' => $name]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * 5 minutes site stats method
+     * ---------------------------
+     * returns an array of 5 minutes stats objects for the current site
+     * optional parameter <start> = Unix timestamp in seconds
+     * optional parameter <end>   = Unix timestamp in seconds
+     *
+     * NOTES:
+     * - defaults to the past 12 hours
+     * - this function/method is only supported on controller versions 5.5.* and later
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
+     */
+    public function stat_5minutes_site($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end             = is_null($end) ? ((time())*1000) : $end;
+        $start           = is_null($start) ? $end-(12*3600*1000) : $start;
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/5minutes.site', 'json='.$json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Hourly site stats method
+     * ------------------------
+     * returns an array of hourly stats objects for the current site
+     * optional parameter <start> = Unix timestamp in seconds
+     * optional parameter <end>   = Unix timestamp in seconds
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - "bytes" are no longer returned with controller version 4.9.1 and later
+     */
+    public function stat_hourly_site($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end             = is_null($end) ? ((time())*1000) : $end;
+        $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
+        return $this->process_response($content_decoded);
     }
 
     /**
@@ -406,24 +446,28 @@ class Client
     }
 
     /**
-     * Hourly site stats method
-     * ------------------------
-     * returns an array of hourly stats objects for the current site
+     * 5 minutes stats method for a single access point or all access points
+     * ---------------------------------------------------------------------
+     * returns an array of 5 minutes stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
-     * - defaults to the past 7*24 hours
-     * - "bytes" are no longer returned with controller version 4.9.1 and later
+     * - defaults to the past 12 hours
+     * - this function/method is only supported on controller versions 5.5.* and later
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
      */
-    public function stat_hourly_site($start = null, $end = null)
+    public function stat_5minutes_aps($start = null, $end = null, $mac = null)
     {
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
-        $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
-        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
+        $start           = is_null($start) ? $end-(12*3600*1000) : $start;
+        $json            = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = $mac;
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/5minutes.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
 
@@ -478,7 +522,7 @@ class Client
     /**
      * Show all login sessions
      * -----------------------
-     * returns an array of login session objects for all devices
+     * returns an array of login session objects for all devices or a single device
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = client MAC address to return sessions for (can only be used when start and end are also provided)
@@ -605,8 +649,8 @@ class Client
     }
 
     /**
-     * Assign user device to another group
-     * -----------------------------------
+     * Assign client device to another group
+     * -------------------------------------
      * return true on success
      * required parameter <user_id>  = id of the user device to be modified
      * required parameter <group_id> = id of the user group to assign user to
@@ -685,18 +729,21 @@ class Client
      * List dashboard metrics
      * ----------------------
      * returns an array of dashboard metric objects (available since controller version 4.9.1.alpha)
+     * optional parameter <five_minutes> = boolean; if true, return stats based on 5 minute intervals,
+     *                                     returns hourly stats by default (supported on controller versions 5.5.* and higher)
      */
-    public function list_dashboard()
+    public function list_dashboard($five_minutes = false)
     {
         if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dashboard'));
+        $url_suffix = $five_minutes ? '?scale=5minutes' : null;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dashboard'.$url_suffix));
         return $this->process_response($content_decoded);
     }
 
     /**
-     * List user devices
-     * -----------------
-     * returns an array of known user device objects
+     * List client devices
+     * -------------------
+     * returns an array of known client device objects
      */
     public function list_users()
     {
@@ -924,7 +971,7 @@ class Client
     /**
      * Create voucher(s)
      * -----------------
-     * returns an array of voucher codes (without the dash "-" in the middle) by calling the stat_voucher method
+     * returns an array containing a single object which contains the create_time(stamp) of the voucher(s) created
      * required parameter <minutes> = minutes the voucher is valid after activation (expiration time)
      * optional parameter <count>   = number of vouchers to create, default value is 1
      * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use,
@@ -933,6 +980,8 @@ class Client
      * optional parameter <up>      = upload speed limit in kbps
      * optional parameter <down>    = download speed limit in kbps
      * optional parameter <MBytes>  = data transfer limit in MB
+     *
+     * NOTES: please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
      */
     public function create_voucher($minutes, $count = 1, $quota = '0', $note = null, $up = null, $down = null, $MBytes = null)
     {
@@ -1730,6 +1779,11 @@ class Client
      */
     public function list_aps($device_mac = null)
     {
+        trigger_error(
+            'Function list_aps() has been deprecated, use list_devices() instead.',
+            E_USER_DEPRECATED
+        );
+
         return $this->list_devices($device_mac);
     }
 
@@ -1808,23 +1862,15 @@ class Client
         if (isset($response->meta->rc)) {
             if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
-                if (is_array($response->data)) {
-                    return $response->data;
-                }
-
+                if (is_array($response->data)) return $response->data;
                 return true;
             } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
                  * set $this->set last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                }
-
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: '.$this->last_error_message);
-                }
+                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
+                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
             }
         }
 
@@ -1846,17 +1892,42 @@ class Client
                  * we have an error:
                  * set $this->last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                }
-
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: '.$this->last_error_message);
-                }
+                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
+                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
             }
         }
 
         return false;
+    }
+
+    /**
+     * Check the submitted base URL
+     */
+    private function check_base_url()
+    {
+        $base_url_components = parse_url($this->baseurl);
+
+        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
+            trigger_error('The URL provided is incomplete!');
+        }
+    }
+
+    /**
+     * Check the (short) site name
+     */
+    private function check_site($site)
+    {
+        if ($this->debug && strlen($site) !== 8 && $site !== 'default') {
+            error_log('The provided (short) site name is probably incorrect');
+        }
+    }
+
+    /**
+     * Update the unificookie
+     */
+    private function update_unificookie()
+    {
+        if (isset($_SESSION['unificookie'])) $this->cookies = $_SESSION['unificookie'];
     }
 
     /**
@@ -1876,12 +1947,9 @@ class Client
             } else {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             }
-
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
-            if ($this->request_type === 'DELETE') {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-            }
+            if ($this->request_type === 'DELETE') curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
 
         /**
@@ -1896,21 +1964,19 @@ class Client
         /**
          * has the session timed out?
          */
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         $json_decoded_content = json_decode($content, true);
 
-        if ($httpcode == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-            if ($this->debug) {
-                error_log('cURL debug: Needed reconnect to UniFi Controller');
-            }
+        if ($http_code == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
+            if ($this->debug) error_log('cURL debug: Needed to reconnect to UniFi Controller');
 
             /**
              * explicitly unset the old cookie now
              */
             if (isset($_SESSION['unificookie'])) {
                 unset($_SESSION['unificookie']);
-                $have_cookie_in_use = 1;
+                $no_cookie_in_use = 1;
             }
 
             $this->login();
@@ -1924,9 +1990,9 @@ class Client
                 /**
                  * setup the cookie for the user within $_SESSION
                  */
-                if (isset($have_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
+                if (isset($no_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
                     $_SESSION['unificookie'] = $this->cookies;
-                    unset($have_cookie_in_use);
+                    unset($no_cookie_in_use);
                 }
 
                 return $this->exec_curl($url, $data);
@@ -1957,20 +2023,18 @@ class Client
     }
 
     /**
-     * get the cURL object
+     * Get the cURL object
      */
     private function get_curl_obj()
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
-        if ($this->debug) {
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-        }
+        if ($this->debug) curl_setopt($ch, CURLOPT_VERBOSE, true);
 
         if ($this->cookies != '') {
             curl_setopt($ch, CURLOPT_COOKIESESSION, true);

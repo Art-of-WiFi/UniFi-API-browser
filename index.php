@@ -3,14 +3,14 @@
  * UniFi API browser
  *
  * This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API,
- * written in PHP, JavaScript and the Bootstrap CSS framework.
+ * and is developed with PHP, JavaScript and the Bootstrap CSS framework.
  *
  * Please keep the following in mind:
  * - not all data collections/API endpoints are supported (yet), see the list of
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.23
+ * VERSION: 1.0.24
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,13 +20,13 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.23');
+define('API_BROWSER_VERSION', '1.0.24');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
  * check whether the PHP curl module is available
- * if yes, collect cURL version details for the info modal
- * if not, stop and display an error message
+ * - if yes, collect cURL version details for the info modal
+ * - if not, stop and display an error message
  */
 if (function_exists('curl_version')) {
     $curl_info    = curl_version();
@@ -41,9 +41,8 @@ if (function_exists('curl_version')) {
 session_start();
 
 /**
- * check whether user has requested to clear (force expiry
- * ) the PHP session
- * - this function can be useful when login errors occur, mostly after upgrades or incorrect credential changes
+ * check whether user has requested to clear (force expiry) the PHP session
+ * - this feature can be useful when login errors occur, mostly after upgrades or credential changes
  */
 if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
     $_SESSION = [];
@@ -58,7 +57,7 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
 $time_start = microtime(true);
 
 /**
- * Declare variables which are required later on together with their default values
+ * declare variables which are required later on together with their default values
  */
 $controller_id = '';
 $action        = '';
@@ -87,6 +86,7 @@ if (!is_readable('config.php')) {
  * load the UniFi API client and Kint classes using composer autoloader
  */
 require('vendor/autoload.php');
+require('../UniFi-API-client/src/Client.php');
 
 /**
  * set relevant Kint options
@@ -115,11 +115,11 @@ $_SESSION['last_activity'] = time();
  * process the GET variables and store them in the $_SESSION array
  * if a GET variable is not set, get the values from the $_SESSION array (if available)
  *
- * Process in this order:
+ * process in this order:
  * - controller_id
- * Only process this after controller_id is set:
+ * only process this after controller_id is set:
  * - site_id
- * Only process these after site_id is set:
+ * only process these after site_id is set:
  * - action
  * - output_format
  * - theme
@@ -231,7 +231,7 @@ if (!isset($_SESSION['controller'])) {
 }
 
 /**
- * Do this when a controller has been selected and was stored in the $_SESSION array
+ * do this when a controller has been selected and was stored in the $_SESSION array
  */
 if (isset($_SESSION['controller'])) {
     /**
@@ -255,12 +255,12 @@ if (isset($_SESSION['controller'])) {
         $detected_controller_version = 'undetected';
     } else {
         /**
-         * Remember authentication cookie to the controller.
+         * remember authentication cookie to the controller.
          */
         $_SESSION['unificookie'] = $unifidata->get_cookie();
 
         /**
-         * Get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
+         * get the list of sites managed by the UniFi controller (if not already stored in the $_SESSION array)
          */
         if (!isset($_SESSION['sites']) || empty($_SESSION['sites'])) {
             $sites = $unifidata->list_sites();
@@ -281,7 +281,7 @@ if (isset($_SESSION['controller'])) {
         }
 
         /**
-         * Get the version of the UniFi controller (if not already stored in the $_SESSION array or when 'undetected')
+         * get the version of the UniFi controller (if not already stored in the $_SESSION array or when 'undetected')
          */
         if (!isset($_SESSION['detected_controller_version']) || $_SESSION['detected_controller_version'] === 'undetected') {
             $site_info = $unifidata->stat_sysinfo();
@@ -331,6 +331,10 @@ if (isset($unifidata)) {
             $selection = 'list usergroups';
             $data      = $unifidata->list_usergroups();
             break;
+        case 'stat_5minutes_site':
+            $selection = '5 minutes site stats';
+            $data      = $unifidata->stat_5minutes_site();
+            break;
         case 'stat_hourly_site':
             $selection = 'hourly site stats';
             $data      = $unifidata->stat_hourly_site();
@@ -338,6 +342,10 @@ if (isset($unifidata)) {
         case 'stat_daily_site':
             $selection = 'daily site stats';
             $data      = $unifidata->stat_daily_site();
+            break;
+        case 'stat_5minutes_aps':
+            $selection = '5 minutes ap stats';
+            $data      = $unifidata->stat_5minutes_aps();
             break;
         case 'stat_hourly_aps':
             $selection = 'hourly ap stats';
@@ -399,8 +407,12 @@ if (isset($unifidata)) {
             $selection = 'site health metrics';
             $data      = $unifidata->list_health();
             break;
-        case 'list_dashboard':
-            $selection = 'site dashboard metrics';
+        case 'list_5minutes_dashboard':
+            $selection = '5 minutes site dashboard metrics';
+            $data      = $unifidata->list_dashboard(true);
+            break;
+        case 'list_hourly_dashboard':
+            $selection = 'hourly site dashboard metrics';
             $data      = $unifidata->list_dashboard();
             break;
         case 'list_settings':
@@ -514,12 +526,13 @@ $remain_perc = 100 - $login_perc-$load_perc;
 /**
  * shared functions
  */
+
+/**
+ * function to print the output
+ * switch depending on the selected $output_format
+ */
 function print_output($output_format, $data)
 {
-    /**
-     * function to print the output
-     * switch depending on the selected $output_format
-     */
     switch ($output_format) {
         case 'json':
             echo json_encode($data, JSON_PRETTY_PRINT);
@@ -582,15 +595,15 @@ function get_client_version()
     <meta charset="utf-8">
     <title>UniFi API browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <!-- Latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
+    <!-- latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- Load the appropriate Bootstrap CSS file from CDN -->
+    <!-- load the appropriate Bootstrap CSS file from CDN -->
     <link rel="stylesheet" href="<?php echo $css_url ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-    <!-- Load the base64 encoded favicon file  -->
+    <!-- load the base64 encoded favicon file  -->
     <link rel="icon" type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAADgpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gown/4KQL/+CkDP/enQD/8NOK///////y2Zr/358A/9+fAP/fnwD/358A/9+gAP/foAH/36EB/9+gAP/fnwD/36AA/9+gAv/dmQD/79CB/////////v3//vz4/9+gAP/foAD/36ED/9+hA//engD/3ZsA/92bAP/enAD/36EC/9+hBP/dmgD/8dSM///////+/Pj///////Pbnv/foAD/36EC/96dAf/dmwD/46sc/+i6Rf/ovEr/5bAr/9+fBP/dmgD/8deS///////+/Pb///////LYlf/enAD/36ED/92bAP/jrSf/9eKw//779v/////////////////36MH/9N+q///////+/fn///////HXkv/dmwD/36AD/92bAP/mtj///vv0//////////7////////////////////////////+/fv///////DUiv/dmgD/36AD/9+hAf/iqBv/+/Ti///////+/fr/8tiX/+e3Pf/mszT/7cpx//z36P///v3///////Pbn//cmAD/36EF/9+gAf/foAD/8dWR////////////68Vi/9yWAP/enAL/3pwC/9yXAP/krij//Pbn///////36MP/358A/9+gAf/foAD/36AA//ry2///////9uW7/92aAP/gogX/36ED/9+hA//gowj/3JcA/+3Jc/////////77/+SwK//enAD/36EC/9+gAP/+/Pf//////+7Of//dmgD/4KIE/9+gAP/foAD/36EC/96cAP/lszf////////////ou0n/3ZsA/9+hA//foAD//frz///////w0or/3ZkA/+CiBf/foAD/36AA/9+hA//enAD/5rZA////////////57lE/92bAP/foQP/36AA//jry///////+u/U/9+fB//engD/4KIF/+CiBf/gogX/3JYA//HWk////////frx/+OrHv/enQD/36EC/9+gAP/syG3////////////z253/358C/92ZAP/dmgL/3ZoA/+vEYP/+/fv///////Xgrv/dmwD/36EC/9+gAP/foAD/358C//fmvP////////////rw1v/w0ob/7s16//bluv///v3///////368f/krir/3p0A/9+hAv/foAD/36AA/96eAP/hpRP/9+jA/////////v3///////////////7///////z36f/mtj7/3ZsA/9+hAv/foAD/36AA/9+gAP/foQH/3p4B/96eBf/tyWz/+e3Q//779f/+/fn/+/Pg//HXkv/iqBr/3ZsA/9+hA//foAD/36AA/9+gAP/foAD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
 
     <!-- custom CSS styling -->
@@ -758,6 +771,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
                             <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
@@ -766,15 +780,18 @@ function get_client_version()
                             <?php } ?>
                             <!-- /all sites stats -->
                             <li role="separator" class="divider"></li>
+                            <li id="stat_5minutes_aps"><a href="?action=stat_5minutes_aps">5 minutes access point stats</a></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
                             <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
                             <li role="separator" class="divider"></li>
-                            <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
                             <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
-                                <li id="list_dashboard"><a href="?action=list_dashboard">site dashboard metrics</a></li>
+                                <li id="list_5minutes_dashboard"><a href="?action=list_5minutes_dashboard">5 minutes site dashboard metrics</a></li>
+                                <li id="list_hourly_dashboard"><a href="?action=list_hourly_dashboard">hourly site dashboard metrics</a></li>
+                                <li role="separator" class="divider"></li>
                             <?php } ?>
                             <!-- /site dashboard metrics -->
+                            <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
                             <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
                             <li id="list_dpi_stats"><a href="?action=list_dpi_stats">DPI stats</a></li>
                         </ul>
@@ -859,6 +876,7 @@ function get_client_version()
                         <li id="sandstone"><a href="?theme=sandstone">Sandstone</a></li>
                         <li id="simplex"><a href="?theme=simplex">Simplex</a></li>
                         <li id="slate"><a href="?theme=slate">Slate</a></li>
+                        <li id="solar"><a href="?theme=solar">Solar</a></li>
                         <li id="spacelab"><a href="?theme=spacelab">Spacelab</a></li>
                         <li id="superhero"><a href="?theme=superhero">Superhero</a></li>
                         <li id="united"><a href="?theme=united">United</a></li>
@@ -928,10 +946,10 @@ function get_client_version()
     <?php } ?>
     <!-- /data-panel -->
 </div>
-<!-- Back to Top button element -->
+<!-- back-to-top button element -->
 <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" title="Back to top" data-toggle="tooltip" data-placement="left"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
-<!-- /Back to Top button element -->
-<!-- Modal -->
+<!-- /back-to-top button element -->
+<!-- About modal -->
 <div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -987,7 +1005,7 @@ function get_client_version()
         </div>
     </div>
 </div>
-<!-- Latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
+<!-- latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha256-yB+xHoEi5PoOnEAgHNbRMIbN4cNtOXAmBzkhNE/tQlI=" crossorigin="anonymous"></script>
