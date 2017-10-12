@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.24
+ * VERSION: 1.0.25
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,7 +20,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.24');
+define('API_BROWSER_VERSION', '1.0.25');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -68,6 +68,7 @@ $data          = '';
 $objects_count = '';
 $alert_message = '';
 $output_format = 'json';
+$debug         = false;
 
 /**
  * load the configuration file
@@ -86,7 +87,6 @@ if (!is_readable('config.php')) {
  * load the UniFi API client and Kint classes using composer autoloader
  */
 require('vendor/autoload.php');
-require('../UniFi-API-client/src/Client.php');
 
 /**
  * set relevant Kint options
@@ -239,7 +239,7 @@ if (isset($_SESSION['controller'])) {
      * - if an error occurs during the login process, an alert is displayed on the page
      */
     $unifidata      = new UniFi_API\Client($controller['user'], $controller['password'], $controller['url'], $site_id);
-    $set_debug_mode = $unifidata->set_debug(trim($debug));
+    $set_debug_mode = $unifidata->set_debug($debug);
     $loginresults   = $unifidata->login();
 
     if ($loginresults === 400) {
@@ -850,6 +850,7 @@ function get_client_version()
                             <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
                             <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
                             <li id="count_active_alarms"><a href="?action=count_active_alarms">count active alarms</a></li>
+                            <li role="separator" class="divider"></li>
                             <li id="list_events"><a href="?action=list_events">list events</a></li>
                         </ul>
                     </li>
