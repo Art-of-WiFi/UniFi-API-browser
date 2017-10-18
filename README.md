@@ -52,6 +52,7 @@ The UniFi API browser tool offers the following features:
   - list devices (access points, USG routers and USW switches)
   - list wlan groups
   - list rogue access points
+  - list_known_rogueaps
   - list devices tags (supported on controller version 5.5.19 and higher)
 - Stats
   - hourly site stats

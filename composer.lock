@@ -4,12 +4,12 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4c8dabe994dc86394e2893cf347639ca",
-    "content-hash": "fd05e8c81881169ac60bffe337500634",
+    "hash": "3b9ed2222c5654c689b0596971543279",
+    "content-hash": "40e3afb9b218959612743f404689f2c8",
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "1.1.20",
+            "version": "v1.1.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
