@@ -10,7 +10,7 @@
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
  *
- * VERSION: 1.0.25
+ * VERSION: 1.0.26
  *
  * ------------------------------------------------------------------------------------
  *
@@ -20,11 +20,11 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.25');
+define('API_BROWSER_VERSION', '1.0.26');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
- * check whether the PHP curl module is available
+ * check whether the required PHP curl module is available
  * - if yes, collect cURL version details for the info modal
  * - if not, stop and display an error message
  */
@@ -382,6 +382,10 @@ if (isset($unifidata)) {
         case 'list_rogueaps':
             $selection = 'list rogue access points';
             $data      = $unifidata->list_rogueaps();
+            break;
+        case 'list_known_rogueaps':
+            $selection = 'list known rogue access points';
+            $data      = $unifidata->list_known_rogueaps();
             break;
         case 'list_events':
             $selection = 'list events';
@@ -757,6 +761,7 @@ function get_client_version()
                             <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
                             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
+                            <li id="list_known_rogueaps"><a href="?action=list_known_rogueaps">list known rogue access points</a></li>
                             <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.0') >= 0) { ?>
                                 <li role="separator" class="divider"></li>
