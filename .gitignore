@@ -1,2 +1,4 @@
 # Ignore personal config file
 config.php
+vendor/
+composer.lock
