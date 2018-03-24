@@ -13,7 +13,6 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
  */
-
 namespace UniFi_API;
 
 /**
@@ -24,11 +23,11 @@ class Client
     /**
      * private properties
      */
-    private $baseurl              = 'https://127.0.0.1:8443';
-    private $site                 = 'default';
-    private $version              = '5.4.16';
-    private $debug                = false;
-    private $is_loggedin          = false;
+    protected $baseurl            = 'https://127.0.0.1:8443';
+    protected $site               = 'default';
+    protected $version            = '5.4.16';
+    protected $debug              = false;
+    protected $is_loggedin        = false;
     private $cookies              = '';
     private $request_type         = 'POST';
     private $connect_timeout      = 10;
@@ -43,12 +42,12 @@ class Client
      * return a new class instance
      * required parameter <user>       = string; user name to use when connecting to the UniFi controller
      * required parameter <password>   = string; password to use when connecting to the UniFi controller
-     * optional parameter <baseurl>    = string; base URL of the UniFi controller, must include "https://" prefix and port suffix (:8443)
+     * optional parameter <baseurl>    = string; base URL of the UniFi controller, *must* include "https://" prefix and port suffix (:8443)
      * optional parameter <site>       = string; short site name to access, defaults to "default"
      * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
-     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, true is recommended for
-     *                                   production environments to prevent potential MitM attacks, default is to not validate the
-     *                                   controller certificate
+     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, a value of true is
+     *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
+     *                                   is to not validate the controller certificate
      */
     function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -178,8 +177,8 @@ class Client
      */
     public function set_site($site)
     {
+        $this->check_site($site);
         $this->site = trim($site);
-        $this->check_site($this->site);
         return $this->site;
     }
 
@@ -208,6 +207,16 @@ class Client
 
         trigger_error('Error: the parameter for set_debug() must be boolean');
         return false;
+    }
+
+    /**
+     * Get debug mode
+     * --------------
+     * get the value of private property debug, returns the current boolean value for debug
+     */
+    public function get_debug()
+    {
+        return $this->debug;
     }
 
     /**
@@ -242,6 +251,12 @@ class Client
      * Get Cookie from UniFi Controller
      * --------------------------------
      * returns the UniFi controller cookie
+     *
+     * NOTES:
+     * - when the results from this method are stored in $_SESSION['unificookie'], the class will initially not
+     *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
+     *   overall request considerably. If that subsequent request fails (e.g. cookies have expired), a new login
+     *   is executed automatically and the value of $_SESSION['unificookie'] is updated.
      */
     public function get_cookie()
     {
@@ -467,7 +482,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.ap', 'json='.$json);
         return $this->process_response($response);
@@ -491,7 +506,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.ap', 'json='.$json);
         return $this->process_response($response);
@@ -515,7 +530,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json);
         return $this->process_response($response);
@@ -528,17 +543,19 @@ class Client
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = client MAC address to return sessions for (can only be used when start and end are also provided)
+     * optional parameter <type>  = client type to return sessions for, can be 'all', 'guest' or 'user'; default value is 'all'
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      */
-    public function stat_sessions($start = null, $end = null, $mac = null)
+    public function stat_sessions($start = null, $end = null, $mac = null, $type = 'all')
     {
         if (!$this->is_loggedin) return false;
+        if (!in_array($type, ['all', 'guest', 'user'])) return false;
         $end      = is_null($end) ? time() : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600) : intval($start);
-        $json     = ['type'=> 'all', 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        $json     = ['type'=> $type, 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/session', 'json='.$json);
         return $this->process_response($response);
@@ -864,6 +881,142 @@ class Client
     }
 
     /**
+     * Change a site's name
+     * --------------------
+     * return true on success
+     * required parameter <site_name> = string; the long name for the site
+     *
+     * NOTES: immediately after being changed, the site will be available in the output of the list_sites() function
+     */
+    public function set_site_name($site_name)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['cmd' => 'update-site', 'desc' => $site_name]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site country
+     * ----------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "country" key.
+     *                                Valid country codes can be obtained using the list_country_codes() function/method.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_country($country_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/country/'.trim($country_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site locale
+     * ---------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "locale" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_locale($locale_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/locale/'.trim($locale_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site snmp
+     * -------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "snmp" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_snmp($snmp_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/snmp/'.trim($snmp_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site mgmt
+     * -------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "mgmt" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_mgmt($mgmt_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/mgmt/'.trim($mgmt_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site guest access
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "guest_access" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_guest_access($guest_access_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/guest_access/'.trim($guest_access_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site ntp
+     * ------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "ntp" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_ntp($ntp_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/ntp/'.trim($ntp_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site connectivity
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "connectivity" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_connectivity($connectivity_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/connectivity/'.trim($connectivity_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List admins
      * -----------
      * returns an array containing administrator objects for selected site
@@ -873,6 +1026,18 @@ class Client
         if (!$this->is_loggedin) return false;
         $json     = json_encode(['cmd' => 'get-admins']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * List all admins
+     * ---------------
+     * returns an array containing administrator objects for all sites
+     */
+    public function list_all_admins()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/stat/admin');
         return $this->process_response($response);
     }
 
@@ -889,7 +1054,7 @@ class Client
     }
 
     /**
-     * List sysinfo
+     * Show sysinfo
      * ------------
      * returns an array of known sysinfo data
      */
@@ -901,14 +1066,17 @@ class Client
     }
 
     /**
-     * List controller status
-     * ----------------------
-     * returns an array containing general controller status info
+     * Get controller status
+     * ---------------------
+     * returns true upon success (controller is online)
+     *
+     * NOTES: in order to get useful results (e.g. controller version) you can call get_last_results_raw()
+     * immediately after this method
      */
     public function stat_status()
     {
         $response = $this->exec_curl('/status');
-        return $this->process_response($response);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1070,6 +1238,18 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/current-channel');
+        return $this->process_response($response);
+    }
+
+    /**
+     * List country codes
+     * ------------------
+     * returns an array of available country codes
+     */
+    public function list_country_codes()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/ccode');
         return $this->process_response($response);
     }
 
@@ -1250,6 +1430,9 @@ class Client
      * required parameter <ht>(default=20)
      * required parameter <tx_power_mode>
      * required parameter <tx_power>(default=0)
+     *
+     * NOTES:
+     * - only supported on pre-5.X.X controller versions
      */
     public function set_ap_radiosettings($ap_id, $radio, $channel, $ht, $tx_power_mode, $tx_power)
     {
@@ -1272,7 +1455,7 @@ class Client
      */
     public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id) {
         if (!$this->is_loggedin) return false;
-        if (in_array($wlantype_id, ['ng', 'na'])) return false;
+        if (!in_array($wlantype_id, ['ng', 'na'])) return false;
         $json     = json_encode(['wlan_overrides' => [],'wlangroup_id_'.$wlantype_id => $wlangroup_id]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($device_id),'json='.$json);
         return $this->process_response_boolean($response);
@@ -1321,6 +1504,20 @@ class Client
     }
 
     /**
+     * Update guestlogin settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
+     *                                         object/array structured in the same manner as is returned by list_settings() for the guest_access.
+     */
+    public function set_guestlogin_settings_base($guestlogin_settings) {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode($guestlogin_settings, JSON_UNESCAPED_SLASHES);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * Rename access point
      * -------------------
      * return true on success
@@ -1332,6 +1529,35 @@ class Client
         if (!$this->is_loggedin) return false;
         $json     = json_encode(['name' => $apname]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Move a device to another site
+     * -----------------------------
+     * return true on success
+     * required parameter <mac>     = string; MAC address of the device to move
+     * required parameter <site_id> = 24 char string; _id of the site to move the device to
+     */
+    public function move_device($mac, $site_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['site' => $site_id, 'mac' => $mac, 'cmd' => 'move-device']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Delete a device from the current site
+     * -------------------------------------
+     * return true on success
+     * required parameter <mac> = string; MAC address of the device to delete
+     */
+    public function delete_device($mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['mac' => $mac, 'cmd' => 'delete-device']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
@@ -1360,7 +1586,7 @@ class Client
         if (!$this->is_loggedin) return false;
         $this->request_type = 'POST';
         $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/', 'json='.$json);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf', 'json='.$json);
         return $this->process_response($response);
     }
 
@@ -1499,7 +1725,7 @@ class Client
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
-        $payload = new \stdClass();
+        $payload = (object)[];
         if (!is_null($x_passphrase)) $payload->x_passphrase = trim($x_passphrase);
         if (!is_null($name)) $payload->name = trim($name);
         return $this->set_wlansettings_base($wlan_id, $payload);
@@ -1514,7 +1740,7 @@ class Client
      */
     public function disable_wlan($wlan_id, $disable)
     {
-        $payload          = new \stdClass();
+        $payload          = (object)[];
         $action           = ($disable) ? false : true;
         $payload->enabled = (bool)$action;
         return $this->set_wlansettings_base($wlan_id, $payload);
@@ -1541,14 +1767,14 @@ class Client
      * required parameter <wlan_id>
      * required parameter <mac_filter_policy>  = string, "allow" or "deny"; default MAC policy to apply
      * required parameter <mac_filter_enabled> = boolean; true enables the policy, false disables it
-     * required parameter <macs>               = array; must contain MAC strings to be placed in the MAC filter list,
+     * required parameter <macs>               = array; must contain valid MAC strings to be placed in the MAC filter list,
      *                                           replacing existing values. Existing MAC filter list can be obtained
      *                                           through list_wlanconf().
      */
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
-        if (in_array($mac_filter_policy, ['allow', 'deny'])) return false;
-        $payload                     = new \stdClass();
+        if (!in_array($mac_filter_policy, ['allow', 'deny'])) return false;
+        $payload                     = (object)[];
         $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
         $payload->mac_filter_policy  = $mac_filter_policy;
         $payload->mac_filter_list    = $macs;
@@ -1596,6 +1822,23 @@ class Client
         $url_suffix = ($archived === false) ? '?archived=false' : null;
         $response   = $this->exec_curl('/api/s/'.$this->site.'/cnt/alarm'.$url_suffix);
         return $this->process_response($response);
+    }
+
+    /**
+     * Archive alarms(s)
+     * -----------------
+     * return true on success
+     * optional parameter <alarm_id> = 24 char string; _id of the alarm to archive which can be found with the list_alarms() function,
+     *                                 if not provided, *all* un-archived alarms for the current site will be archived!
+     */
+    public function archive_alarm($alarm_id = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode(['cmd' => 'archive-all-alarms']);
+        if (!is_null($alarm_id)) $json = json_encode(['_id' => $alarm_id, 'cmd' => 'archive-alarm']);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/cmd/evtmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1921,7 +2164,7 @@ class Client
     /**
      * Process regular responses where output is the content of the data array
      */
-    private function process_response($response_json)
+    protected function process_response($response_json)
     {
         $response = json_decode($response_json);
         $this->catch_json_last_error();
@@ -1947,7 +2190,7 @@ class Client
     /**
      * Process responses where output should be boolean (true/false)
      */
-    private function process_response_boolean($response_json)
+    protected function process_response_boolean($response_json)
     {
         $response = json_decode($response_json);
         $this->catch_json_last_error();
@@ -2071,7 +2314,7 @@ class Client
     /**
      * Execute the cURL request
      */
-    private function exec_curl($path, $data = '')
+    protected function exec_curl($path, $data = '')
     {
         $url = $this->baseurl.$path;
 

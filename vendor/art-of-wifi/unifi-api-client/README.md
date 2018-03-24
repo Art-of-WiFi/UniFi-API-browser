@@ -1,21 +1,17 @@
-## UniFi controller API client class
+## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.29 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
-This class can now also be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
-
-### Donations
-
-If you'd like to support further development of this PHP API client class, please use the PayPal donate button below. All donations go to the project maintainer.
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
+This class can be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Methods and functions supported
 
-The class currently supports the following functions/methods to get/post/put/delete data through the UniFi controller API:
+The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API:
+
 - login()
 - logout()
 - adopt_device()
+- archive_alarm()
 - authorize_guest()
 - block_sta()
 - count_alarms()
@@ -26,6 +22,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - create_usergroup()
 - create_voucher()
 - create_wlan()
+- delete_device()
 - delete_network()
 - delete_radius_account()
 - delete_site()
@@ -36,9 +33,11 @@ The class currently supports the following functions/methods to get/post/put/del
 - extend_guest_validity()
 - led_override()
 - list_admins()
+- list_all_admins()
 - list_alarms()
 - list_aps() (deprecated but still available as alias)
 - list_clients()
+- list_country_codes()
 - list_current_channels()
 - list_dashboard()
 - list_devices()
@@ -66,6 +65,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - list_wlan_groups()
 - list_wlanconf()
 - locate_ap()
+- move_device()
 - power_cycle_switch_port()
 - reconnect_sta()
 - rename_ap()
@@ -74,9 +74,18 @@ The class currently supports the following functions/methods to get/post/put/del
 - set_ap_radiosettings()
 - set_device_settings_base()
 - set_guestlogin_settings()
+- set_guestlogin_settings_base()
 - set_locate_ap() (deprecated but still available as alias)
 - set_networksettings_base()
 - set_radius_account_base()
+- set_site_connectivity()
+- set_site_country()
+- set_site_guest_access()
+- set_site_locale()
+- set_site_mgmt()
+- set_site_name()
+- set_site_ntp()
+- set_site_snmp()
 - set_sta_name()
 - set_sta_note()
 - set_usergroup()
@@ -111,24 +120,25 @@ The class currently supports the following functions/methods to get/post/put/del
 - upgrade_device_external()
 
 Internal functions, getters/setters:
+
 - set_debug()
-- set_site()
+- get_debug()
 - set_site()
 - get_site()
 - get_cookie() (renamed from getcookie())
 - get_last_results_raw()
 - get_last_error_message()
 
-Please refer to the source code for more details on each function/method and their parameters.
+Please refer to the source code for more details on the functions/methods and their parameters.
 
 ## Requirements
 
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi controller is running
+- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
 
 ## Installation ##
 
-You can use **Composer**, **Git** or simply **Download the Release** to install the API client class.
+You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
 
 ### Composer
 
@@ -138,6 +148,16 @@ Once composer is installed, simply execute this command from the shell in your p
 
 ```sh
 composer require art-of-wifi/unifi-api-client
+```
+
+ Or you can manually add the package to your composer.json file:
+
+```javascript
+{
+    "require": {
+        "art-of-wifi/unifi-api-client": "^1.1"
+    }
+}
 ```
 
 Finally, be sure to include the autoloader in your code:
@@ -189,18 +209,15 @@ $results          = $unifi_connection->list_alarms(); // returns a PHP array con
 
 Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
 
-### IMPORTANT NOTES:
+#### IMPORTANT NOTES:
 
-In the example above, the last parameter (`true`) that is passed to the constructor, enables validation of the controller's SSL certificate which is otherwise **disabled** by default.
-It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+1. The last parameter (`true`) that is passed to the constructor, enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
----
+2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
 
-In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi controller:
+   `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
-`https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
-
-In this case, `jl3z2shm` is the value required for $site_id.
+   In this case, `jl3z2shm` is the value required for $site_id.
 
 ## Need help or have suggestions?
 
@@ -212,11 +229,11 @@ If you would like to contribute code (improvements), please open an issue and in
 
 ## Credits
 
-This class is largely based on the work done by the following developers:
+This class is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
 - and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.6.18-8261dc5066/unifi_sh_api
 
 ## Important Disclaimer
 
-Many of the functions in this API client class are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi controller API.
+Many of the functions in this API client class are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi Controller API.

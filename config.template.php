@@ -57,4 +57,3 @@ $theme              = 'bootstrap'; // your default theme of choice, pick one fro
                                    // readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
 
 $debug              = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
-?>

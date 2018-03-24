@@ -9,9 +9,6 @@
  * - not all data collections/API endpoints are supported (yet), see the list of
  *   the currently supported data collections/API endpoints in the README.md file
  * - this tool currently supports versions 4.x and 5.x of the UniFi Controller software
- *
- * VERSION: 1.0.26
- *
  * ------------------------------------------------------------------------------------
  *
  * Copyright (c) 2017, Art of WiFi
@@ -20,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.26');
+define('API_BROWSER_VERSION', '1.0.27');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -29,10 +26,13 @@ define('API_CLASS_VERSION', get_client_version());
  * - if not, stop and display an error message
  */
 if (function_exists('curl_version')) {
-    $curl_info    = curl_version();
-    $curl_version = $curl_info['version'];
+    $curl_info       = curl_version();
+    $curl_version    = $curl_info['version'];
+    $openssl_version = $curl_info['ssl_version'];
 } else {
     exit('The <b>PHP curl</b> module is not installed! Please correct this before you proceed!<br>');
+    $curl_version    = 'unavailable';
+    $openssl_version = 'unavailable';
 }
 
 /**
@@ -491,6 +491,10 @@ if (isset($unifidata)) {
             $selection = 'list radius profiles';
             $data      = $unifidata->list_radius_profiles();
             break;
+        case 'list_country_codes':
+            $selection = 'list country codes';
+            $data      = $unifidata->list_country_codes();
+            break;
         default:
             break;
     }
@@ -837,6 +841,8 @@ function get_client_version()
                             <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
                             <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
                             <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
                                 <li role="separator" class="divider"></li>
@@ -1001,6 +1007,8 @@ function get_client_version()
                     <dd><span id="span_memory_used" class="label label-primary"></span></dd>
                     <dt>cURL version</dt>
                     <dd><span id="span_curl_version" class="label label-primary"></span></dd>
+                    <dt>OpenSSL version</dt>
+                    <dd><span id="span_openssl_version" class="label label-primary"></span></dd>
                     <dt>operating system</dt>
                     <dd><span id="span_os_version" class="label label-primary"></span></dd>
                 </dl>
@@ -1045,6 +1053,7 @@ $(document).ready(function() {
     var memory_limit        = '<?php echo (ini_get('memory_limit')) ?>';
     var memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>';
     var curl_version        = '<?php echo $curl_version ?>';
+    var openssl_version     = '<?php echo $openssl_version ?>';
     var os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>';
     var api_browser_version = '<?php echo API_BROWSER_VERSION ?>';
     var api_class_version   = '<?php echo API_CLASS_VERSION ?>';
@@ -1057,24 +1066,22 @@ $(document).ready(function() {
      */
     $('#alert_placeholder').html(alert_message);
     $('#alert_placeholder').fadeIn(1000);
+
     $('#span_site_id').html(site_id);
     $('#span_site_name').html(site_name);
     $('#span_output_format').html(output_format);
     $('#span_selection').html(selection);
     $('#span_objects_count').html(objects_count);
-
     $('#span_elapsed_time').html('total elapsed time: ' + timing_total_time + ' seconds');
 
     $('#timing_login_perc').attr('aria-valuenow', timing_login_perc);
     $('#timing_login_perc').css('width', timing_login_perc + '%');
     $('#timing_login_perc').attr('data-original-title', time_after_login + ' seconds');
     $('#timing_login_perc').html('API login time');
-
     $('#timing_load_perc').attr('aria-valuenow', timing_load_perc);
     $('#timing_load_perc').css('width', timing_load_perc + '%');
     $('#timing_load_perc').attr('data-original-title', time_for_load + ' seconds');
     $('#timing_load_perc').html('data load time');
-
     $('#timing_remain_perc').attr('aria-valuenow', timing_remain_perc);
     $('#timing_remain_perc').css('width', timing_remain_perc + '%');
     $('#timing_remain_perc').attr('data-original-title', 'PHP overhead: ' + timing_remain_perc + '%');
@@ -1087,6 +1094,7 @@ $(document).ready(function() {
     $('#span_controller_version').html(controller_version);
     $('#span_php_version').html(php_version);
     $('#span_curl_version').html(curl_version);
+    $('#span_openssl_version').html(openssl_version);
     $('#span_os_version').html(os_version);
     $('#span_memory_limit').html(memory_limit);
     $('#span_memory_used').html(memory_used);

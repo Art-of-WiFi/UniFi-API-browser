@@ -11,13 +11,13 @@ This tool is for browsing data that is exposed through Ubiquiti's UniFi Controll
 
 It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#methods-and-functions-supported) than the UniFi API browser tool does.
 
-If you plan to create your own PHP code levering the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
+If you plan to create your own PHP code leveraging the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
 
 You will find examples and detailed instructions there.
 
 Please keep the following in mind:
 - the API Browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work)
+- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.7.20 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
@@ -81,6 +81,7 @@ The UniFi API browser tool offers the following features:
   - list current channels
   - list DPI stats
   - dynamic DNS configuration
+  - list country codes
   - list Radius accounts (supported on controller version 5.5.19 and higher)
 - Messages
   - list events
