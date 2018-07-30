@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.27');
+define('API_BROWSER_VERSION', '1.0.28');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -711,7 +711,7 @@ function get_client_version()
                             usort($sites, "sites_sort");
 
                             foreach ($sites as $site) {
-                                echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . $site->desc . '">' . $site->desc . '</a></li>' . "\n";
+                                echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . htmlspecialchars($site->desc) . '">' . $site->desc . '</a></li>' . "\n";
                             }
                             ?>
                          </ul>
@@ -1037,7 +1037,7 @@ $(document).ready(function() {
     var alert_message       = '<?php echo $alert_message ?>';
     var action              = '<?php echo $action ?>';
     var site_id             = '<?php echo $site_id ?>';
-    var site_name           = '<?php echo $site_name ?>';
+    var site_name           = "<?php echo htmlspecialchars($site_name) ?>";
     var controller_id       = '<?php echo $controller_id ?>';
     var output_format       = '<?php echo $output_format ?>';
     var selection           = '<?php echo $selection ?>';

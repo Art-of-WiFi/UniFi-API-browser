@@ -21,11 +21,6 @@ Please keep the following in mind:
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
-### Donations
-If you'd like to support further development of the API browser tool and the PHP API client class, please use the donate button below. All donations go to the project maintainer.
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
-
 ### Features
 The UniFi API browser tool offers the following features:
 - browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
@@ -91,7 +86,7 @@ The UniFi API browser tool offers the following features:
 Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
 ### Requirements
-- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
+- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.0.7 and cURL 7.37.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 

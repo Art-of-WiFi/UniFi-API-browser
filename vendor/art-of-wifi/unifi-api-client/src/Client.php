@@ -138,8 +138,8 @@ class Client
                 }
 
                 if ($code === 400) {
-                     trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
-                     return $code;
+                    trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
+                    return $code;
                 }
             }
         }
@@ -358,14 +358,57 @@ class Client
     }
 
     /**
-     * Add/modify/remove a client device note
+     * Forget one or more client devices
+     * ---------------------------------
+     * return true on success
+     * required parameter <macs> = array of client MAC addresses
+     *
+     * NOTE:
+     * only supported with controller versions 5.9.X and higher
+     */
+    public function forget_sta($macs)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['cmd' => 'forget-sta', 'macs' => $macs]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Create a new user/client-device
+     * -------------------------------
+     * return an array with a single object containing details of the new user/client-device on success, else return false
+     * required parameter <mac>           = client MAC address
+     * required parameter <user_group_id> = _id value for the user group the new user/client-device should belong to which
+     *                                      can be obtained from the output of list_usergroups()
+     * optional parameter <name>          = name to be given to the new user/client-device
+     * optional parameter <note>          = note to be applied to the new user/client-device
+     */
+    public function create_user($mac, $user_group_id, $name = null, $note = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $new_user           = ['mac' => $mac, 'usergroup_id' => $user_group_id];
+        if (!is_null($name)) $new_user['name'] = $name;
+        if (!is_null($note)) {
+            $new_user['note'] = $note;
+            $new_user['noted'] = true;
+        }
+        $json               = ['objects' => [['data' => $new_user]]];
+        $json               = json_encode($json);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/group/user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Add/modify/remove a client-device note
      * --------------------------------------
      * return true on success
-     * required parameter <user_id> = id of the user device to be modified
-     * optional parameter <note>    = note to be applied to the user device
+     * required parameter <user_id> = id of the client-device to be modified
+     * optional parameter <note>    = note to be applied to the client-device
      *
      * NOTES:
-     * - when note is empty or not set, the existing note for the user will be removed and "noted" attribute set to false
+     * - when note is empty or not set, the existing note for the client-device will be removed and "noted" attribute set to false
      */
     public function set_sta_note($user_id, $note = null)
     {
@@ -397,7 +440,7 @@ class Client
     /**
      * 5 minutes site stats method
      * ---------------------------
-     * returns an array of 5 minutes stats objects for the current site
+     * returns an array of 5-minute stats objects for the current site
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      *
@@ -465,7 +508,7 @@ class Client
     /**
      * 5 minutes stats method for a single access point or all access points
      * ---------------------------------------------------------------------
-     * returns an array of 5 minutes stats objects
+     * returns an array of 5-minute stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = AP MAC address to return stats for
@@ -533,6 +576,92 @@ class Client
         if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * 5 minutes stats method for a single user/client device
+     * ------------------------------------------------------
+     * returns an array of 5-minute stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 12 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Hourly stats method for a a single user/client device
+     * -----------------------------------------------------
+     * returns an array of hourly stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_hourly_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Daily stats method for a single user/client device
+     * --------------------------------------------------
+     * returns an array of daily stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.user', 'json='.$json);
         return $this->process_response($response);
     }
 
@@ -1042,6 +1171,77 @@ class Client
     }
 
     /**
+     * Invite a new admin for access to the current site
+     * -------------------------------------------------
+     * returns true on success
+     * required parameter <name>           = string, name to assign to the new admin user
+     * required parameter <email>          = email address to assign to the new admin user
+     * optional parameter <enable_sso>     = boolean, whether or not SSO will be allowed for the new admin
+     *                                       default value is true which enables the SSO capability
+     * optional parameter <readonly>       = boolean, whether or not the new admin will have readonly
+     *                                       permissions, default value is true which gives the new admin
+     *                                       administrator permissions
+     * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
+     *                                       adopt devices, default value is false. Only applies when readonly
+     *                                       is true.
+     * optional parameter <device_restart> = boolean, whether or not the new admin will have permissions to
+     *                                       restart devices, default value is false. Only applies when readonly
+     *                                       is true.
+     *
+     * NOTES:
+     * - after issuing a valid request, an invite will be sent to the email address provided
+     * - issuing this command against an existing admin will trigger a "re-invite"
+     */
+    public function invite_admin($name, $email, $enable_sso = true, $readonly = false, $device_adopt = false, $device_restart = false)
+    {
+        if (!$this->is_loggedin) return false;
+        $email_valid = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+        if (!$email_valid) {
+            trigger_error('The email address provided is invalid!');
+            return false;
+        }
+
+        $json = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin'];
+        if ($readonly) {
+            $json['role'] = 'readonly';
+            $permissions = [];
+            if ($device_adopt) {
+                $permissions[] = "API_DEVICE_ADOPT";
+            }
+
+            if ($device_restart) {
+                $permissions[] = "API_DEVICE_RESTART";
+            }
+
+            if (count($permissions) > 0) {
+                $json['permissions'] = $permissions;
+            }
+        }
+
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Revoke an admin
+     * ---------------
+     * returns true on success
+     * required parameter <admin_id> = id of the admin to revoke which can be obtained using the
+     *                                 list_all_admins() method/function
+     *
+     * NOTES:
+     * only non-superadmins account can be revoked
+     */
+    public function revoke_admin($admin_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['admin' => $admin_id, 'cmd' => 'revoke-admin']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List wlan_groups
      * ----------------
      * returns an array containing known wlan_groups
@@ -1245,6 +1445,10 @@ class Client
      * List country codes
      * ------------------
      * returns an array of available country codes
+     *
+     * NOTES:
+     * these codes following the ISO standard:
+     * https://en.wikipedia.org/wiki/ISO_3166-1_numeric
      */
     public function list_country_codes()
     {
@@ -1278,8 +1482,8 @@ class Client
     }
 
     /**
-     * List port configuration
-     * -----------------------
+     * List port configurations
+     * ------------------------
      * returns an array of port configurations
      */
     public function list_portconf()
@@ -1880,6 +2084,38 @@ class Client
     }
 
     /**
+     * Start rolling upgrade
+     * ---------------------
+     * return true on success
+     *
+     * NOTES:
+     * - updates all access points to the latest firmware known to the controller in a
+     *   staggered/rolling fashion
+     */
+    public function start_rolling_upgrade()
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['cmd' => 'set-rollupgrade'];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Cancel rolling upgrade
+     * ---------------------
+     * return true on success
+     */
+    public function cancel_rolling_upgrade()
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['cmd' => 'unset-rollupgrade'];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * Power-cycle the PoE output of a switch port
      * -------------------------------------------
      * return true on success
@@ -1888,6 +2124,7 @@ class Client
      *
      * NOTES:
      * - only applies to switches and their PoE ports...
+     * - port must be actually providing power
      */
     public function power_cycle_switch_port($switch_mac, $port_idx)
     {

@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.25",
+            "version": "v1.1.30",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "d7827fdbf18e454f876bba514a6175a32160d669"
+                "reference": "871ab82608327b04a228629628545497cd2a872a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/d7827fdbf18e454f876bba514a6175a32160d669",
-                "reference": "d7827fdbf18e454f876bba514a6175a32160d669",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/871ab82608327b04a228629628545497cd2a872a",
+                "reference": "871ab82608327b04a228629628545497cd2a872a",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "ubiquiti",
                 "unifi"
             ],
-            "time": "2018-03-24 09:46:42"
+            "time": "2018-07-02 13:06:31"
         },
         {
             "name": "kint-php/kint",
