@@ -25,7 +25,7 @@ class Client
      */
     protected $baseurl            = 'https://127.0.0.1:8443';
     protected $site               = 'default';
-    protected $version            = '5.4.16';
+    protected $version            = '5.6.39';
     protected $debug              = false;
     protected $is_loggedin        = false;
     private $cookies              = '';
@@ -441,8 +441,8 @@ class Client
      * 5 minutes site stats method
      * ---------------------------
      * returns an array of 5-minute stats objects for the current site
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -465,8 +465,8 @@ class Client
      * Hourly site stats method
      * ------------------------
      * returns an array of hourly stats objects for the current site
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -487,8 +487,8 @@ class Client
      * Daily site stats method
      * ------------------------
      * returns an array of daily stats objects for the current site
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      *
      * NOTES:
      * - defaults to the past 52*7*24 hours
@@ -509,8 +509,8 @@ class Client
      * 5 minutes stats method for a single access point or all access points
      * ---------------------------------------------------------------------
      * returns an array of 5-minute stats objects
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
@@ -535,8 +535,8 @@ class Client
      * Hourly stats method for a single access point or all access points
      * ------------------------------------------------------------------
      * returns an array of hourly stats objects
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
@@ -559,8 +559,8 @@ class Client
      * Daily stats method for a single access point or all access points
      * -----------------------------------------------------------------
      * returns an array of daily stats objects
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
      * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
@@ -584,8 +584,8 @@ class Client
      * ------------------------------------------------------
      * returns an array of 5-minute stats objects
      * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in seconds
-     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <start>   = Unix timestamp in milliseconds
+     * optional parameter <end>     = Unix timestamp in milliseconds
      * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
      *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
      *                                default is ['rx_bytes', 'tx_bytes']
@@ -614,8 +614,8 @@ class Client
      * -----------------------------------------------------
      * returns an array of hourly stats objects
      * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in seconds
-     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <start>   = Unix timestamp in milliseconds
+     * optional parameter <end>     = Unix timestamp in milliseconds
      * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
      *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
      *                                default is ['rx_bytes', 'tx_bytes']
@@ -642,8 +642,8 @@ class Client
      * --------------------------------------------------
      * returns an array of daily stats objects
      * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in seconds
-     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <start>   = Unix timestamp in milliseconds
+     * optional parameter <end>     = Unix timestamp in milliseconds
      * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
      *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
      *                                default is ['rx_bytes', 'tx_bytes']
@@ -785,18 +785,6 @@ class Client
     }
 
     /**
-     * List user groups
-     * ----------------
-     * returns an array of user group objects
-     */
-    public function list_usergroups()
-    {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/usergroup');
-        return $this->process_response($response);
-    }
-
-    /**
      * Assign client device to another group
      * -------------------------------------
      * return true on success
@@ -812,22 +800,39 @@ class Client
     }
 
     /**
-     * Update user group (using REST)
+     * Update client fixedip (using REST)
      * ------------------------------
-     * returns an array containing a single object with attributes of the updated usergroup on success
-     * required parameter <group_id>   = id of the user group
-     * required parameter <site_id>    = id of the site
-     * required parameter <group_name> = name of the user group
-     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
-     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * returns an array containing a single object with attributes of the updated client on success
+     * required parameter <client_id>   = id of the client
+     * required parameter <use_fixedip> = boolean defining whether if use_fixedip is true or false
+     * optional parameter <network_id>  = network id where the ip belongs to
+     * optional parameter <fixed_ip>    = value of client's fixed_ip field
      *
      */
-    public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
+    public function edit_client_fixedip($client_id, $use_fixedip, $network_id = null, $fixed_ip = null)
     {
         if (!$this->is_loggedin) return false;
+        if (!is_bool($use_fixedip)) return false;
         $this->request_type = 'PUT';
-        $json     = json_encode(['_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up), 'site_id' => $site_id]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id), $json);
+        $data = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
+        if($use_fixedip){
+            if($network_id){ $data["network_id"] = $network_id; }
+            if($fixed_ip){ $data["fixed_ip"] = $fixed_ip; }
+        }
+        $json     = json_encode($data);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/user/'.trim($client_id), $json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * List user groups
+     * ----------------
+     * returns an array of user group objects
+     */
+    public function list_usergroups()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/list/usergroup');
         return $this->process_response($response);
     }
 
@@ -842,8 +847,28 @@ class Client
     public function create_usergroup($group_name, $group_dn = -1, $group_up = -1)
     {
         if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
         $json     = json_encode(['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup', $json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Modify user group (using REST)
+     * ------------------------------
+     * returns an array containing a single object with attributes of the updated usergroup on success
+     * required parameter <group_id>   = id of the user group
+     * required parameter <site_id>    = id of the site
+     * required parameter <group_name> = name of the user group
+     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     */
+    public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode(['_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up), 'site_id' => $site_id]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id), $json);
         return $this->process_response($response);
     }
 
@@ -858,6 +883,75 @@ class Client
         if (!$this->is_loggedin) return false;
         $this->request_type = 'DELETE';
         $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id));
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * List firewall groups (using REST)
+     * ----------------------------------
+     * returns an array containing the current firewall groups on success
+     */
+    public function list_firewallgroups()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup');
+        return $this->process_response($response);
+    }
+
+    /**
+     * Create firewall group (using REST)
+     * ----------------------------------
+     * returns an array containing a single object with attributes of the new firewall group on success
+     * required parameter <group_name>    = name to assign to the firewall group
+     * required parameter <group_type>    = firewall group type; valid values are address-group, ipv6-address-group, port-group
+     * optional parameter <group_members> = array containing the members of the new group (IPv4 addresses, IPv6 addresses or port numbers)
+     *                                      (default is an empty array)
+     */
+    public function create_firewallgroup($group_name, $group_type, $group_members = [])
+    {
+        if (!$this->is_loggedin) return false;
+        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) return false;
+        $this->request_type = 'POST';
+        $json     = json_encode(['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup', $json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Modify firewall group (using REST)
+     * ----------------------------------
+     * returns an array containing a single object with attributes of the updated firewall group on success
+     * required parameter <group_id>      = _id value of the firewall group
+     * required parameter <site_id>       = site_id value of the firewall group
+     * required parameter <group_name>    = name of the firewall group
+     * required parameter <group_type>    = firewall group type; valid values are address-group, ipv6-address-group, port-group,
+     *                                      group_type cannot be changed for an existing firewall group!
+     * optional parameter <group_members> = array containing the members of the group (IPv4 addresses, IPv6 addresses or port numbers)
+     *                                      which will overwrite the existing group_members (default is an empty array)
+     *
+     *
+     */
+    public function edit_firewallgroup($group_id, $site_id, $group_name, $group_type, $group_members = [])
+    {
+        if (!$this->is_loggedin) return false;
+        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode(['_id' => $group_id, 'name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members, 'site_id' => $site_id]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup/'.trim($group_id), $json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Delete firewall group (using REST)
+     * ----------------------------------
+     * returns true on success
+     * required parameter <group_id> = id of the firewall group
+     */
+    public function delete_firewallgroup($group_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'DELETE';
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup/'.trim($group_id));
         return $this->process_response_boolean($response);
     }
 
@@ -1330,6 +1424,7 @@ class Client
     public function create_hotspotop($name, $x_password, $note = null)
     {
         if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
         $json     = ['name' => $name, 'x_password' => $x_password];
         if (isset($note)) $json['note'] = trim($note);
         $json     = json_encode($json);
@@ -1562,8 +1657,9 @@ class Client
     public function disable_ap($ap_id, $disable)
     {
         if (!$this->is_loggedin) return false;
+        if (!is_bool($disable)) return false;
         $this->request_type = 'PUT';
-        $json     = json_encode(['disabled' => (bool)$disable]);
+        $json     = json_encode(['disabled' => $disable]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($ap_id), $json);
         return $this->process_response_boolean($response);
     }
@@ -1603,6 +1699,7 @@ class Client
     public function locate_ap($mac, $enable)
     {
         if (!$this->is_loggedin) return false;
+        if (!is_bool($enable)) return false;
         $mac      = strtolower($mac);
         $cmd      = (($enable) ? 'set-locate' : 'unset-locate');
         $json     = json_encode(['cmd' => $cmd, 'mac' => $mac]);
@@ -1619,7 +1716,8 @@ class Client
     public function site_leds($enable)
     {
         if (!$this->is_loggedin) return false;
-        $json     = json_encode(['led_enabled' => (bool)$enable]);
+        if (!is_bool($enable)) return false;
+        $json     = json_encode(['led_enabled' => $enable]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/mgmt', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -1769,11 +1867,12 @@ class Client
      * List network settings (using REST)
      * ----------------------------------
      * returns an array of (non-wireless) networks and their settings
+     * optional parameter <network_id> = string; network id to get specific network data for
      */
-    public function list_networkconf()
+    public function list_networkconf($network_id = '')
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf');
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id));
         return $this->process_response($response);
     }
 
@@ -1929,9 +2028,9 @@ class Client
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
-        $payload = (object)[];
-        if (!is_null($x_passphrase)) $payload->x_passphrase = trim($x_passphrase);
-        if (!is_null($name)) $payload->name = trim($name);
+        $payload = [];
+        if (!is_null($x_passphrase)) $payload['x_passphrase'] = trim($x_passphrase);
+        if (!is_null($name)) $payload['name'] = trim($name);
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
@@ -1944,9 +2043,9 @@ class Client
      */
     public function disable_wlan($wlan_id, $disable)
     {
-        $payload          = (object)[];
-        $action           = ($disable) ? false : true;
-        $payload->enabled = (bool)$action;
+        if (!is_bool($disable)) return false;
+        $action  = $disable ? false : true;
+        $payload = ['enabled' => $action];
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
@@ -1977,11 +2076,9 @@ class Client
      */
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
+        if (!is_bool($mac_filter_enabled)) return false;
         if (!in_array($mac_filter_policy, ['allow', 'deny'])) return false;
-        $payload                     = (object)[];
-        $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
-        $payload->mac_filter_policy  = $mac_filter_policy;
-        $payload->mac_filter_list    = $macs;
+        $payload = ['mac_filter_enabled' => (bool)$mac_filter_enabled, 'mac_filter_policy' => $mac_filter_policy, 'mac_filter_list' => $macs];
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 

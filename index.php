@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.28');
+define('API_BROWSER_VERSION', '1.0.29');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -395,6 +395,10 @@ if (isset($unifidata)) {
             $selection = 'list alarms';
             $data      = $unifidata->list_alarms();
             break;
+        case 'list_firewallgroups':
+            $selection = 'list firewall groups';
+            $data      = $unifidata->list_firewallgroups();
+            break;
         case 'count_alarms':
             $selection = 'count all alarms';
             $data      = $unifidata->count_alarms();
@@ -711,7 +715,7 @@ function get_client_version()
                             usort($sites, "sites_sort");
 
                             foreach ($sites as $site) {
-                                echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . htmlspecialchars($site->desc) . '">' . $site->desc . '</a></li>' . "\n";
+                                echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . urlencode($site->desc) . '">' . $site->desc . '</a></li>' . "\n";
                             }
                             ?>
                          </ul>
@@ -840,6 +844,7 @@ function get_client_version()
                             <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
                             <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
                             <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
+                            <li id="list_firewallgroups"><a href="?action=list_firewallgroups">list firewall groups</a></li>
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
