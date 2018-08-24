@@ -2,11 +2,13 @@
 >
 >The repository has been transferred to this new GitHub organisation account, the project maintainer will remain the same and will continue to actively maintain it.
 > If you have previously installed the API Browser tool using `git clone`, you may consider pointing the clone to the new repository URL. You can do this with the following command from within the directory of your clone:
+>
 >```bash
 >$ git remote set-url origin https://github.com/Art-of-WiFi/UniFi-API-browser.git
 >```
 
 ## UniFi API browser
+
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
 
 It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#methods-and-functions-supported) than the UniFi API browser tool does.
@@ -16,16 +18,20 @@ If you plan to create your own PHP code leveraging the UniFi controller API, it 
 You will find examples and detailed instructions there.
 
 Please keep the following in mind:
+
 - the API Browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
 - currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.8.24 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
 ### Features
+
 The UniFi API browser tool offers the following features:
+
 - browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
 - switch between sites managed by the connected controller
 - switch between output formats (currently `json`, `PHP array`, `PHP var_dump`, `PHP var_export`, `json highlighted` and `PHP array using Kint` have been implemented)
+- copy the results to clipboard (only output formats `json`, `PHP array`, `PHP var_dump` and `PHP var_export` are supported, will fail gracefully with large collections)
 - switch between default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL and the UniFi Controller
 - very easy setup with minimal dependencies
@@ -35,6 +41,7 @@ The UniFi API browser tool offers the following features:
 - debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 ### Data collections/API endpoints currently implemented in the API browser
+
 - Clients/users
   - list online clients
   - list guests
@@ -87,11 +94,13 @@ The UniFi API browser tool offers the following features:
 Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
 ### Requirements
+
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.0.7 and cURL 7.37.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because the CSS and JS files are loaded from CDNs.
 
 ### Installation
+
 Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
 - open up a terminal window on your server and cd to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```bash
@@ -102,31 +111,39 @@ git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
 
 ### Configuration
+
 - credentials for access to the UniFi Controller API need to be configured in the file named `config.template.php` which should be copied/renamed to `config.php` before using the UniFi API browser tool
 - starting with API browser tool version 1.0.3 you can store **multiple controller configurations** in a single `config.php` file
 - please refer to the comments in the `config.template.php` file for further instructions
-- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http://<server IP address>/UniFi-API-browser/`
+- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
 
 ### Updates
+
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
 
 ### Credits
+
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
+
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
 - and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.6.18-8261dc5066/unifi_sh_api
 
 Other included libraries:
-- Bootstrap (version 3.3.7) http://getbootstrap.com
+
+- Bootstrap (version 3.3.7) https://getbootstrap.com
 - Font-awesome (version 4.7.0) https://fortawesome.github.io/Font-Awesome
 - jQuery (version 2.2.4) https://jquery.com
 - jQuery JSONView (version 1.2.3) https://github.com/yesmeck/jquery-jsonview
-- Kint (version 2.1.2) http://kint-php.github.io/kint
+- Kint (version 2.1.2) https://kint-php.github.io/kint
+- clipboard.js (2.0.1) https://clipboardjs.com/
 
 ### Security notice
+
 The use of this tool is **not secured in any way**! Make sure to prevent unauthorised access to it, preventing exposure of details and credentials such as user names and passwords for access to the UniFi Controller!
 
 ### Screenshots
+
 Here are a couple of screenshots of the tool in action.
 
 The controller selection dropdown menu:

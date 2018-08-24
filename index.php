@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.29');
+define('API_BROWSER_VERSION', '1.0.30');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -626,7 +626,7 @@ function get_client_version()
 
         .scrollable-menu {
             height: auto;
-            max-height: 600px;
+            max-height: 80vh;
             overflow-x: hidden;
             overflow-y: auto;
         }
@@ -635,12 +635,27 @@ function get_client_version()
             color: rgba(0,0,0,.4);
         }
 
+        #output {
+            display: none;
+            position:relative;
+        }
+
         .back-to-top {
             cursor: pointer;
             position: fixed;
             bottom: 20px;
             right: 20px;
             display:none;
+        }
+
+        #copy_to_clipboard_button {
+             position: absolute;
+             top: 0;
+             right: 0;
+        }
+
+        #toggle_buttons {
+             display: none;
         }
     </style>
     <!-- /custom CSS styling -->
@@ -715,7 +730,11 @@ function get_client_version()
                             usort($sites, "sites_sort");
 
                             foreach ($sites as $site) {
-                                echo '<li id="' . $site->name . '"><a href="?site_id=' . $site->name . '&site_name=' . urlencode($site->desc) . '">' . $site->desc . '</a></li>' . "\n";
+                                $link_row = '<li id="' . $site->name . '"><a href="?site_id=' .
+                                            urlencode($site->name) . '&site_name=' . urlencode($site->desc) .
+                                            '">' . $site->desc . '</a></li>' . "\n";
+
+                                echo $link_row;
                             }
                             ?>
                          </ul>
@@ -729,7 +748,7 @@ function get_client_version()
                             Output
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="outputselection">
+                        <ul class="dropdown-menu scrollable-menu" id="outputselection">
                             <li class="dropdown-header">Select an output format</li>
                             <li id="json"><a href="?output_format=json">json (default)</a></li>
                             <li role="separator" class="divider"></li>
@@ -747,7 +766,7 @@ function get_client_version()
                             Clients
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
                             <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
@@ -764,7 +783,7 @@ function get_client_version()
                             Devices
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
@@ -782,7 +801,7 @@ function get_client_version()
                             Stats
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
@@ -814,7 +833,7 @@ function get_client_version()
                             Hotspot
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
                             <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
@@ -827,7 +846,7 @@ function get_client_version()
                             Configuration
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
                             <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
@@ -861,7 +880,7 @@ function get_client_version()
                             Messages
                             <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
                             <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
                             <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
@@ -878,7 +897,7 @@ function get_client_version()
                     <a id="theme-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-bars fa-lg"></i>
                     </a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu scrollable-menu">
                         <li class="dropdown-header">Select a theme</li>
                         <li id="bootstrap"><a href="?theme=bootstrap">Bootstrap (default)</a></li>
                         <li id="cerulean"><a href="?theme=cerulean">Cerulean</a></li>
@@ -949,13 +968,14 @@ function get_client_version()
                     <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
                     <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
                 </div>
-                <div id="toggle_button" style="display: none">
+                <div id="toggle_buttons">
                     <button id="toggle-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse</button>
                     <button id="toggle-level2-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-level2-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse level 2</button>
                     <br><br>
                 </div>
-                <div id="output" style="display: none">
-                    <pre id="pre_output"><?php print_output($output_format, $data) ?></pre>
+                <div id="output" class="js-copy-container">
+                    <button id="copy_to_clipboard_button" class="btn btn-xs js-copy-trigger" data-original-title="Copy to clipboard" data-clipboard-target="#pre_output" data-toggle="tooltip" data-placement="top"><i class="fa fa-copy"></i></button>
+                    <pre id="pre_output" class="js-copy-target"><?php print_output($output_format, $data) ?></pre>
                 </div>
             <?php } ?>
         </div>
@@ -1025,9 +1045,10 @@ function get_client_version()
     </div>
 </div>
 <!-- latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
-<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha256-yB+xHoEi5PoOnEAgHNbRMIbN4cNtOXAmBzkhNE/tQlI=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha384-DmFpgjLdJIZgLscJ9DpCHynOVhvNfaTvPJA+1ijsbkMKhI/e8eKnBZp1AmHDVjrT" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha384-JbuAF+8+4FF8uR/7D07/5IWwIj2FoNw5jJQGg1s8GtGIfQXFxWPRdMNWYmU35KjP" crossorigin="anonymous"></script>
 <script>
 $(document).ready(function() {
     /**
@@ -1039,32 +1060,32 @@ $(document).ready(function() {
     /**
      * populate some Javascript variables with PHP output for cleaner code
      */
-    var alert_message       = '<?php echo $alert_message ?>';
-    var action              = '<?php echo $action ?>';
-    var site_id             = '<?php echo $site_id ?>';
-    var site_name           = "<?php echo htmlspecialchars($site_name) ?>";
-    var controller_id       = '<?php echo $controller_id ?>';
-    var output_format       = '<?php echo $output_format ?>';
-    var selection           = '<?php echo $selection ?>';
-    var objects_count       = '<?php echo $objects_count ?>';
-    var timing_login_perc   = '<?php echo $login_perc ?>';
-    var time_after_login    = '<?php echo $time_after_login ?>';
-    var timing_load_perc    = '<?php echo $load_perc ?>';
-    var time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>';
-    var timing_remain_perc  = '<?php echo $remain_perc ?>';
-    var timing_total_time   = '<?php echo $time_total ?>';
-    var theme               = '<?php echo $theme ?>';
-    var php_version         = '<?php echo (phpversion()) ?>';
-    var memory_limit        = '<?php echo (ini_get('memory_limit')) ?>';
-    var memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>';
-    var curl_version        = '<?php echo $curl_version ?>';
-    var openssl_version     = '<?php echo $openssl_version ?>';
-    var os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>';
-    var api_browser_version = '<?php echo API_BROWSER_VERSION ?>';
-    var api_class_version   = '<?php echo API_CLASS_VERSION ?>';
-    var controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>';
-    var controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>';
-    var controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
+    var alert_message       = '<?php echo $alert_message ?>',
+        action              = '<?php echo $action ?>',
+        site_id             = '<?php echo $site_id ?>',
+        site_name           = "<?php echo htmlspecialchars($site_name) ?>",
+        controller_id       = '<?php echo $controller_id ?>',
+        output_format       = '<?php echo $output_format ?>',
+        selection           = '<?php echo $selection ?>',
+        objects_count       = '<?php echo $objects_count ?>',
+        timing_login_perc   = '<?php echo $login_perc ?>',
+        time_after_login    = '<?php echo $time_after_login ?>',
+        timing_load_perc    = '<?php echo $load_perc ?>',
+        time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
+        timing_remain_perc  = '<?php echo $remain_perc ?>',
+        timing_total_time   = '<?php echo $time_total ?>',
+        theme               = '<?php echo $theme ?>',
+        php_version         = '<?php echo (phpversion()) ?>',
+        memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
+        memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>',
+        curl_version        = '<?php echo $curl_version ?>',
+        openssl_version     = '<?php echo $openssl_version ?>',
+        os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
+        api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
+        api_class_version   = '<?php echo API_CLASS_VERSION ?>',
+        controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
+        controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
+        controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
 
     /**
      * update dynamic elements in the DOM using some of the above variables
@@ -1124,7 +1145,7 @@ $(document).ready(function() {
      * initialise the jquery-jsonview library, only when required
      */
     if (output_format == 'json_color') {
-        $('#toggle_button').show();
+        $('#toggle_buttons').show();
         $('#pre_output').JSONView($('#pre_output').text());
 
         /**
@@ -1149,13 +1170,6 @@ $(document).ready(function() {
     $('#output').show();
 
     /**
-     * enable Bootstrap tooltips
-     */
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
-
-    /**
      * check latest version of API browser tool and inform user when it's more recent than the current,
      * but only when the "about" modal is opened
      */
@@ -1165,8 +1179,11 @@ $(document).ready(function() {
                 if (api_browser_version < external.tag_name.substring(1)) {
                     $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));
                     $('#span_api_browser_update').removeClass('label-success').addClass('label-warning');
-                } else {
+                } else if (api_browser_version == external.tag_name.substring(1)) {
                     $('#span_api_browser_update').html('up to date');
+                } else {
+                    $('#span_api_browser_update').html('bleeding edge!');
+                    $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
                 }
             }
         }).fail(function(d, textStatus, error) {
@@ -1183,6 +1200,71 @@ $(document).ready(function() {
         $('#span_api_browser_update').html('<i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span>');
         $('#span_api_browser_update').removeClass('label-warning').removeClass('label-danger').addClass('label-success');
     })
+
+    /**
+     * initialize the "copy to clipboard" function, "borrowed" from the UserFrosting framework
+     */
+    if (typeof $.uf === 'undefined') {
+        $.uf = {};
+    }
+
+    $.uf.copy = function (button) {
+        var _this = this;
+
+        var clipboard = new ClipboardJS(button, {
+            text: function(trigger) {
+                var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
+                if (el.is(':input')) {
+                    return el.val();
+                } else {
+                    return el.html();
+                }
+            }
+        });
+
+        clipboard.on('success', function(e) {
+            setTooltip(e.trigger, 'Copied!');
+            hideTooltip(e.trigger);
+        });
+
+        clipboard.on('error', function(e) {
+            setTooltip(e.trigger, 'Failed!');
+            hideTooltip(e.trigger);
+            console.log('Copy to clipboard failed, most probably the selection is too large');
+        });
+
+        function setTooltip(btn, message) {
+            $(btn)
+            .attr('data-original-title', message)
+            .tooltip('show');
+        }
+
+        function hideTooltip(btn) {
+            setTimeout(function() {
+                $(btn).tooltip('hide')
+                .attr('data-original-title', 'Copy to clipboard');
+            }, 1000);
+        }
+
+        /**
+         * tooltip trigger
+         */
+        $(button).tooltip({
+            trigger: 'hover'
+        });
+    };
+
+    /**
+     * link the copy button
+     */
+    $.uf.copy('.js-copy-trigger');
+
+    /**
+     * hide button if the ClipboardJS function isn't supported or the output format isn't supported
+     */
+    if (!ClipboardJS.isSupported() || $.inArray(output_format, ['json', 'php_array', 'php_var_dump', 'php_var_export'] ) === -1) {
+        $('.js-copy-trigger').hide();
+    }
 
     /**
      * manage display of the "back to top" button element
@@ -1207,6 +1289,13 @@ $(document).ready(function() {
     });
 
     $('#back-to-top').tooltip('show');
+
+    /**
+     * enable Bootstrap tooltips
+     */
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
 });
 </script>
 </body>
