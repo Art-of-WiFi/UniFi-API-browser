@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.30');
+define('API_BROWSER_VERSION', '1.0.31');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -181,10 +181,13 @@ if (isset($_GET['controller_id'])) {
 if (isset($_GET['theme'])) {
     $theme             = $_GET['theme'];
     $_SESSION['theme'] = $theme;
+    $theme_changed     = true;
 } else {
     if (isset($_SESSION['theme'])) {
         $theme = $_SESSION['theme'];
     }
+
+    $theme_changed = false;
 }
 
 /**
@@ -499,6 +502,10 @@ if (isset($unifidata)) {
             $selection = 'list country codes';
             $data      = $unifidata->list_country_codes();
             break;
+        case 'list_backups':
+            $selection = 'list auto backups';
+            $data      = $unifidata->list_backups();
+            break;
         default:
             break;
     }
@@ -613,10 +620,10 @@ function get_client_version()
     <!-- load the appropriate Bootstrap CSS file from CDN -->
     <link rel="stylesheet" href="<?php echo $css_url ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-    <!-- load the base64 encoded favicon file  -->
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAADgpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gpAn/4KQJ/+CkCf/gown/4KQL/+CkDP/enQD/8NOK///////y2Zr/358A/9+fAP/fnwD/358A/9+gAP/foAH/36EB/9+gAP/fnwD/36AA/9+gAv/dmQD/79CB/////////v3//vz4/9+gAP/foAD/36ED/9+hA//engD/3ZsA/92bAP/enAD/36EC/9+hBP/dmgD/8dSM///////+/Pj///////Pbnv/foAD/36EC/96dAf/dmwD/46sc/+i6Rf/ovEr/5bAr/9+fBP/dmgD/8deS///////+/Pb///////LYlf/enAD/36ED/92bAP/jrSf/9eKw//779v/////////////////36MH/9N+q///////+/fn///////HXkv/dmwD/36AD/92bAP/mtj///vv0//////////7////////////////////////////+/fv///////DUiv/dmgD/36AD/9+hAf/iqBv/+/Ti///////+/fr/8tiX/+e3Pf/mszT/7cpx//z36P///v3///////Pbn//cmAD/36EF/9+gAf/foAD/8dWR////////////68Vi/9yWAP/enAL/3pwC/9yXAP/krij//Pbn///////36MP/358A/9+gAf/foAD/36AA//ry2///////9uW7/92aAP/gogX/36ED/9+hA//gowj/3JcA/+3Jc/////////77/+SwK//enAD/36EC/9+gAP/+/Pf//////+7Of//dmgD/4KIE/9+gAP/foAD/36EC/96cAP/lszf////////////ou0n/3ZsA/9+hA//foAD//frz///////w0or/3ZkA/+CiBf/foAD/36AA/9+hA//enAD/5rZA////////////57lE/92bAP/foQP/36AA//jry///////+u/U/9+fB//engD/4KIF/+CiBf/gogX/3JYA//HWk////////frx/+OrHv/enQD/36EC/9+gAP/syG3////////////z253/358C/92ZAP/dmgL/3ZoA/+vEYP/+/fv///////Xgrv/dmwD/36EC/9+gAP/foAD/358C//fmvP////////////rw1v/w0ob/7s16//bluv///v3///////368f/krir/3p0A/9+hAv/foAD/36AA/96eAP/hpRP/9+jA/////////v3///////////////7///////z36f/mtj7/3ZsA/9+hAv/foAD/36AA/9+gAP/foQH/3p4B/96eBf/tyWz/+e3Q//779f/+/fn/+/Pg//HXkv/iqBr/3ZsA/9+hA//foAD/36AA/9+gAP/foAD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
+    <!-- define favicon  -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" sizes="16x16" href="favicon.ico" type="image/x-icon" >
 
     <!-- custom CSS styling -->
     <style>
@@ -867,6 +874,8 @@ function get_client_version()
                             <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li id="list_backups"><a href="?action=list_backups">list auto backups</a></li>
                             <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
                                 <li role="separator" class="divider"></li>
@@ -898,6 +907,12 @@ function get_client_version()
                         <i class="fa fa-bars fa-lg"></i>
                     </a>
                     <ul class="dropdown-menu scrollable-menu">
+                        <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)">
+                            <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
                         <li class="dropdown-header">Select a theme</li>
                         <li id="bootstrap"><a href="?theme=bootstrap">Bootstrap (default)</a></li>
                         <li id="cerulean"><a href="?theme=cerulean">Cerulean</a></li>
@@ -917,12 +932,6 @@ function get_client_version()
                         <li id="superhero"><a href="?theme=superhero">Superhero</a></li>
                         <li id="united"><a href="?theme=united">United</a></li>
                         <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)">
-                            <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
                     </ul>
                 </li>
             </ul>
@@ -1050,42 +1059,62 @@ function get_client_version()
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha384-DmFpgjLdJIZgLscJ9DpCHynOVhvNfaTvPJA+1ijsbkMKhI/e8eKnBZp1AmHDVjrT" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha384-JbuAF+8+4FF8uR/7D07/5IWwIj2FoNw5jJQGg1s8GtGIfQXFxWPRdMNWYmU35KjP" crossorigin="anonymous"></script>
 <script>
+/**
+ * populate some global Javascript variables with PHP output for cleaner code
+ */
+var alert_message       = '<?php echo $alert_message ?>',
+    action              = '<?php echo $action ?>',
+    site_id             = '<?php echo $site_id ?>',
+    site_name           = "<?php echo htmlspecialchars($site_name) ?>",
+    controller_id       = '<?php echo $controller_id ?>',
+    output_format       = '<?php echo $output_format ?>',
+    selection           = '<?php echo $selection ?>',
+    objects_count       = '<?php echo $objects_count ?>',
+    timing_login_perc   = '<?php echo $login_perc ?>',
+    time_after_login    = '<?php echo $time_after_login ?>',
+    timing_load_perc    = '<?php echo $load_perc ?>',
+    time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
+    timing_remain_perc  = '<?php echo $remain_perc ?>',
+    timing_total_time   = '<?php echo $time_total ?>',
+    theme               = '<?php echo $theme ?>',
+    theme_changed       = '<?php echo $theme_changed ?>',
+    php_version         = '<?php echo (phpversion()) ?>',
+    memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
+    memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>',
+    curl_version        = '<?php echo $curl_version ?>',
+    openssl_version     = '<?php echo $openssl_version ?>',
+    os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
+    api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
+    api_class_version   = '<?php echo API_CLASS_VERSION ?>',
+    controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
+    controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
+    controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
+
+/**
+ * check whether user has requested a theme change, if yes we store the new value
+ * for later use
+ */
+if (theme_changed == 1 || theme_changed == 'true') {
+    localStorage.setItem('API_browser_theme', theme);
+} else {
+    /**
+     * check whether the current value of theme is the same as stored in the browser localStorage,
+     * if not, we refresh the page with an additional GET parameter to switch to the stored theme
+     */
+    if (localStorage.getItem('API_browser_theme') !== null) {
+        var stored_theme = localStorage.getItem('API_browser_theme');
+        if (stored_theme != theme) {
+            window.location.href = 'index.php?theme=' + stored_theme;
+        }
+    }
+}
+
 $(document).ready(function() {
     /**
      * we hide the loading div and show the output panel
      */
     $("#output_panel_loading").hide();
     $("#output_panel").show();
-
-    /**
-     * populate some Javascript variables with PHP output for cleaner code
-     */
-    var alert_message       = '<?php echo $alert_message ?>',
-        action              = '<?php echo $action ?>',
-        site_id             = '<?php echo $site_id ?>',
-        site_name           = "<?php echo htmlspecialchars($site_name) ?>",
-        controller_id       = '<?php echo $controller_id ?>',
-        output_format       = '<?php echo $output_format ?>',
-        selection           = '<?php echo $selection ?>',
-        objects_count       = '<?php echo $objects_count ?>',
-        timing_login_perc   = '<?php echo $login_perc ?>',
-        time_after_login    = '<?php echo $time_after_login ?>',
-        timing_load_perc    = '<?php echo $load_perc ?>',
-        time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
-        timing_remain_perc  = '<?php echo $remain_perc ?>',
-        timing_total_time   = '<?php echo $time_total ?>',
-        theme               = '<?php echo $theme ?>',
-        php_version         = '<?php echo (phpversion()) ?>',
-        memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
-        memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>',
-        curl_version        = '<?php echo $curl_version ?>',
-        openssl_version     = '<?php echo $openssl_version ?>',
-        os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
-        api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
-        api_class_version   = '<?php echo API_CLASS_VERSION ?>',
-        controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
-        controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
-        controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
 
     /**
      * update dynamic elements in the DOM using some of the above variables
