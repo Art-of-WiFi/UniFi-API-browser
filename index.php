@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.31');
+define('API_BROWSER_VERSION', '1.0.32');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -30,7 +30,7 @@ if (function_exists('curl_version')) {
     $curl_version    = $curl_info['version'];
     $openssl_version = $curl_info['ssl_version'];
 } else {
-    exit('The <b>PHP curl</b> module is not installed! Please correct this before you proceed!<br>');
+    exit('The <b>PHP curl</b> module is not installed! Please correct this before proceeding!<br>');
     $curl_version    = 'unavailable';
     $openssl_version = 'unavailable';
 }
@@ -219,18 +219,18 @@ if (isset($_GET['action'])) {
  * placed here so they can be overwritten by more "severe" error messages later on
  */
 if ($action === '') {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus' .
-                     ' <i class="fa fa-arrow-circle-up"></i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a data collection/API endpoint from the dropdown menus ' .
+                     '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 if ($site_id === '' && isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu <i class="fa fa-arrow-circle-up">' .
-                     '</i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu ' .
+                     '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 if (!isset($_SESSION['controller'])) {
-    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu <i class="fa fa-arrow-circle-up">' .
-                     '</i></div>';
+    $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu ' .
+                     '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
 /**
@@ -311,6 +311,25 @@ $time_after_login = $time_1 - $time_start;
 
 if (isset($unifidata)) {
     /**
+     * array containing attributes to fetch for the gateway stats, overriding
+     * the default attributes
+     */
+    $gateway_stats_attribs = [
+        'time',
+        'mem',
+        'cpu',
+        'loadavg_5',
+        'lan-rx_errors',
+        'lan-tx_errors',
+        'lan-rx_bytes',
+        'lan-tx_bytes',
+        'lan-rx_packets',
+        'lan-tx_packets',
+        'lan-rx_dropped',
+        'lan-tx_dropped'
+    ];
+
+    /**
      * select the required call to the UniFi Controller API based on the selected action
      */
     switch ($action) {
@@ -357,6 +376,18 @@ if (isset($unifidata)) {
         case 'stat_daily_aps':
             $selection = 'daily ap stats';
             $data      = $unifidata->stat_daily_aps();
+            break;
+        case 'stat_5minutes_gateway':
+            $selection = '5 minutes gateway stats';
+            $data      = $unifidata->stat_5minutes_gateway(null, null, $gateway_stats_attribs);
+            break;
+        case 'stat_hourly_gateway':
+            $selection = 'hourly gateway stats';
+            $data      = $unifidata->stat_hourly_gateway(null, null, $gateway_stats_attribs);
+            break;
+        case 'stat_daily_gateway':
+            $selection = 'daily gateway stats';
+            $data      = $unifidata->stat_daily_gateway(null, null, $gateway_stats_attribs);
             break;
         case 'stat_sysinfo':
             $selection = 'sysinfo';
@@ -796,8 +827,8 @@ function get_client_version()
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
                             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
                             <li id="list_known_rogueaps"><a href="?action=list_known_rogueaps">list known rogue access points</a></li>
-                            <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.0') >= 0) { ?>
+                                <!-- list tags, only to be displayed when we have detected a capable controller version -->
                                 <li role="separator" class="divider"></li>
                                 <li id="list_tags"><a href="?action=list_tags">list tags</a></li>
                             <?php } ?>
@@ -813,18 +844,29 @@ function get_client_version()
                             <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
-                            <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
+                                <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
                                 <li id="stat_sites"><a href="?action=stat_sites">all sites stats</a></li>
                             <?php } ?>
                             <!-- /all sites stats -->
+                            <!-- access point stats -->
                             <li role="separator" class="divider"></li>
                             <li id="stat_5minutes_aps"><a href="?action=stat_5minutes_aps">5 minutes access point stats</a></li>
                             <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
                             <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
+                            <!-- /access point stats -->
+                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.8.0') >= 0) { ?>
+                                <!-- gateway stats, only to be displayed when we have detected a capable controller version -->
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">USG required:</li>
+                                <li id="stat_5minutes_gateway"><a href="?action=stat_5minutes_gateway">5 minutes gateway stats</a></li>
+                                <li id="stat_hourly_gateway"><a href="?action=stat_hourly_gateway">hourly gateway stats</a></li>
+                                <li id="stat_daily_gateway"><a href="?action=stat_daily_gateway">daily gateway stats</a></li>
+                                <!-- /gateway stats -->
+                            <?php } ?>
                             <li role="separator" class="divider"></li>
-                            <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
+                                <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
                                 <li id="list_5minutes_dashboard"><a href="?action=list_5minutes_dashboard">5 minutes site dashboard metrics</a></li>
                                 <li id="list_hourly_dashboard"><a href="?action=list_hourly_dashboard">hourly site dashboard metrics</a></li>
                                 <li role="separator" class="divider"></li>
@@ -876,8 +918,8 @@ function get_client_version()
                             <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_backups"><a href="?action=list_backups">list auto backups</a></li>
-                            <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
                             <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
+                                <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
                                 <li role="separator" class="divider"></li>
                                 <li id="list_radius_profiles"><a href="?action=list_radius_profiles">list Radius profiles</a></li>
                                 <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
@@ -1065,7 +1107,7 @@ function get_client_version()
 var alert_message       = '<?php echo $alert_message ?>',
     action              = '<?php echo $action ?>',
     site_id             = '<?php echo $site_id ?>',
-    site_name           = "<?php echo htmlspecialchars($site_name) ?>",
+    site_name           = '<?php echo htmlspecialchars($site_name) ?>',
     controller_id       = '<?php echo $controller_id ?>',
     output_format       = '<?php echo $output_format ?>',
     selection           = '<?php echo $selection ?>',
@@ -1113,8 +1155,8 @@ $(document).ready(function() {
     /**
      * we hide the loading div and show the output panel
      */
-    $("#output_panel_loading").hide();
-    $("#output_panel").show();
+    $('#output_panel_loading').hide();
+    $('#output_panel').show();
 
     /**
      * update dynamic elements in the DOM using some of the above variables
@@ -1218,7 +1260,7 @@ $(document).ready(function() {
         }).fail(function(d, textStatus, error) {
             $('#span_api_browser_update').html('error checking updates');
             $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
-            console.error("getJSON failed, status: " + textStatus + ", error: " + error);
+            console.error('getJSON failed, status: ' + textStatus + ', error: ' + error);
         });;
     })
 
@@ -1289,9 +1331,15 @@ $(document).ready(function() {
     $.uf.copy('.js-copy-trigger');
 
     /**
-     * hide button if the ClipboardJS function isn't supported or the output format isn't supported
+     * hide "copy to clipboard" button if the ClipboardJS function isn't supported or the output format isn't supported
      */
-    if (!ClipboardJS.isSupported() || $.inArray(output_format, ['json', 'php_array', 'php_var_dump', 'php_var_export'] ) === -1) {
+    var unsupported_formats = [
+        'json',
+        'php_array',
+        'php_var_dump',
+        'php_var_export'
+    ];
+    if (!ClipboardJS.isSupported() || $.inArray(output_format, unsupported_formats) === -1) {
         $('.js-copy-trigger').hide();
     }
 
