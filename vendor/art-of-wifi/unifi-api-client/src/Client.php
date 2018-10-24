@@ -25,6 +25,8 @@ class Client
      * private properties
      */
     protected $baseurl            = 'https://127.0.0.1:8443';
+    protected $user               = '';
+    protected $password           = '';
     protected $site               = 'default';
     protected $version            = '5.6.39';
     protected $debug              = false;
@@ -50,7 +52,7 @@ class Client
      *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
      *                                   is to not validate the controller certificate
      */
-    function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
+    public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -81,7 +83,7 @@ class Client
         $this->update_unificookie();
     }
 
-    function __destruct()
+    public function __destruct()
     {
         /**
          * if user has $_SESSION['unificookie'] set, do not logout here
@@ -212,15 +214,15 @@ class Client
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
-        if (isset($up)) {
+        if (!empty($up)) {
             $json['up'] = intval($up);
         }
 
-        if (isset($down)) {
+        if (!empty($down)) {
             $json['down'] = intval($down);
         }
 
-        if (isset($MBytes)) {
+        if (!empty($MBytes)) {
             $json['bytes'] = intval($MBytes);
         }
 
@@ -426,7 +428,7 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
         $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attributes = [
             'bytes',
@@ -461,7 +463,7 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
         $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attributes = [
             'bytes',
@@ -534,12 +536,13 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end   = is_null($end) ? (time() * 1000) : intval($end);
         $start = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $json['mac'] = strtolower($mac);
         }
+
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', 'json=' . $json);
 
@@ -564,7 +567,7 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end   = is_null($end) ? (time() * 1000) : intval($end);
         $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
@@ -594,12 +597,13 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end   = is_null($end) ? (time() * 1000) : intval($end);
         $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $json['mac'] = strtolower($mac);
         }
+
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', 'json=' . $json);
 
@@ -630,7 +634,7 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
@@ -662,7 +666,7 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
@@ -694,7 +698,7 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
@@ -728,11 +732,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -758,11 +762,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -788,11 +792,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()-(time() % 3600))*1000) : intval($end);
-        $start    = is_null($start) ? $end-(52*7*24*3600*1000) : intval($start);
+        $end      = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -814,11 +818,40 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
         $json     = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/archive.speedtest', 'json=' . $json);
+
+        return $this->process_response($response);
+    }
+
+    /**
+     * Method to fetch IPS/IDS event
+     * ----------------------------------
+     * returns an array of IPS/IDS event objects
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
+     * optional parameter <limit> = Maximum number of events to return, defaults to 10000
+     *
+     * NOTES:
+     * - defaults to the past 24 hours
+     * - requires a USG
+     * - supported in UniFi controller versions 5.9.X and higher
+     */
+    public function stat_ips_events($start = null, $end = null, $limit = null)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $end      = is_null($end) ? (time() * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $limit    = is_null($limit) ? 10000 : intval($limit);
+        $json     = ['start' => $start, 'end' => $end, '_limit' => $limit];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ips/event', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -1064,12 +1097,12 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json               = json_encode([
+        $json = json_encode([
             'name'              => $group_name,
             'qos_rate_max_down' => intval($group_dn),
             'qos_rate_max_up'   => intval($group_up)
         ]);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $json);
 
         return $this->process_response($response);
     }
@@ -1091,7 +1124,7 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode([
+        $json = json_encode([
             '_id'               => $group_id,
             'name'              => $group_name,
             'qos_rate_max_down' => intval($group_dn),
@@ -1099,7 +1132,7 @@ class Client
             'site_id'           => $site_id
         ]);
 
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $json);
 
         return $this->process_response($response);
     }
@@ -1158,12 +1191,12 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json               = json_encode([
+        $json = json_encode([
             'name'          => $group_name,
             'group_type'    => $group_type,
             'group_members' => $group_members
         ]);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $json);
 
         return $this->process_response($response);
     }
@@ -1193,14 +1226,14 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode([
+        $json = json_encode([
             '_id'           => $group_id,
             'name'          => $group_name,
             'group_type'    => $group_type,
             'group_members' => $group_members,
             'site_id'       => $site_id
         ]);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id),
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id),
             $json);
 
         return $this->process_response($response);
@@ -1905,15 +1938,15 @@ class Client
             $json['note'] = trim($note);
         }
 
-        if (isset($up)) {
+        if (!empty($up)) {
             $json['up'] = intval($up);
         }
 
-        if (isset($down)) {
+        if (!empty($down)) {
             $json['down'] = intval($down);
         }
 
-        if (isset($MBytes)) {
+        if (!empty($MBytes)) {
             $json['bytes'] = intval($MBytes);
         }
 
@@ -2270,7 +2303,7 @@ class Client
             return false;
         }
 
-        $json     = json_encode([
+        $json = json_encode([
             'radio_table' => [
                 'radio'         => $radio,
                 'channel'       => $channel,
@@ -2340,7 +2373,7 @@ class Client
         if (!$this->is_loggedin) {
             return false;
         }
-        $json     = [
+        $json = [
             'portal_enabled'    => $portal_enabled,
             'portal_customized' => $portal_customized,
             'redirect_enabled'  => $redirect_enabled,
@@ -2361,7 +2394,7 @@ class Client
      * ------------------------------------------
      * return true on success
      * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
-     *                                         object/array structured in the same manner as is returned by list_settings() for the guest_access.
+     *                                         object/array structured in the same manner as is returned by list_settings() for the "guest_access" section.
      */
     public function set_guestlogin_settings_base($guestlogin_settings)
     {
@@ -2371,6 +2404,25 @@ class Client
 
         $json     = json_encode($guestlogin_settings, JSON_UNESCAPED_SLASHES);
         $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', 'json=' . $json);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update IPS/IDS settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <ips_settings> = stdClass object or associative array containing the IPS/IDS settings to apply, must be a (partial)
+     *                                     object/array structured in the same manner as is returned by list_settings() for the "ips" section.
+     */
+    public function set_ips_settings_base($ips_settings)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $json     = json_encode($ips_settings, JSON_UNESCAPED_SLASHES);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/ips', 'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -2699,7 +2751,7 @@ class Client
 
         $macs    = array_map('strtolower', $macs);
         $payload = [
-            'mac_filter_enabled' => (bool)$mac_filter_enabled,
+            'mac_filter_enabled' => (bool) $mac_filter_enabled,
             'mac_filter_policy'  => $mac_filter_policy,
             'mac_filter_list'    => $macs
         ];
@@ -3054,11 +3106,11 @@ class Client
         $account_details    = [
             'name'               => $name,
             'x_password'         => $x_password,
-            'tunnel_type'        => (int)$tunnel_type,
-            'tunnel_medium_type' => (int)$tunnel_medium_type
+            'tunnel_type'        => (int) $tunnel_type,
+            'tunnel_medium_type' => (int) $tunnel_medium_type
         ];
         if (isset($vlan)) {
-            $account_details['vlan'] = (int)$vlan;
+            $account_details['vlan'] = (int) $vlan;
         }
 
         $json     = json_encode($account_details);

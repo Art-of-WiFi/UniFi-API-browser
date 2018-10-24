@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.32');
+define('API_BROWSER_VERSION', '1.0.33');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -537,6 +537,10 @@ if (isset($unifidata)) {
             $selection = 'list auto backups';
             $data      = $unifidata->list_backups();
             break;
+        case 'stat_ips_events':
+            $selection = 'list IPS/IDS events';
+            $data      = $unifidata->stat_ips_events();
+            break;
         default:
             break;
     }
@@ -730,6 +734,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu" id="controllerslist">
                             <li class="dropdown-header">Select a controller</li>
+                            <li role="separator" class="divider"></li>
                             <?php
                             /**
                              * here we loop through the configured UniFi controllers
@@ -761,6 +766,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu" id="siteslist">
                             <li class="dropdown-header">Select a site</li>
+                            <li role="separator" class="divider"></li>
                             <?php
                             /**
                              * here we loop through the available sites, after we've sorted the sites collection
@@ -788,14 +794,15 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu" id="outputselection">
                             <li class="dropdown-header">Select an output format</li>
-                            <li id="json"><a href="?output_format=json">json (default)</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li id="json"><a href="?output_format=json">JSON (default)</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="php_array"><a href="?output_format=php_array">PHP array</a></li>
                             <li id="php_var_dump"><a href="?output_format=php_var_dump">PHP var_dump</a></li>
                             <li id="php_var_export"><a href="?output_format=php_var_export">PHP var_export</a></li>
                             <li role="separator" class="divider"></li>
                             <li class="dropdown-header">Nice but slow with large collections</li>
-                            <li id="json_color"><a href="?output_format=json_color">json highlighted</a></li>
+                            <li id="json_color"><a href="?output_format=json_color">JSON highlighted</a></li>
                             <li id="php_array_kint"><a href="?output_format=php_array_kint">PHP array using Kint</a></li>
                         </ul>
                     </li>
@@ -806,6 +813,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
                             <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
                             <li id="list_users"><a href="?action=list_users">list users</a></li>
@@ -823,6 +831,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
                             <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
                             <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
@@ -841,6 +850,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
                             <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
                             <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
@@ -884,6 +894,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
                             <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
                             <li role="separator" class="divider"></li>
@@ -897,6 +908,7 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
                             <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
                             <li id="list_self"><a href="?action=list_self">self</a></li>
@@ -933,11 +945,16 @@ function get_client_version()
                         </a>
                         <ul class="dropdown-menu scrollable-menu">
                             <li class="dropdown-header">Select a data collection</li>
+                            <li role="separator" class="divider"></li>
                             <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
                             <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
                             <li id="count_active_alarms"><a href="?action=count_active_alarms">count active alarms</a></li>
                             <li role="separator" class="divider"></li>
                             <li id="list_events"><a href="?action=list_events">list events</a></li>
+                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.9.10') >= 0) { ?>
+                                <li role="separator" class="divider"></li>
+                                <li id="stat_ips_events"><a href="?action=stat_ips_events">list IPS/IDS events</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                 <?php } ?>
@@ -951,7 +968,8 @@ function get_client_version()
                     <ul class="dropdown-menu scrollable-menu">
                         <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
                         <li role="separator" class="divider"></li>
-                        <li id="reset_session" data-toggle="tooltip" data-placement="top" data-original-title="In some cases this will fix login errors (e.g. empty sites list)">
+                        <li id="reset_session" data-toggle="tooltip" data-container="body" data-placement="left"
+                            data-original-title="In some cases this can fix login errors and/or an empty sites list">
                             <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
                         </li>
                         <li role="separator" class="divider"></li>
