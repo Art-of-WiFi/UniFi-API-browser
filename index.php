@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.33');
+define('API_BROWSER_VERSION', '1.0.34');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -122,7 +122,6 @@ $_SESSION['last_activity'] = time();
  * only process these after site_id is set:
  * - action
  * - output_format
- * - theme
  */
 if (isset($_GET['controller_id'])) {
     /**
@@ -173,21 +172,6 @@ if (isset($_GET['controller_id'])) {
             $site_name = $_SESSION['site_name'];
         }
     }
-}
-
-/**
- * get requested theme or use the theme stored in the $_SESSION array
- */
-if (isset($_GET['theme'])) {
-    $theme             = $_GET['theme'];
-    $_SESSION['theme'] = $theme;
-    $theme_changed     = true;
-} else {
-    if (isset($_SESSION['theme'])) {
-        $theme = $_SESSION['theme'];
-    }
-
-    $theme_changed = false;
 }
 
 /**
@@ -554,15 +538,6 @@ if ($action != '') {
 }
 
 /**
- * construct the url for the Bootstrap CSS file based on the selected theme (standard Bootstrap or one of the Bootswatch themes)
- */
-if ($theme === 'bootstrap') {
-    $css_url = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
-} else {
-    $css_url = 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' . trim($theme) . '/bootstrap.min.css';
-}
-
-/**
  * execute timing of data collection from UniFi controller
  */
 $time_2          = microtime(true);
@@ -632,8 +607,8 @@ function get_client_version()
 
         if (isset($json_decoded['packages'])) {
             foreach ($json_decoded['packages'] as $package) {
-                if($package['name'] === 'art-of-wifi/unifi-api-client') {
-                   return substr($package['version'], 1);
+                if ($package['name'] === 'art-of-wifi/unifi-api-client') {
+                    return substr($package['version'], 1);
                 }
             }
         }
@@ -652,8 +627,13 @@ function get_client_version()
     <!-- latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- load the appropriate Bootstrap CSS file from CDN -->
-    <link rel="stylesheet" href="<?php echo $css_url ?>">
+    <!-- load the default Bootstrap CSS file from CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- placeholder to dynamically load the appropriate Bootswatch CSS file from CDN -->
+    <link rel="stylesheet" href="" id="bootswatch_theme_stylesheet">
+
+    <!-- load the jsonview CSS file from CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
 
     <!-- define favicon  -->
@@ -974,24 +954,24 @@ function get_client_version()
                         </li>
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">Select a theme</li>
-                        <li id="bootstrap"><a href="?theme=bootstrap">Bootstrap (default)</a></li>
-                        <li id="cerulean"><a href="?theme=cerulean">Cerulean</a></li>
-                        <li id="cosmo"><a href="?theme=cosmo">Cosmo</a></li>
-                        <li id="cyborg"><a href="?theme=cyborg">Cyborg</a></li>
-                        <li id="darkly"><a href="?theme=darkly">Darkly</a></li>
-                        <li id="flatly"><a href="?theme=flatly">Flatly</a></li>
-                        <li id="journal"><a href="?theme=journal">Journal</a></li>
-                        <li id="lumen"><a href="?theme=lumen">Lumen</a></li>
-                        <li id="paper"><a href="?theme=paper">Paper</a></li>
-                        <li id="readable"><a href="?theme=readable">Readable</a></li>
-                        <li id="sandstone"><a href="?theme=sandstone">Sandstone</a></li>
-                        <li id="simplex"><a href="?theme=simplex">Simplex</a></li>
-                        <li id="slate"><a href="?theme=slate">Slate</a></li>
-                        <li id="solar"><a href="?theme=solar">Solar</a></li>
-                        <li id="spacelab"><a href="?theme=spacelab">Spacelab</a></li>
-                        <li id="superhero"><a href="?theme=superhero">Superhero</a></li>
-                        <li id="united"><a href="?theme=united">United</a></li>
-                        <li id="yeti"><a href="?theme=yeti">Yeti</a></li>
+                        <li id="bootstrap"><a href="#" onclick=switchCSS('bootstrap')>Bootstrap (default)</a></li>
+                        <li id="cerulean"><a href="#" onclick=switchCSS('cerulean')>Cerulean</a></li>
+                        <li id="cosmo"><a href="#" onclick=switchCSS('cosmo')>Cosmo</a></li>
+                        <li id="cyborg"><a href="#" onclick=switchCSS('cyborg')>Cyborg</a></li>
+                        <li id="darkly"><a href="#" onclick=switchCSS('darkly')>Darkly</a></li>
+                        <li id="flatly"><a href="#" onclick=switchCSS('flatly')>Flatly</a></li>
+                        <li id="journal"><a href="#" onclick=switchCSS('journal')>Journal</a></li>
+                        <li id="lumen"><a href="#" onclick=switchCSS('lumen')>Lumen</a></li>
+                        <li id="paper"><a href="#" onclick=switchCSS('paper')>Paper</a></li>
+                        <li id="readable"><a href="#" onclick=switchCSS('readable')>Readable</a></li>
+                        <li id="sandstone"><a href="#" onclick=switchCSS('sandstone')>Sandstone</a></li>
+                        <li id="simplex"><a href="#" onclick=switchCSS('simplex')>Simplex</a></li>
+                        <li id="slate"><a href="#" onclick=switchCSS('slate')>Slate</a></li>
+                        <li id="solar"><a href="#" onclick=switchCSS('solar')>Solar</a></li>
+                        <li id="spacelab"><a href="#" onclick=switchCSS('spacelab')>Spacelab</a></li>
+                        <li id="superhero"><a href="#" onclick=switchCSS('superhero')>Superhero</a></li>
+                        <li id="united"><a href="#" onclick=switchCSS('united')>United</a></li>
+                        <li id="yeti"><a href="#" onclick=switchCSS('yeti')>Yeti</a></li>
                     </ul>
                 </li>
             </ul>
@@ -1136,8 +1116,6 @@ var alert_message       = '<?php echo $alert_message ?>',
     time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
     timing_remain_perc  = '<?php echo $remain_perc ?>',
     timing_total_time   = '<?php echo $time_total ?>',
-    theme               = '<?php echo $theme ?>',
-    theme_changed       = '<?php echo $theme_changed ?>',
     php_version         = '<?php echo (phpversion()) ?>',
     memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
     memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>',
@@ -1148,28 +1126,37 @@ var alert_message       = '<?php echo $alert_message ?>',
     api_class_version   = '<?php echo API_CLASS_VERSION ?>',
     controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
     controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
-    controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
+    controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>',
+    theme               = 'bootstrap';
 
 /**
- * check whether user has requested a theme change, if yes we store the new value
- * for later use
+ * check whether user has stored a custom theme, if yes we switch to the stored value
  */
-if (theme_changed == 1 || theme_changed == 'true') {
-    localStorage.setItem('API_browser_theme', theme);
+if (localStorage.getItem('API_browser_theme') == null || localStorage.getItem('API_browser_theme') === 'bootstrap') {
+    $('#bootstrap').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 } else {
-    /**
-     * check whether the current value of theme is the same as stored in the browser localStorage,
-     * if not, we refresh the page with an additional GET parameter to switch to the stored theme
-     */
-    if (localStorage.getItem('API_browser_theme') !== null) {
-        var stored_theme = localStorage.getItem('API_browser_theme');
-        if (stored_theme != theme) {
-            window.location.href = 'index.php?theme=' + stored_theme;
-        }
-    }
+    var stored_theme = localStorage.getItem('API_browser_theme');
+    switchCSS(stored_theme);
 }
 
-$(document).ready(function() {
+/**
+ * process a Bootswatch CSS stylesheet change
+ */
+function switchCSS(new_theme) {
+    console.log('current theme: ' + theme + ' new theme: ' + new_theme);
+    if (new_theme === 'bootstrap') {
+        $('#bootswatch_theme_stylesheet').attr('href', '');
+    } else {
+        $('#bootswatch_theme_stylesheet').attr('href', 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' + new_theme + '/bootstrap.min.css');
+    }
+
+    $('#' + theme).removeClass('active').find('a').children('i').remove();
+    $('#' + new_theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+    theme = new_theme;
+    localStorage.setItem('API_browser_theme', theme);
+}
+
+$(document).ready(function () {
     /**
      * we hide the loading div and show the output panel
      */
@@ -1228,7 +1215,6 @@ $(document).ready(function() {
      * these two options have default values so no tests needed here
      */
     $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    $('#' + theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
     /**
      * initialise the jquery-jsonview library, only when required
@@ -1240,13 +1226,13 @@ $(document).ready(function() {
         /**
          * the expand/collapse toggle buttons to control the json view
          */
-        $('#toggle-btn').on('click', function() {
+        $('#toggle-btn').on('click', function () {
             $('#pre_output').JSONView('toggle');
             $('#i_toggle-btn').toggleClass('fa-plus').toggleClass('fa-minus');
             $(this).blur();
         });
 
-        $('#toggle-level2-btn').on('click', function() {
+        $('#toggle-level2-btn').on('click', function () {
             $('#pre_output').JSONView('toggle', 2);
             $('#i_toggle-level2-btn').toggleClass('fa-plus').toggleClass('fa-minus');
             $(this).blur();
@@ -1263,7 +1249,7 @@ $(document).ready(function() {
      * but only when the "about" modal is opened
      */
     $('#about_modal').on('shown.bs.modal', function (e) {
-        $.getJSON('https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest', function(external) {
+        $.getJSON('https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest', function (external) {
             if (api_browser_version != '' && typeof(external.tag_name) !== 'undefined') {
                 if (api_browser_version < external.tag_name.substring(1)) {
                     $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));
@@ -1275,7 +1261,7 @@ $(document).ready(function() {
                     $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
                 }
             }
-        }).fail(function(d, textStatus, error) {
+        }).fail(function (d, textStatus, error) {
             $('#span_api_browser_update').html('error checking updates');
             $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
             console.error('getJSON failed, status: ' + textStatus + ', error: ' + error);
@@ -1301,7 +1287,7 @@ $(document).ready(function() {
         var _this = this;
 
         var clipboard = new ClipboardJS(button, {
-            text: function(trigger) {
+            text: function (trigger) {
                 var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
                 if (el.is(':input')) {
                     return el.val();
@@ -1311,12 +1297,12 @@ $(document).ready(function() {
             }
         });
 
-        clipboard.on('success', function(e) {
+        clipboard.on('success', function (e) {
             setTooltip(e.trigger, 'Copied!');
             hideTooltip(e.trigger);
         });
 
-        clipboard.on('error', function(e) {
+        clipboard.on('error', function (e) {
             setTooltip(e.trigger, 'Failed!');
             hideTooltip(e.trigger);
             console.log('Copy to clipboard failed, most probably the selection is too large');
@@ -1329,7 +1315,7 @@ $(document).ready(function() {
         }
 
         function hideTooltip(btn) {
-            setTimeout(function() {
+            setTimeout(function () {
                 $(btn).tooltip('hide')
                 .attr('data-original-title', 'Copy to clipboard');
             }, 1000);

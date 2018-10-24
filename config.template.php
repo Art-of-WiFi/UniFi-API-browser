@@ -49,11 +49,11 @@ $controllers[2] = [
 ];
 */
 
-$cookietimeout      = '3600';      // time of inactivity in seconds, after which the PHP session cookie will be refreshed
-                                   // after the cookie refresh the site and data collection will need to be selected again
+$cookietimeout      = '3600'; // time of inactivity in seconds, after which the PHP session cookie will be refreshed
+                              // after the cookie refresh the site and data collection will need to be selected again
 
 $theme              = 'bootstrap'; // your default theme of choice, pick one from the list below:
                                    // bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
                                    // readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
 
-$debug              = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
+$debug              = false; // set to true (without quotes) to enable debug output to the browser and the PHP error log
