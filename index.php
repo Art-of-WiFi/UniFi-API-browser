@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.33');
+define('API_BROWSER_VERSION', '1.0.34');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -49,6 +49,8 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
     session_unset();
     session_destroy();
     session_start();
+    header("Location: ".strtok($_SERVER['REQUEST_URI'], '?'));
+    exit;
 }
 
 /**
@@ -59,28 +61,30 @@ $time_start = microtime(true);
 /**
  * declare variables which are required later on together with their default values
  */
-$controller_id = '';
-$action        = '';
-$site_id       = '';
-$site_name     = '';
-$selection     = '';
-$data          = '';
-$objects_count = '';
-$alert_message = '';
-$output_format = 'json';
-$debug         = false;
+$show_login         = false;
+$controller_id      = '';
+$action             = '';
+$site_id            = '';
+$site_name          = '';
+$selection          = '';
+$data               = '';
+$objects_count      = '';
+$alert_message      = '';
+$output_format      = 'json';
+$controlleruser     = '';
+$controllerpassword = '';
+$controllerurl      = '';
+$controllername     = 'Controller';
+$cookietimeout      = '3600';
+$theme              = 'bootstrap';
+$debug              = false;
 
 /**
- * load the configuration file
+ * load the optional configuration file if readable
  * - allows override of several of the previously declared variables
- * - if the config.php file is unreadable or does not exist, an alert is displayed on the page
  */
-if (!is_readable('config.php')) {
-    $alert_message = '<div class="alert alert-danger" role="alert">The file <code>config.php</code> is not readable or does not exist.' .
-                     '<br>If you have not yet done so, please copy/rename the <code>config.template.php</code> file to <code>config.php</code> and follow ' .
-                     'the instructions inside to enter your credentials and controller details.</div>';
-} else {
-    require_once('config.php');
+if (is_file('config.php') && is_readable('config.php')) {
+    include('config.php');
 }
 
 /**
@@ -128,6 +132,10 @@ if (isset($_GET['controller_id'])) {
     /**
      * user has requested a controller switch
      */
+    if (!isset($controllers)) {
+        header("Location: " . strtok($_SERVER['REQUEST_URI'], '?') . "?reset_session=true");
+        exit;
+    }
     $controller                = $controllers[$_GET['controller_id']];
     $controller_id             = $_GET['controller_id'];
     $_SESSION['controller']    = $controller;
@@ -156,7 +164,7 @@ if (isset($_GET['controller_id'])) {
                 'user'     => $controlleruser,
                 'password' => $controllerpassword,
                 'url'      => $controllerurl,
-                'name'     => 'Controller'
+                'name'     => $controllername
             ];
             $controller = $_SESSION['controller'];
         }
@@ -173,6 +181,22 @@ if (isset($_GET['controller_id'])) {
             $site_name = $_SESSION['site_name'];
         }
     }
+}
+
+/**
+ * use form data if present to login
+ */
+if (isset($_POST['controller_user']) && !empty($_POST['controller_user'])) {
+    $controller['user']     = $_POST['controller_user'];
+}
+if (isset($_POST['controller_password']) && !empty($_POST['controller_password'])) {
+    $controller['password'] = $_POST['controller_password'];
+}
+if (isset($_POST['controller_url']) && !empty($_POST['controller_url'])) {
+    $controller['url']      = $_POST['controller_url'];
+}
+if (isset($controller)) {
+    $_SESSION['controller'] = $controller;
 }
 
 /**
@@ -223,33 +247,49 @@ if ($action === '') {
                      '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
-if ($site_id === '' && isset($_SESSION['controller'])) {
+if ($site_id === '' && isset($_SESSION['unificookie'])) {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu ' .
                      '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
-if (!isset($_SESSION['controller'])) {
+if (!isset($controller['name']) && isset($controllers)) {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a controller from the Controllers dropdown menu ' .
                      '<i class="fa fa-arrow-circle-up"></i></div>';
+} else {
+    if (!isset($_SESSION['unificookie']) && (empty($controller['user']) || empty($controller['password']) || empty($controller['url']))) {
+        $show_login    = true;
+        $alert_message = '<div class="alert alert-info" role="alert">Please login to ';
+        if (!empty($controller['url'])) {
+            $alert_message .= '<a href="' . $controller['url'] . '">';
+        }
+        $alert_message .= $controller['name'];
+        if (!empty($controller['url'])) {
+            $alert_message .= '</a>';
+        }
+        if (!empty($controller['user'])) {
+            $alert_message .= ' with username ' . $controller['user'];
+        }
+        $alert_message .= ' <i class="fa fa-sign-in"></i></div>';
+    }
 }
 
+
 /**
- * do this when a controller has been selected and was stored in the $_SESSION array
+ * do this when a controller has been selected and was stored in the $_SESSION array and login isn't needed
  */
-if (isset($_SESSION['controller'])) {
+if (isset($_SESSION['controller']) && $show_login != true) {
     /**
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
      */
-    $unifidata      = new UniFi_API\Client($controller['user'], $controller['password'], $controller['url'], $site_id);
+    $unifidata      = new UniFi_API\Client(trim($controller['user']), $controller['password'], rtrim(trim($controller['url']), '/'), $site_id);
     $set_debug_mode = $unifidata->set_debug($debug);
     $loginresults   = $unifidata->login();
 
     if ($loginresults === 400) {
         $alert_message = '<div class="alert alert-danger" role="alert">HTTP response status: 400' .
-                         '<br>This is probably caused by a UniFi controller login failure, please check your credentials in ' .
-                         'config.php. After correcting your credentials, please restart your browser or use the <b>Reset PHP session</b> function ' .
-                         'in the dropdown menu on the right, before attempting to use the API browser tool again.</div>';
+                         '<br>This is probably caused by a UniFi controller login failure. Please check your credentials and ' .
+                         '<a href="?reset_session=true">try again</a>.</div>';
 
         /**
          * to prevent unwanted errors we assign empty values to the following variables
@@ -273,10 +313,9 @@ if (isset($_SESSION['controller'])) {
                 $sites = [];
 
                 $alert_message = '<div class="alert alert-danger" role="alert">No sites available' .
-                                 '<br>This is probably caused by incorrect access rights in the UniFi controller for the credentials provided in ' .
-                                 'config.php, or else check your web server error logs. After updating your credentials, please restart your ' .
-                                 'browser or use the <b>Reset PHP session</b> function in the dropdown menu on the right, before attempting to use ' .
-                                 'the API browser tool again.</div>';
+                                 '<br>This is probably caused by incorrect access rights in the UniFi controller, or the controller is not ' .
+                                 'accepting connections. Please check your credentials and/or your server error logs and ' .
+                                 '<a href="?reset_session=true">try again</a>.</div>';
             }
 
         } else {
@@ -724,7 +763,7 @@ function get_client_version()
                             /**
                              * here we display the UniFi controller name, if selected, else just label it
                              */
-                            if (isset($controller)) {
+                            if (isset($controller['name'])) {
                                 echo $controller['name'];
                             } else {
                                 echo 'Controllers';
@@ -748,7 +787,7 @@ function get_client_version()
                 <?php } ?>
                 <!-- /controllers dropdown -->
                 <!-- sites dropdown, only show when a controller has been selected -->
-                <?php if (isset($_SESSION['controller'])) { ?>
+                <?php if ($show_login == false && isset($controller['name'])) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 
@@ -786,7 +825,7 @@ function get_client_version()
                 <?php } ?>
                 <!-- /sites dropdown -->
                 <!-- data collection dropdowns, only show when a site_id is selected -->
-                <?php if ($site_id && isset($_SESSION['controller'])) { ?>
+                <?php if ($site_id && isset($_SESSION['unificookie'])) { ?>
                     <li id="output-menu" class="dropdown">
                         <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             Output
@@ -1000,8 +1039,16 @@ function get_client_version()
 </nav><!-- /top navbar -->
 <div class="container-fluid">
     <div id="alert_placeholder" style="display: none"></div>
+    <div id="login_form" style="display: none">
+        <form method="post">
+            <?php if (empty($controller['user'])) : ?><input type="text" name="controller_user" class="form-control" placeholder="Username"><br /><?php endif; ?>
+            <?php if (empty($controller['password'])) : ?><input type="password" name="controller_password" class="form-control" placeholder="Password"><br /><?php endif; ?>
+            <?php if (empty($controller['url'])) : ?><input type="text" name="controller_url" class="form-control" placeholder="URL"><br /><?php endif; ?>
+            <input type="submit" name="login" class="btn btn-primary" value="Login">
+        </form>
+    </div>
     <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
-    <?php if (isset($_SESSION['controller']) && $action) { ?>
+    <?php if (isset($_SESSION['unificookie']) && $action) { ?>
     <div id="output_panel_loading" class="text-center">
         <br>
         <h2><i class="fa fa-spinner fa-spin fa-fw"></i></h2>
@@ -1028,7 +1075,7 @@ function get_client_version()
         </div>
         <div class="panel-body">
             <!--only display panel content when an action has been selected-->
-            <?php if ($action !== '' && isset($_SESSION['controller'])) { ?>
+            <?php if ($action !== '' && isset($_SESSION['unificookie'])) { ?>
                 <!-- present the timing results using an HTML5 progress bar -->
                 <span id="span_elapsed_time"></span>
                 <br>
@@ -1123,6 +1170,7 @@ function get_client_version()
  * populate some global Javascript variables with PHP output for cleaner code
  */
 var alert_message       = '<?php echo $alert_message ?>',
+    show_login          = '<?php echo $show_login ?>',
     action              = '<?php echo $action ?>',
     site_id             = '<?php echo $site_id ?>',
     site_name           = '<?php echo htmlspecialchars($site_name) ?>',
@@ -1146,9 +1194,9 @@ var alert_message       = '<?php echo $alert_message ?>',
     os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
     api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
     api_class_version   = '<?php echo API_CLASS_VERSION ?>',
-    controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
-    controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
-    controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>';
+    controller_user     = '<?php if (isset($controller['user'])) echo $controller['user'] ?>',
+    controller_url      = '<?php if (isset($controller['url'])) echo $controller['url'] ?>',
+    controller_version  = '<?php if (isset($detected_controller_version)) echo $detected_controller_version ?>';
 
 /**
  * check whether user has requested a theme change, if yes we store the new value
@@ -1181,6 +1229,9 @@ $(document).ready(function() {
      */
     $('#alert_placeholder').html(alert_message);
     $('#alert_placeholder').fadeIn(1000);
+    if (show_login == 1 || show_login == 'true') {
+        $('#login_form').show();
+    }
 
     $('#span_site_id').html(site_id);
     $('#span_site_name').html(site_name);
