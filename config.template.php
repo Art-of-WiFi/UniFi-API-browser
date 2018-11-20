@@ -9,8 +9,10 @@
 
 /**
  * Optionally copy/rename this configuration template file to config.php and store all or part of your credentials
- * If credential information is not specific in this file, or the file is not copied to config.php,
- * or only part of the crential information is given, then the API browser will show a form to complete the login
+ *
+ * IMPORTANT NOTE:
+ * If credential information is not specified in this file, or the file is not copied to config.php,
+ * or only part of the credentials are provided, then the API browser will show a form to complete the login
  */
 
 /**
@@ -33,8 +35,8 @@
  *
  * Please remember to only have one of either two methods active!
  *
- * NOTE: If you use the multi controller method, then at least the 'name' value is required
- *
+ * IMPORTANT NOTE:
+ * If you use the multi controller method, then at least the 'name' value is required for each controller entry
  */
 /*
 $controllers[0] = [

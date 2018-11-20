@@ -195,12 +195,15 @@ if (isset($_GET['controller_id'])) {
 if (isset($_POST['controller_user']) && !empty($_POST['controller_user'])) {
     $controller['user']     = $_POST['controller_user'];
 }
+
 if (isset($_POST['controller_password']) && !empty($_POST['controller_password'])) {
     $controller['password'] = $_POST['controller_password'];
 }
+
 if (isset($_POST['controller_url']) && !empty($_POST['controller_url'])) {
     $controller['url']      = $_POST['controller_url'];
 }
+
 if (isset($controller)) {
     $_SESSION['controller'] = $controller;
 }
@@ -253,7 +256,7 @@ if ($action === '') {
                      '<i class="fa fa-arrow-circle-up"></i></div>';
 }
 
-if ($site_id === '' && isset($_SESSION['unificookie'])) {
+if ($site_id === '') {
     $alert_message = '<div class="alert alert-info" role="alert">Please select a site from the Sites dropdown menu ' .
                      '<i class="fa fa-arrow-circle-up"></i></div>';
 }
@@ -268,13 +271,16 @@ if (!isset($controller['name']) && isset($controllers)) {
         if (!empty($controller['url'])) {
             $alert_message .= '<a href="' . $controller['url'] . '">';
         }
+
         $alert_message .= $controller['name'];
         if (!empty($controller['url'])) {
             $alert_message .= '</a>';
         }
+
         if (!empty($controller['user'])) {
             $alert_message .= ' with username ' . $controller['user'];
         }
+
         $alert_message .= ' <i class="fa fa-sign-in"></i></div>';
     }
 }
@@ -1045,14 +1051,39 @@ function get_client_version()
 </nav><!-- /top navbar -->
 <div class="container-fluid">
     <div id="alert_placeholder" style="display: none"></div>
+    <!-- login_form, only to be displayed when we have no controller config -->
     <div id="login_form" style="display: none">
-        <form method="post">
-            <?php if (empty($controller['user'])) : ?><input type="text" name="controller_user" class="form-control" placeholder="Username"><br /><?php endif; ?>
-            <?php if (empty($controller['password'])) : ?><input type="password" name="controller_password" class="form-control" placeholder="Password"><br /><?php endif; ?>
-            <?php if (empty($controller['url'])) : ?><input type="text" name="controller_url" class="form-control" placeholder="URL"><br /><?php endif; ?>
-            <input type="submit" name="login" class="btn btn-primary" value="Login">
-        </form>
+        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 align="center">UniFi Controller login</h3>
+                    <br>
+                    <form method="post">
+                        <?php if (empty($controller['user'])) : ?>
+                            <div class="form-group">
+                                <label for="input_controller_user">Username</label>
+                                <input type="text" id="input_controller_user" name="controller_user" class="form-control" placeholder="Controller username">
+                            </div>
+                        <?php endif; ?>
+                        <?php if (empty($controller['password'])) : ?>
+                            <div class="form-group">
+                                <label for="input_controller_password">Password</label>
+                                <input type="password" id="input_controller_password" name="controller_password" class="form-control" placeholder="Controller password">
+                            </div>
+                        <?php endif; ?>
+                        <?php if (empty($controller['url'])) : ?>
+                            <div class="form-group">
+                                <label for="input_controller_url">URL</label>
+                                <input type="text" id="input_controller_url" name="controller_url" class="form-control" placeholder="https://<controller FQDN or IP>:8443">
+                            </div>
+                        <?php endif; ?>
+                        <input type="submit" name="login" class="btn btn-primary pull-right" value="Login">
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+    <!-- /login_form -->
     <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
     <?php if (isset($_SESSION['unificookie']) && $action) { ?>
     <div id="output_panel_loading" class="text-center">
@@ -1231,14 +1262,17 @@ $(document).ready(function() {
     $('#output_panel').show();
 
     /**
-     * update dynamic elements in the DOM using some of the above variables
+     * if needed we display the login form
      */
-    $('#alert_placeholder').html(alert_message);
-    $('#alert_placeholder').fadeIn(1000);
     if (show_login == 1 || show_login == 'true') {
         $('#login_form').show();
     }
 
+    /**
+     * update dynamic elements in the DOM using some of the above variables
+     */
+    $('#alert_placeholder').html(alert_message);
+    $('#alert_placeholder').fadeIn(1000);
     $('#span_site_id').html(site_id);
     $('#span_site_name').html(site_name);
     $('#span_output_format').html(output_format);
