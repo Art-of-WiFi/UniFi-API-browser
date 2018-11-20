@@ -49,7 +49,7 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
     session_unset();
     session_destroy();
     session_start();
-    header("Location: ".strtok($_SERVER['REQUEST_URI'], '?'));
+    header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
 
@@ -157,16 +157,22 @@ if (isset($_GET['controller_id'])) {
     } else {
         if (!isset($controllers)) {
             /**
-             * if the user has configured a single controller, we push it's details
-             * to the $_SESSION and $controller arrays
+             * pre-load $controller array with $_SESSION['controllers'] if present
+             * then load configured single site credentials
              */
-            $_SESSION['controller'] = [
-                'user'     => $controlleruser,
-                'password' => $controllerpassword,
-                'url'      => $controllerurl,
-                'name'     => $controllername
-            ];
-            $controller = $_SESSION['controller'];
+            $controller = [];
+            if (isset($_SESSION['controller'])) {
+                $controller = $_SESSION['controller'];
+            }
+            if (!isset($controller['user']) || !isset($controller['password']) || !isset($controller['url'])) {
+                $_SESSION['controller'] = [
+                    'user'     => $controlleruser,
+                    'password' => $controllerpassword,
+                    'url'      => $controllerurl,
+                    'name'     => $controllername
+                ];
+                $controller = $_SESSION['controller'];
+            }
         }
     }
 
@@ -184,7 +190,7 @@ if (isset($_GET['controller_id'])) {
 }
 
 /**
- * use form data if present to login
+ * load login form data, if present, and save to credential variables
  */
 if (isset($_POST['controller_user']) && !empty($_POST['controller_user'])) {
     $controller['user']     = $_POST['controller_user'];
@@ -277,7 +283,7 @@ if (!isset($controller['name']) && isset($controllers)) {
 /**
  * do this when a controller has been selected and was stored in the $_SESSION array and login isn't needed
  */
-if (isset($_SESSION['controller']) && $show_login != true) {
+if (isset($_SESSION['controller']) && $show_login !== true) {
     /**
      * create a new instance of the API client class and log in to the UniFi controller
      * - if an error occurs during the login process, an alert is displayed on the page
@@ -588,7 +594,7 @@ if (isset($unifidata)) {
 /**
  * count the number of objects collected from the UniFi controller
  */
-if ($action != '') {
+if ($action != '' && !empty($data)) {
     $objects_count = count($data);
 }
 

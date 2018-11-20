@@ -19,10 +19,10 @@
  * Update this section with your UniFi controller details and credentials
  * Remove or comment out this section when using the Multi controller configuration method
  */
-$controlleruser     = ''; // the user name for access to the UniFi Controller
-$controllerpassword = ''; // the password for access to the UniFi Controller
-$controllerurl      = ''; // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-$controllername     = ''; // name for this controller
+//$controlleruser     = ''; // the user name for access to the UniFi Controller
+//$controllerpassword = ''; // the password for access to the UniFi Controller
+//$controllerurl      = ''; // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
+//$controllername     = ''; // name for this controller
 
 /**
  * Multi controller configuration
@@ -59,11 +59,15 @@ $controllers[2] = [
 ];
 */
 
-$cookietimeout      = '3600';      // time of inactivity in seconds, after which the PHP session cookie will be refreshed
-                                   // after the cookie refresh the site and data collection will need to be selected again
+/**
+ * Optionally uncomment and change the default options below
+ */
 
-$theme              = 'bootstrap'; // your default theme of choice, pick one from the list below:
-                                   // bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
-                                   // readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
+//$cookietimeout      = '3600';      // time of inactivity in seconds, after which the PHP session cookie will be refreshed
+                                     // after the cookie refresh the site and data collection will need to be selected again
 
-$debug              = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
+//$theme              = 'bootstrap'; // your default theme of choice, pick one from the list below:
+                                     // bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
+                                     // readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
+
+//$debug              = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
