@@ -11,9 +11,9 @@
     - could be combined with the DataTables output option
     - will require "flattening" of multidimensional arrays/objects
 
-3. Add simple user/password login
-    - consider setting user name/password in the config file, though not very secure
-    - avoid dependencies such as MySQL etc. as much as possible
+3. ~~Add simple user/password login~~
+    - ~~consider setting user name/password in the config file, though not very secure~~
+    - ~~avoid dependencies such as MySQL etc. as much as possible~~
 
 ### Call for suggestions
 
