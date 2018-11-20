@@ -189,8 +189,6 @@ if (isset($_GET['controller_id'])) {
 }
 
 /**
-<<<<<<< HEAD
-=======
  * load login form data, if present, and save to credential variables
  */
 if (isset($_POST['controller_user']) && !empty($_POST['controller_user'])) {
@@ -225,7 +223,6 @@ if (isset($_GET['theme'])) {
 }
 
 /**
->>>>>>> pr58
  * get requested output_format or use the output_format stored in the $_SESSION array
  */
 if (isset($_GET['output_format'])) {
@@ -1227,16 +1224,10 @@ var alert_message       = '<?php echo $alert_message ?>',
     os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
     api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
     api_class_version   = '<?php echo API_CLASS_VERSION ?>',
-<<<<<<< HEAD
-    controller_user     = '<?php if (isset($_SESSION['controller'])) echo $controller['user'] ?>',
-    controller_url      = '<?php if (isset($_SESSION['controller'])) echo $controller['url'] ?>',
-    controller_version  = '<?php if (isset($_SESSION['controller'])) echo $detected_controller_version ?>',
-    theme               = 'bootstrap';
-=======
     controller_user     = '<?php if (isset($controller['user'])) echo $controller['user'] ?>',
     controller_url      = '<?php if (isset($controller['url'])) echo $controller['url'] ?>',
     controller_version  = '<?php if (isset($detected_controller_version)) echo $detected_controller_version ?>';
->>>>>>> pr58
+    theme               = 'bootstrap';
 
 /**
  * check whether user has stored a custom theme, if yes we switch to the stored value
