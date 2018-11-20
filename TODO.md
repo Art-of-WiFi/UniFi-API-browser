@@ -4,12 +4,14 @@
     - ~~print_r ($data);~~
     - ~~echo json_encode($data, JSON_PRETTY_PRINT);~~
     - DataTables for table output and more
+        - requires "flattening" of multidimensional arrays/objects
+        - or else only expose a selection of attributes
     - Chart output as option for certain data collections (and selected attributes)
 
 2. Add the option to export data to CSV file format
     - need to have the option to select which fields to export
     - could be combined with the DataTables output option
-    - will require "flattening" of multidimensional arrays/objects
+    - requires "flattening" of multidimensional arrays/objects
 
 3. ~~Add simple user/password login~~
     - ~~consider setting user name/password in the config file, though not very secure~~

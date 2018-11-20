@@ -192,7 +192,7 @@ if (isset($_GET['controller_id'])) {
  * load login form data, if present, and save to credential variables
  */
 if (isset($_POST['controller_user']) && !empty($_POST['controller_user'])) {
-    $controller['user']     = $_POST['controller_user'];
+    $controller['user'] = $_POST['controller_user'];
 }
 
 if (isset($_POST['controller_password']) && !empty($_POST['controller_password'])) {
@@ -200,7 +200,7 @@ if (isset($_POST['controller_password']) && !empty($_POST['controller_password']
 }
 
 if (isset($_POST['controller_url']) && !empty($_POST['controller_url'])) {
-    $controller['url']      = $_POST['controller_url'];
+    $controller['url'] = $_POST['controller_url'];
 }
 
 if (isset($controller)) {
@@ -614,9 +614,9 @@ $time_after_load = $time_2 - $time_start;
  */
 $time_end    = microtime(true);
 $time_total  = $time_end - $time_start;
-$login_perc  = ($time_after_login/$time_total)*100;
-$load_perc   = (($time_after_load - $time_after_login)/$time_total)*100;
-$remain_perc = 100 - $login_perc-$load_perc;
+$login_perc  = ($time_after_login / $time_total) * 100;
+$load_perc   = (($time_after_load - $time_after_login) / $time_total) * 100;
+$remain_perc = 100 - $login_perc - $load_perc;
 
 /**
  * shared functions
@@ -794,7 +794,7 @@ function get_client_version()
                 <?php } ?>
                 <!-- /controllers dropdown -->
                 <!-- sites dropdown, only show when a controller has been selected -->
-                <?php if ($show_login == false && isset($controller['name'])) { ?>
+                <?php if ($show_login === false && isset($controller['name'])) { ?>
                     <li id="site-menu" class="dropdown">
                         <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 
@@ -1218,7 +1218,7 @@ var alert_message       = '<?php echo $alert_message ?>',
     timing_total_time   = '<?php echo $time_total ?>',
     php_version         = '<?php echo (phpversion()) ?>',
     memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
-    memory_used         = '<?php echo round(memory_get_peak_usage(false)/1024/1024, 2) . 'M' ?>',
+    memory_used         = '<?php echo round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M' ?>',
     curl_version        = '<?php echo $curl_version ?>',
     openssl_version     = '<?php echo $openssl_version ?>',
     os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
