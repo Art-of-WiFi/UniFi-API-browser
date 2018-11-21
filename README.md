@@ -122,6 +122,8 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
 
+Otherwise you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been installed.
+
 ### Credits
 
 The PHP API client that comes bundled with this tool is based on the work done by the following developers:
@@ -149,20 +151,24 @@ Here are a couple of screenshots of the tool in action.
 
 The controller selection dropdown menu:
 
-![alt text](https://user-images.githubusercontent.com/12016131/29446799-7081ad00-83ee-11e7-93df-37f31fb28391.PNG "Controller selection")
+![Controller selection](https://user-images.githubusercontent.com/12016131/48832366-45a3f980-ed79-11e8-82a4-e66225fba71e.png "Controller selection")
 
 The site selection dropdown menu:
 
-![alt text](https://user-images.githubusercontent.com/12016131/29446798-707f17a2-83ee-11e7-8ea7-c273862787f4.PNG "Site selection")
+![Site selection](https://user-images.githubusercontent.com/12016131/48832367-45a3f980-ed79-11e8-8a91-70f505720ea1.png "Site selection")
 
 Showing the online device data collection using the default Bootstrap theme:
 
-![alt text](https://user-images.githubusercontent.com/12016131/29446796-7077a76a-83ee-11e7-9b96-aa58209e572d.PNG "Online device collection")
+![Online device collection](https://user-images.githubusercontent.com/12016131/48832368-463c9000-ed79-11e8-9d17-4005cf142cbe.png "Online device collection")
 
 With one of the Bootswatch themes selected:
 
-![alt text](https://user-images.githubusercontent.com/12016131/29446800-708476d4-83ee-11e7-9cfd-c6e18f02a217.PNG "Dark theme selected")
+![Dark theme selected](https://user-images.githubusercontent.com/12016131/48832369-463c9000-ed79-11e8-841b-07e7842a23a5.png "Dark theme selected")
 
 The "About" modal:
 
-![alt text](https://user-images.githubusercontent.com/12016131/29446797-707d1e02-83ee-11e7-8c4a-a80ad08a72a0.PNG "About modal")
+![About modal](https://user-images.githubusercontent.com/12016131/48832371-463c9000-ed79-11e8-90f4-faee7958cd2c.png "About modal")
+
+The Login form when a controller password has not been configured in the config.php file:
+
+![Login form](https://user-images.githubusercontent.com/12016131/48832373-463c9000-ed79-11e8-990f-04e9ae36e171.png "Login form")
