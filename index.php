@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.34');
+define('API_BROWSER_VERSION', '1.0.35');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -1053,6 +1053,7 @@ function get_client_version()
                 <div class="panel-body">
                     <h3 align="center">UniFi Controller login</h3>
                     <br>
+                    <div id="login_alert_placeholder" style="display: none"></div>
                     <form method="post">
                         <?php if (empty($controller['user'])) : ?>
                             <div class="form-group">
@@ -1267,14 +1268,17 @@ $(document).ready(function () {
      * if needed we display the login form
      */
     if (show_login == 1 || show_login == 'true') {
-        $('#login_form').show();
+        $('#login_alert_placeholder').html(alert_message);
+        $('#login_alert_placeholder').show();
+        $('#login_form').fadeIn(500);
+    } else {
+        $('#alert_placeholder').html(alert_message);
+        $('#alert_placeholder').fadeIn(500);
     }
 
     /**
      * update dynamic elements in the DOM using some of the above variables
      */
-    $('#alert_placeholder').html(alert_message);
-    $('#alert_placeholder').fadeIn(1000);
     $('#span_site_id').html(site_id);
     $('#span_site_name').html(site_name);
     $('#span_output_format').html(output_format);
@@ -1424,7 +1428,7 @@ $(document).ready(function () {
             setTimeout(function () {
                 $(btn).tooltip('hide')
                 .attr('data-original-title', 'Copy to clipboard');
-            }, 1000);
+            }, 500);
         }
 
         /**

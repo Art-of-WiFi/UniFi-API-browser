@@ -1,12 +1,3 @@
->**NOTICE**
->
->The repository has been transferred to this new GitHub organisation account, the project maintainer will remain the same and will continue to actively maintain it.
-> If you have previously installed the API browser tool using `git clone`, you may consider pointing the clone to the new repository URL. You can do this with the following command from within the directory of your clone:
->
->```bash
->$ git remote set-url origin https://github.com/Art-of-WiFi/UniFi-API-browser.git
->```
-
 ## UniFi API browser
 
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
@@ -163,7 +154,7 @@ Showing the online device data collection using the default Bootstrap theme:
 
 With one of the Bootswatch themes selected:
 
-![Dark theme selected](https://user-images.githubusercontent.com/12016131/48832369-463c9000-ed79-11e8-841b-07e7842a23a5.png "Dark theme selected")
+![Slate theme selected](https://user-images.githubusercontent.com/12016131/48832369-463c9000-ed79-11e8-841b-07e7842a23a5.png "Slate theme selected")
 
 The "About" modal:
 
