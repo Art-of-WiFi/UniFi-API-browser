@@ -11,7 +11,7 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.8.24 has been confirmed to work)
+- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.10.12 has been confirmed to work)
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 

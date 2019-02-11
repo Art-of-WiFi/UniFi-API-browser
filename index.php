@@ -17,7 +17,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('API_BROWSER_VERSION', '1.0.35');
+define('API_BROWSER_VERSION', '1.0.36');
 define('API_CLASS_VERSION', get_client_version());
 
 /**
@@ -404,7 +404,7 @@ if (isset($unifidata)) {
             $data      = $unifidata->list_usergroups();
             break;
         case 'stat_5minutes_site':
-            $selection = '5 minutes site stats';
+            $selection = '5 minute site stats';
             $data      = $unifidata->stat_5minutes_site();
             break;
         case 'stat_hourly_site':
@@ -416,7 +416,7 @@ if (isset($unifidata)) {
             $data      = $unifidata->stat_daily_site();
             break;
         case 'stat_5minutes_aps':
-            $selection = '5 minutes ap stats';
+            $selection = '5 minute ap stats';
             $data      = $unifidata->stat_5minutes_aps();
             break;
         case 'stat_hourly_aps':
@@ -428,7 +428,7 @@ if (isset($unifidata)) {
             $data      = $unifidata->stat_daily_aps();
             break;
         case 'stat_5minutes_gateway':
-            $selection = '5 minutes gateway stats';
+            $selection = '5 minute gateway stats';
             $data      = $unifidata->stat_5minutes_gateway(null, null, $gateway_stats_attribs);
             break;
         case 'stat_hourly_gateway':
@@ -487,7 +487,7 @@ if (isset($unifidata)) {
             $selection = 'count all alarms';
             $data      = $unifidata->count_alarms();
             break;
-        case 'count_active_alarms':
+        case 'count_alarms(false)':
             $selection = 'count active alarms';
             $data      = $unifidata->count_alarms(false);
             break;
@@ -499,7 +499,7 @@ if (isset($unifidata)) {
             $selection = 'site health metrics';
             $data      = $unifidata->list_health();
             break;
-        case 'list_5minutes_dashboard':
+        case 'list_dashboard(true)':
             $selection = '5 minutes site dashboard metrics';
             $data      = $unifidata->list_dashboard(true);
             break;
@@ -528,7 +528,7 @@ if (isset($unifidata)) {
             $data      = $unifidata->list_networkconf();
             break;
         case 'list_dynamicdns':
-            $selection = 'dynamic dns configuration';
+            $selection = 'dynamic DNS configuration';
             $data      = $unifidata->list_dynamicdns();
             break;
         case 'list_current_channels':
@@ -571,12 +571,16 @@ if (isset($unifidata)) {
             $selection = 'list_admins';
             $data      = $unifidata->list_admins();
             break;
+        case 'list_all_admins':
+            $selection = 'list_all_admins';
+            $data      = $unifidata->list_all_admins();
+            break;
         case 'list_radius_accounts':
-            $selection = 'list radius accounts';
+            $selection = 'list Radius accounts';
             $data      = $unifidata->list_radius_accounts();
             break;
         case 'list_radius_profiles':
-            $selection = 'list radius profiles';
+            $selection = 'list Radius profiles';
             $data      = $unifidata->list_radius_profiles();
             break;
         case 'list_country_codes':
@@ -685,809 +689,820 @@ function get_client_version()
 ?>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <title>UniFi API browser</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <!-- latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>UniFi API browser</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <!-- latest compiled and minified versions of Bootstrap, Font-awesome and Highlight.js CSS, loaded from CDN -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- load the default Bootstrap CSS file from CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- load the default Bootstrap CSS file from CDN -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-    <!-- placeholder to dynamically load the appropriate Bootswatch CSS file from CDN -->
-    <link rel="stylesheet" href="" id="bootswatch_theme_stylesheet">
+        <!-- placeholder to dynamically load the appropriate Bootswatch CSS file from CDN -->
+        <link rel="stylesheet" href="" id="bootswatch_theme_stylesheet">
 
-    <!-- load the jsonview CSS file from CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
+        <!-- load the jsonview CSS file from CDN -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" integrity="sha256-OhImf+9TMPW5iYXKNT4eRNntf3fCtVYe5jZqo/mrSQA=" crossorigin="anonymous">
 
-    <!-- define favicon  -->
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" sizes="16x16" href="favicon.ico" type="image/x-icon" >
+        <!-- define favicon  -->
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="icon" sizes="16x16" href="favicon.ico" type="image/x-icon" >
 
-    <!-- custom CSS styling -->
-    <style>
-        body {
-            padding-top: 70px;
-        }
+        <!-- custom CSS styling -->
+        <style>
+            body {
+                padding-top: 70px;
+            }
 
-        .scrollable-menu {
-            height: auto;
-            max-height: 80vh;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
+            .scrollable-menu {
+                height: auto;
+                max-height: 80vh;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
 
-        #output_panel_loading {
-            color: rgba(0,0,0,.4);
-        }
+            #output_panel_loading {
+                color: rgba(0,0,0,.4);
+            }
 
-        #output {
-            display: none;
-            position:relative;
-        }
+            #output {
+                display: none;
+                position:relative;
+            }
 
-        .back-to-top {
-            cursor: pointer;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display:none;
-        }
+            .back-to-top {
+                cursor: pointer;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                display:none;
+            }
 
-        #copy_to_clipboard_button {
-             position: absolute;
-             top: 0;
-             right: 0;
-        }
+            #copy_to_clipboard_button {
+                 position: absolute;
+                 top: 0;
+                 right: 0;
+            }
 
-        #toggle_buttons {
-             display: none;
-        }
-    </style>
-    <!-- /custom CSS styling -->
-</head>
-<body>
-<!-- top navbar -->
-<nav id="navbar" class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar-main">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand hidden-sm hidden-md" href="index.php"><i class="fa fa-search fa-fw fa-lg" aria-hidden="true"></i> UniFi API browser</a>
-        </div>
-        <div id="navbar-main" class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-left">
-                <!-- controllers dropdown, only show when multiple controllers have been configured -->
-                <?php if (isset($controllers)) { ?>
-                    <li id="site-menu" class="dropdown">
-                        <a id="controller-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            <?php
-                            /**
-                             * here we display the UniFi controller name, if selected, else just label it
-                             */
-                            if (isset($controller['name'])) {
-                                echo $controller['name'];
-                            } else {
-                                echo 'Controllers';
-                            }
-                            ?>
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu" id="controllerslist">
-                            <li class="dropdown-header">Select a controller</li>
-                            <li role="separator" class="divider"></li>
-                            <?php
-                            /**
-                             * here we loop through the configured UniFi controllers
-                             */
-                            foreach ($controllers as $key => $value) {
-                                echo '<li id="controller_' . $key . '"><a href="?controller_id=' . $key . '">' . $value['name'] . '</a></li>' . "\n";
-                            }
-                            ?>
-                         </ul>
-                    </li>
-                <?php } ?>
-                <!-- /controllers dropdown -->
-                <!-- sites dropdown, only show when a controller has been selected -->
-                <?php if ($show_login === false && isset($controller['name'])) { ?>
-                    <li id="site-menu" class="dropdown">
-                        <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            #toggle_buttons {
+                 display: none;
+            }
+        </style>
+        <!-- /custom CSS styling -->
+    </head>
+    <body>
+        <!-- top navbar -->
+        <nav id="navbar" class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar-main">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand hidden-sm hidden-md" href="index.php"><i class="fa fa-search fa-fw fa-lg" aria-hidden="true"></i> UniFi API browser</a>
+                </div>
+                <div id="navbar-main" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <!-- controllers dropdown, only show when multiple controllers have been configured -->
+                        <?php if (isset($controllers)) { ?>
+                            <li id="site-menu" class="dropdown">
+                                <a id="controller-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <?php
+                                    /**
+                                     * here we display the UniFi controller name, if selected, else just label it
+                                     */
+                                    if (isset($controller['name'])) {
+                                        echo $controller['name'];
+                                    } else {
+                                        echo 'Controllers';
+                                    }
+                                    ?>
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu" id="controllerslist">
+                                    <li class="dropdown-header">Select a controller</li>
+                                    <li role="separator" class="divider"></li>
+                                    <?php
+                                    /**
+                                     * here we loop through the configured UniFi controllers
+                                     */
+                                    foreach ($controllers as $key => $value) {
+                                        echo '<li id="controller_' . $key . '"><a href="?controller_id=' . $key . '">' . $value['name'] . '</a></li>' . "\n";
+                                    }
+                                    ?>
+                                 </ul>
+                            </li>
+                        <?php } ?>
+                        <!-- /controllers dropdown -->
+                        <!-- sites dropdown, only show when a controller has been selected -->
+                        <?php if ($show_login === false && isset($controller['name'])) { ?>
+                            <li id="site-menu" class="dropdown">
+                                <a id="site-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 
-                            <?php
-                            /**
-                             * here we display the site name, if selected, else just label it
-                             */
-                            if (!empty($site_name)) {
-                                echo $site_name;
-                            } else {
-                                echo 'Sites';
-                            }
-                            ?>
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu" id="siteslist">
-                            <li class="dropdown-header">Select a site</li>
-                            <li role="separator" class="divider"></li>
-                            <?php
-                            /**
-                             * here we loop through the available sites, after we've sorted the sites collection
-                             */
-                            usort($sites, "sites_sort");
+                                    <?php
+                                    /**
+                                     * here we display the site name, if selected, else just label it
+                                     */
+                                    if (!empty($site_name)) {
+                                        echo $site_name;
+                                    } else {
+                                        echo 'Sites';
+                                    }
+                                    ?>
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu" id="siteslist">
+                                    <li class="dropdown-header">Select a site</li>
+                                    <li role="separator" class="divider"></li>
+                                    <?php
+                                    /**
+                                     * here we loop through the available sites, after we've sorted the sites collection
+                                     */
+                                    usort($sites, "sites_sort");
 
-                            foreach ($sites as $site) {
-                                $link_row = '<li id="' . $site->name . '"><a href="?site_id=' .
-                                            urlencode($site->name) . '&site_name=' . urlencode($site->desc) .
-                                            '">' . $site->desc . '</a></li>' . "\n";
+                                    foreach ($sites as $site) {
+                                        $link_row = '<li id="' . $site->name . '"><a href="?site_id=' .
+                                                    urlencode($site->name) . '&site_name=' . urlencode($site->desc) .
+                                                    '">' . $site->desc . '</a></li>' . "\n";
 
-                                echo $link_row;
-                            }
-                            ?>
-                         </ul>
-                    </li>
-                <?php } ?>
-                <!-- /sites dropdown -->
-                <!-- data collection dropdowns, only show when a site_id is selected -->
-                <?php if ($site_id && isset($_SESSION['unificookie'])) { ?>
-                    <li id="output-menu" class="dropdown">
-                        <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Output
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu" id="outputselection">
-                            <li class="dropdown-header">Select an output format</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="json"><a href="?output_format=json">JSON (default)</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="php_array"><a href="?output_format=php_array">PHP array</a></li>
-                            <li id="php_var_dump"><a href="?output_format=php_var_dump">PHP var_dump</a></li>
-                            <li id="php_var_export"><a href="?output_format=php_var_export">PHP var_export</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li class="dropdown-header">Nice but slow with large collections</li>
-                            <li id="json_color"><a href="?output_format=json_color">JSON highlighted</a></li>
-                            <li id="php_array_kint"><a href="?output_format=php_array_kint">PHP array using Kint</a></li>
-                        </ul>
-                    </li>
-                    <li id="user-menu" class="dropdown">
-                        <a id="user-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Clients
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
-                            <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
-                            <li id="list_users"><a href="?action=list_users">list users</a></li>
-                            <li id="list_usergroups"><a href="?action=list_usergroups">list user groups</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="stat_allusers"><a href="?action=stat_allusers">stat all users</a></li>
-                            <li id="stat_auths"><a href="?action=stat_auths">stat authorisations</a></li>
-                            <li id="stat_sessions"><a href="?action=stat_sessions">stat sessions</a></li>
-                        </ul>
-                    </li>
-                    <li id="ap-menu" class="dropdown">
-                        <a id="ap-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Devices
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
-                            <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
-                            <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
-                            <li id="list_known_rogueaps"><a href="?action=list_known_rogueaps">list known rogue access points</a></li>
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.0') >= 0) { ?>
-                                <!-- list tags, only to be displayed when we have detected a capable controller version -->
-                                <li role="separator" class="divider"></li>
-                                <li id="list_tags"><a href="?action=list_tags">list tags</a></li>
-                            <?php } ?>
-                        </ul>
-                    </li>
-                    <li id="stats-menu" class="dropdown">
-                        <a id="stats-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Stats
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
-                            <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
-                            <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
-                                <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
-                                <li id="stat_sites"><a href="?action=stat_sites">all sites stats</a></li>
-                            <?php } ?>
-                            <!-- /all sites stats -->
-                            <!-- access point stats -->
-                            <li role="separator" class="divider"></li>
-                            <li id="stat_5minutes_aps"><a href="?action=stat_5minutes_aps">5 minutes access point stats</a></li>
-                            <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
-                            <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
-                            <!-- /access point stats -->
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.8.0') >= 0) { ?>
-                                <!-- gateway stats, only to be displayed when we have detected a capable controller version -->
-                                <li role="separator" class="divider"></li>
-                                <li class="dropdown-header">USG required:</li>
-                                <li id="stat_5minutes_gateway"><a href="?action=stat_5minutes_gateway">5 minutes gateway stats</a></li>
-                                <li id="stat_hourly_gateway"><a href="?action=stat_hourly_gateway">hourly gateway stats</a></li>
-                                <li id="stat_daily_gateway"><a href="?action=stat_daily_gateway">daily gateway stats</a></li>
-                                <!-- /gateway stats -->
-                            <?php } ?>
-                            <li role="separator" class="divider"></li>
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
-                                <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
-                                <li id="list_5minutes_dashboard"><a href="?action=list_5minutes_dashboard">5 minutes site dashboard metrics</a></li>
-                                <li id="list_hourly_dashboard"><a href="?action=list_hourly_dashboard">hourly site dashboard metrics</a></li>
-                                <li role="separator" class="divider"></li>
-                            <?php } ?>
-                            <!-- /site dashboard metrics -->
-                            <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
-                            <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
-                            <li id="list_dpi_stats"><a href="?action=list_dpi_stats">DPI stats</a></li>
-                        </ul>
-                    </li>
-                    <li id="hotspot-menu" class="dropdown">
-                        <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Hotspot
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
-                            <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_hotspotop"><a href="?action=list_hotspotop">list hotspot operators</a></li>
-                        </ul>
-                    </li>
-                    <li id="config-menu" class="dropdown">
-                        <a id="config-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Configuration
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
-                            <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
-                            <li id="list_self"><a href="?action=list_self">self</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
-                            <li id="list_admins"><a href="?action=list_admins">list admins for current site</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
-                            <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_extension"><a href="?action=list_extension">list VoIP extensions</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
-                            <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
-                            <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
-                            <li id="list_firewallgroups"><a href="?action=list_firewallgroups">list firewall groups</a></li>
-                            <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_backups"><a href="?action=list_backups">list auto backups</a></li>
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
-                                <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
-                                <li role="separator" class="divider"></li>
-                                <li id="list_radius_profiles"><a href="?action=list_radius_profiles">list Radius profiles</a></li>
-                                <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
-                            <?php } ?>
-                        </ul>
-                    </li>
-                    <li id="msg-menu" class="dropdown">
-                        <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Messages
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu scrollable-menu">
-                            <li class="dropdown-header">Select a data collection</li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
-                            <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
-                            <li id="count_active_alarms"><a href="?action=count_active_alarms">count active alarms</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li id="list_events"><a href="?action=list_events">list events</a></li>
-                            <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.9.10') >= 0) { ?>
-                                <li role="separator" class="divider"></li>
-                                <li id="stat_ips_events"><a href="?action=stat_ips_events">list IPS/IDS events</a></li>
-                            <?php } ?>
-                        </ul>
-                    </li>
-                <?php } ?>
-                <!-- /data collection dropdowns -->
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li id="theme-menu" class="dropdown">
-                    <a id="theme-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-bars fa-lg"></i>
-                    </a>
-                    <ul class="dropdown-menu scrollable-menu">
-                        <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li id="reset_session" data-toggle="tooltip" data-container="body" data-placement="left"
-                            data-original-title="In some cases this can fix login errors and/or an empty sites list">
-                            <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li class="dropdown-header">Select a theme</li>
-                        <li id="bootstrap"><a href="#" onclick=switchCSS('bootstrap')>Bootstrap (default)</a></li>
-                        <li id="cerulean"><a href="#" onclick=switchCSS('cerulean')>Cerulean</a></li>
-                        <li id="cosmo"><a href="#" onclick=switchCSS('cosmo')>Cosmo</a></li>
-                        <li id="cyborg"><a href="#" onclick=switchCSS('cyborg')>Cyborg</a></li>
-                        <li id="darkly"><a href="#" onclick=switchCSS('darkly')>Darkly</a></li>
-                        <li id="flatly"><a href="#" onclick=switchCSS('flatly')>Flatly</a></li>
-                        <li id="journal"><a href="#" onclick=switchCSS('journal')>Journal</a></li>
-                        <li id="lumen"><a href="#" onclick=switchCSS('lumen')>Lumen</a></li>
-                        <li id="paper"><a href="#" onclick=switchCSS('paper')>Paper</a></li>
-                        <li id="readable"><a href="#" onclick=switchCSS('readable')>Readable</a></li>
-                        <li id="sandstone"><a href="#" onclick=switchCSS('sandstone')>Sandstone</a></li>
-                        <li id="simplex"><a href="#" onclick=switchCSS('simplex')>Simplex</a></li>
-                        <li id="slate"><a href="#" onclick=switchCSS('slate')>Slate</a></li>
-                        <li id="solar"><a href="#" onclick=switchCSS('solar')>Solar</a></li>
-                        <li id="spacelab"><a href="#" onclick=switchCSS('spacelab')>Spacelab</a></li>
-                        <li id="superhero"><a href="#" onclick=switchCSS('superhero')>Superhero</a></li>
-                        <li id="united"><a href="#" onclick=switchCSS('united')>United</a></li>
-                        <li id="yeti"><a href="#" onclick=switchCSS('yeti')>Yeti</a></li>
+                                        echo $link_row;
+                                    }
+                                    ?>
+                                 </ul>
+                            </li>
+                        <?php } ?>
+                        <!-- /sites dropdown -->
+                        <!-- data collection dropdowns, only show when a site_id is selected -->
+                        <?php if ($site_id && isset($_SESSION['unificookie'])) { ?>
+                            <li id="output-menu" class="dropdown">
+                                <a id="output-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Output
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu" id="outputselection">
+                                    <li class="dropdown-header">Select an output format</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="json"><a href="?output_format=json">JSON (default)</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="php_array"><a href="?output_format=php_array">PHP array</a></li>
+                                    <li id="php_var_dump"><a href="?output_format=php_var_dump">PHP var_dump</a></li>
+                                    <li id="php_var_export"><a href="?output_format=php_var_export">PHP var_export</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li class="dropdown-header">Nice but slow with large collections</li>
+                                    <li id="json_color"><a href="?output_format=json_color">JSON highlighted</a></li>
+                                    <li id="php_array_kint"><a href="?output_format=php_array_kint">PHP array using Kint</a></li>
+                                </ul>
+                            </li>
+                            <li id="user-menu" class="dropdown">
+                                <a id="user-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Clients
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_clients"><a href="?action=list_clients">list online clients</a></li>
+                                    <li id="list_guests"><a href="?action=list_guests">list guests</a></li>
+                                    <li id="list_users"><a href="?action=list_users">list users</a></li>
+                                    <li id="list_usergroups"><a href="?action=list_usergroups">list user groups</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="stat_allusers"><a href="?action=stat_allusers">stat all users</a></li>
+                                    <li id="stat_auths"><a href="?action=stat_auths">stat authorisations</a></li>
+                                    <li id="stat_sessions"><a href="?action=stat_sessions">stat sessions</a></li>
+                                </ul>
+                            </li>
+                            <li id="ap-menu" class="dropdown">
+                                <a id="ap-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Devices
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_devices"><a href="?action=list_devices">list devices</a></li>
+                                    <li id="list_wlan_groups"><a href="?action=list_wlan_groups">list wlan groups</a></li>
+                                    <li id="list_rogueaps"><a href="?action=list_rogueaps">list rogue access points</a></li>
+                                    <li id="list_known_rogueaps"><a href="?action=list_known_rogueaps">list known rogue access points</a></li>
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.0') >= 0) { ?>
+                                        <!-- list tags, only to be displayed when we have detected a capable controller version -->
+                                        <li role="separator" class="divider"></li>
+                                        <li id="list_tags"><a href="?action=list_tags">list tags</a></li>
+                                    <?php } ?>
+                                </ul>
+                            </li>
+                            <li id="stats-menu" class="dropdown">
+                                <a id="stats-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Stats
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="stat_5minutes_site"><a href="?action=stat_5minutes_site">5 minutes site stats</a></li>
+                                    <li id="stat_hourly_site"><a href="?action=stat_hourly_site">hourly site stats</a></li>
+                                    <li id="stat_daily_site"><a href="?action=stat_daily_site">daily site stats</a></li>
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.2.9') >= 0) { ?>
+                                        <!-- all sites stats, only to be displayed when we have detected a capable controller version -->
+                                        <li id="stat_sites"><a href="?action=stat_sites">all sites stats</a></li>
+                                    <?php } ?>
+                                    <!-- /all sites stats -->
+                                    <!-- access point stats -->
+                                    <li role="separator" class="divider"></li>
+                                    <li id="stat_5minutes_aps"><a href="?action=stat_5minutes_aps">5 minutes access point stats</a></li>
+                                    <li id="stat_hourly_aps"><a href="?action=stat_hourly_aps">hourly access point stats</a></li>
+                                    <li id="stat_daily_aps"><a href="?action=stat_daily_aps">daily access point stats</a></li>
+                                    <!-- /access point stats -->
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.8.0') >= 0) { ?>
+                                        <!-- gateway stats, only to be displayed when we have detected a capable controller version -->
+                                        <li role="separator" class="divider"></li>
+                                        <li class="dropdown-header">USG required:</li>
+                                        <li id="stat_5minutes_gateway"><a href="?action=stat_5minutes_gateway">5 minutes gateway stats</a></li>
+                                        <li id="stat_hourly_gateway"><a href="?action=stat_hourly_gateway">hourly gateway stats</a></li>
+                                        <li id="stat_daily_gateway"><a href="?action=stat_daily_gateway">daily gateway stats</a></li>
+                                        <!-- /gateway stats -->
+                                    <?php } ?>
+                                    <li role="separator" class="divider"></li>
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '4.9.1') >= 0) { ?>
+                                        <!-- site dashboard metrics, only to be displayed when we have detected a capable controller version -->
+                                        <li id="list_5minutes_dashboard"><a href="?action=list_dashboard(true)">5 minutes site dashboard metrics</a></li>
+                                        <li id="list_hourly_dashboard"><a href="?action=list_hourly_dashboard">hourly site dashboard metrics</a></li>
+                                        <li role="separator" class="divider"></li>
+                                    <?php } ?>
+                                    <!-- /site dashboard metrics -->
+                                    <li id="list_health"><a href="?action=list_health">site health metrics</a></li>
+                                    <li id="list_portforward_stats"><a href="?action=list_portforward_stats">port forwarding stats</a></li>
+                                    <li id="list_dpi_stats"><a href="?action=list_dpi_stats">DPI stats</a></li>
+                                </ul>
+                            </li>
+                            <li id="hotspot-menu" class="dropdown">
+                                <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Hotspot
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="stat_voucher"><a href="?action=stat_voucher">stat vouchers</a></li>
+                                    <li id="stat_payment"><a href="?action=stat_payment">stat payments</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_hotspotop"><a href="?action=list_hotspotop">list hotspot operators</a></li>
+                                </ul>
+                            </li>
+                            <li id="config-menu" class="dropdown">
+                                <a id="config-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Configuration
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_sites"><a href="?action=list_sites">list sites on this controller</a></li>
+                                    <li id="stat_sysinfo"><a href="?action=stat_sysinfo">sysinfo</a></li>
+                                    <li id="list_self"><a href="?action=list_self">self</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_settings"><a href="?action=list_settings">list site settings</a></li>
+                                    <li id="list_admins"><a href="?action=list_admins">list admins for current site</a></li>
+                                    <li id="list_all_admins"><a href="?action=list_all_admins">list all admins for this controller</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_wlanconf"><a href="?action=list_wlanconf">list wlan configuration</a></li>
+                                    <li id="list_current_channels"><a href="?action=list_current_channels">list current channels</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_extension"><a href="?action=list_extension">list VoIP extensions</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_networkconf"><a href="?action=list_networkconf">list network configuration</a></li>
+                                    <li id="list_portconf"><a href="?action=list_portconf">list port configuration</a></li>
+                                    <li id="list_portforwarding"><a href="?action=list_portforwarding">list port forwarding rules</a></li>
+                                    <li id="list_firewallgroups"><a href="?action=list_firewallgroups">list firewall groups</a></li>
+                                    <li id="list_dynamicdns"><a href="?action=list_dynamicdns">dynamic DNS configuration</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_country_codes"><a href="?action=list_country_codes">list country codes</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_backups"><a href="?action=list_backups">list auto backups</a></li>
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.5.19') >= 0) { ?>
+                                        <!-- Radius-related collections, only to be displayed when we have detected a capable controller version -->
+                                        <li role="separator" class="divider"></li>
+                                        <li id="list_radius_profiles"><a href="?action=list_radius_profiles">list Radius profiles</a></li>
+                                        <li id="list_radius_accounts"><a href="?action=list_radius_accounts">list Radius accounts</a></li>
+                                    <?php } ?>
+                                </ul>
+                            </li>
+                            <li id="msg-menu" class="dropdown">
+                                <a id="msg-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Messages
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu scrollable-menu">
+                                    <li class="dropdown-header">Select an option</li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_alarms"><a href="?action=list_alarms">list alarms</a></li>
+                                    <li id="count_alarms"><a href="?action=count_alarms">count all alarms</a></li>
+                                    <li id="count_active_alarms"><a href="?action=count_alarms(false)">count active alarms</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li id="list_events"><a href="?action=list_events">list events</a></li>
+                                    <?php if ($detected_controller_version != 'undetected' && version_compare($detected_controller_version, '5.9.10') >= 0) { ?>
+                                        <li role="separator" class="divider"></li>
+                                        <li id="stat_ips_events"><a href="?action=stat_ips_events">list IPS/IDS events</a></li>
+                                    <?php } ?>
+                                </ul>
+                            </li>
+                        <?php } ?>
+                        <!-- /data collection dropdowns -->
                     </ul>
-                </li>
-            </ul>
-        </div><!-- /.nav-collapse -->
-    </div><!-- /.container-fluid -->
-</nav><!-- /top navbar -->
-<div class="container-fluid">
-    <div id="alert_placeholder" style="display: none"></div>
-    <!-- login_form, only to be displayed when we have no controller config -->
-    <div id="login_form" style="display: none">
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h3 align="center">UniFi Controller login</h3>
-                    <br>
-                    <div id="login_alert_placeholder" style="display: none"></div>
-                    <form method="post">
-                        <?php if (empty($controller['user'])) : ?>
-                            <div class="form-group">
-                                <label for="input_controller_user">Username</label>
-                                <input type="text" id="input_controller_user" name="controller_user" class="form-control" placeholder="Controller username">
-                            </div>
-                        <?php endif; ?>
-                        <?php if (empty($controller['password'])) : ?>
-                            <div class="form-group">
-                                <label for="input_controller_password">Password</label>
-                                <input type="password" id="input_controller_password" name="controller_password" class="form-control" placeholder="Controller password">
-                            </div>
-                        <?php endif; ?>
-                        <?php if (empty($controller['url'])) : ?>
-                            <div class="form-group">
-                                <label for="input_controller_url">URL</label>
-                                <input type="text" id="input_controller_url" name="controller_url" class="form-control" placeholder="https://<controller FQDN or IP>:8443">
-                            </div>
-                        <?php endif; ?>
-                        <input type="submit" name="login" class="btn btn-primary pull-right" value="Login">
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- /login_form -->
-    <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
-    <?php if (isset($_SESSION['unificookie']) && $action) { ?>
-    <div id="output_panel_loading" class="text-center">
-        <br>
-        <h2><i class="fa fa-spinner fa-spin fa-fw"></i></h2>
-    </div>
-    <div id="output_panel" class="panel panel-default" style="display: none">
-        <div class="panel-heading">
-            <!-- site info, only to be displayed when a site has been selected -->
-            <?php if ($site_id) { ?>
-                site id: <span id="span_site_id" class="label label-primary"></span>
-                site name: <span id="span_site_name" class="label label-primary"></span>
-            <?php } ?>
-            <!-- /site info -->
-            <!-- selection, only to be displayed when a selection has been made -->
-            <?php if ($selection) { ?>
-                collection: <span id="span_selection" class="label label-primary"></span>
-            <?php } ?>
-            <!-- /selection -->
-            output: <span id="span_output_format" class="label label-primary"></span>
-            <!-- objects_count, only to be displayed when we have results -->
-            <?php if ($objects_count !== '') { ?>
-                # of objects: <span id="span_objects_count" class="badge"></span>
-            <?php } ?>
-            <!-- /objects_count -->
-        </div>
-        <div class="panel-body">
-            <!--only display panel content when an action has been selected-->
-            <?php if ($action !== '' && isset($_SESSION['unificookie'])) { ?>
-                <!-- present the timing results using an HTML5 progress bar -->
-                <span id="span_elapsed_time"></span>
-                <br>
-                <div class="progress">
-                    <div id="timing_login_perc" class="progress-bar progress-bar-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-                    <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-                    <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
-                </div>
-                <div id="toggle_buttons">
-                    <button id="toggle-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse</button>
-                    <button id="toggle-level2-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-level2-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse level 2</button>
-                    <br><br>
-                </div>
-                <div id="output" class="js-copy-container">
-                    <button id="copy_to_clipboard_button" class="btn btn-xs js-copy-trigger" data-original-title="Copy to clipboard" data-clipboard-target="#pre_output" data-toggle="tooltip" data-placement="top"><i class="fa fa-copy"></i></button>
-                    <pre id="pre_output" class="js-copy-target"><?php print_output($output_format, $data) ?></pre>
-                </div>
-            <?php } ?>
-        </div>
-    </div>
-    <?php } ?>
-    <!-- /data-panel -->
-</div>
-<!-- back-to-top button element -->
-<a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" title="Back to top" data-toggle="tooltip" data-placement="left"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
-<!-- /back-to-top button element -->
-<!-- About modal -->
-<div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"></i> About UniFi API browser</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-sm-10 col-sm-offset-1">
-                        A tool for browsing the data collections which are exposed through Ubiquiti's UniFi Controller API.
+                    <ul class="nav navbar-nav navbar-right">
+                        <li id="theme-menu" class="dropdown">
+                            <a id="theme-menu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-bars fa-lg"></i>
+                            </a>
+                            <ul class="dropdown-menu scrollable-menu">
+                                <li id="info" data-toggle="modal" data-target="#about_modal"><a href="#"><i class="fa fa-info-circle"></i> About UniFi API browser</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li id="reset_session" data-toggle="tooltip" data-container="body" data-placement="left"
+                                    data-original-title="In some cases this can fix login errors and/or an empty sites list">
+                                    <a href="?reset_session=true"><i class="fa fa-refresh"></i> Reset PHP session</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Select a theme</li>
+                                <li id="bootstrap"><a href="#" onclick=switchCSS('bootstrap')>Bootstrap (default)</a></li>
+                                <li id="cerulean"><a href="#" onclick=switchCSS('cerulean')>Cerulean</a></li>
+                                <li id="cosmo"><a href="#" onclick=switchCSS('cosmo')>Cosmo</a></li>
+                                <li id="cyborg"><a href="#" onclick=switchCSS('cyborg')>Cyborg</a></li>
+                                <li id="darkly"><a href="#" onclick=switchCSS('darkly')>Darkly</a></li>
+                                <li id="flatly"><a href="#" onclick=switchCSS('flatly')>Flatly</a></li>
+                                <li id="journal"><a href="#" onclick=switchCSS('journal')>Journal</a></li>
+                                <li id="lumen"><a href="#" onclick=switchCSS('lumen')>Lumen</a></li>
+                                <li id="paper"><a href="#" onclick=switchCSS('paper')>Paper</a></li>
+                                <li id="readable"><a href="#" onclick=switchCSS('readable')>Readable</a></li>
+                                <li id="sandstone"><a href="#" onclick=switchCSS('sandstone')>Sandstone</a></li>
+                                <li id="simplex"><a href="#" onclick=switchCSS('simplex')>Simplex</a></li>
+                                <li id="slate"><a href="#" onclick=switchCSS('slate')>Slate</a></li>
+                                <li id="solar"><a href="#" onclick=switchCSS('solar')>Solar</a></li>
+                                <li id="spacelab"><a href="#" onclick=switchCSS('spacelab')>Spacelab</a></li>
+                                <li id="superhero"><a href="#" onclick=switchCSS('superhero')>Superhero</a></li>
+                                <li id="united"><a href="#" onclick=switchCSS('united')>United</a></li>
+                                <li id="yeti"><a href="#" onclick=switchCSS('yeti')>Yeti</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!-- /.nav-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav><!-- /top navbar -->
+        <div class="container-fluid">
+            <div id="alert_placeholder" style="display: none"></div>
+            <!-- login_form, only to be displayed when we have no controller config -->
+            <div id="login_form" style="display: none">
+                <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h3 align="center">UniFi Controller login</h3>
+                            <br>
+                            <div id="login_alert_placeholder" style="display: none"></div>
+                            <form method="post">
+                                <?php if (empty($controller['user'])) : ?>
+                                    <div class="form-group">
+                                        <label for="input_controller_user">Username</label>
+                                        <input type="text" id="input_controller_user" name="controller_user" class="form-control" placeholder="Controller username">
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (empty($controller['password'])) : ?>
+                                    <div class="form-group">
+                                        <label for="input_controller_password">Password</label>
+                                        <input type="password" id="input_controller_password" name="controller_password" class="form-control" placeholder="Controller password">
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (empty($controller['url'])) : ?>
+                                    <div class="form-group">
+                                        <label for="input_controller_url">URL</label>
+                                        <input type="text" id="input_controller_url" name="controller_url" class="form-control" placeholder="https://<controller FQDN or IP>:8443">
+                                    </div>
+                                <?php endif; ?>
+                                <input type="submit" name="login" class="btn btn-primary pull-right" value="Login">
+                            </form>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-browser"
-                    target="_blank">UniFi API browser on Github</a></div>
-                    <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
-                    target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
-                </div>
-                <hr>
-                <dl class="dl-horizontal col-sm-offset-2">
-                    <dt>API browser version</dt>
-                    <dd><span id="span_api_browser_version" class="label label-primary"></span> <span id="span_api_browser_update" class="label label-success"><i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span></dd>
-                    <dt>API client version</dt>
-                    <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
-                </dl>
-                <hr>
-                <dl class="dl-horizontal col-sm-offset-2">
-                    <dt>controller user</dt>
-                    <dd><span id="span_controller_user" class="label label-primary"></span></dd>
-                    <dt>controller URL</dt>
-                    <dd><span id="span_controller_url" class="label label-primary"></span></dd>
-                    <dt>version detected</dt>
-                    <dd><span id="span_controller_version" class="label label-primary"></span></dd>
-                </dl>
-                <hr>
-                <dl class="dl-horizontal col-sm-offset-2">
-                    <dt>PHP version</dt>
-                    <dd><span id="span_php_version" class="label label-primary"></span></dd>
-                    <dt>PHP memory_limit</dt>
-                    <dd><span id="span_memory_limit" class="label label-primary"></span></dd>
-                    <dt>PHP memory used</dt>
-                    <dd><span id="span_memory_used" class="label label-primary"></span></dd>
-                    <dt>cURL version</dt>
-                    <dd><span id="span_curl_version" class="label label-primary"></span></dd>
-                    <dt>OpenSSL version</dt>
-                    <dd><span id="span_openssl_version" class="label label-primary"></span></dd>
-                    <dt>operating system</dt>
-                    <dd><span id="span_os_version" class="label label-primary"></span></dd>
-                </dl>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            <!-- /login_form -->
+            <!-- data-panel, only to be displayed once a controller has been configured and an action has been selected, while loading we display a temp div -->
+            <?php if (isset($_SESSION['unificookie']) && $action) { ?>
+            <div id="output_panel_loading" class="text-center">
+                <br>
+                <h2><i class="fa fa-spinner fa-spin fa-fw"></i></h2>
+            </div>
+            <div id="output_panel" class="panel panel-default" style="display: none">
+                <div class="panel-heading">
+                    <!-- site info, only to be displayed when a site has been selected -->
+                    <?php if ($site_id) { ?>
+                        site id: <span id="span_site_id" class="label label-primary"></span>
+                        site name: <span id="span_site_name" class="label label-primary"></span>
+                    <?php } ?>
+                    <!-- /site info -->
+                    <!-- selection, only to be displayed when a selection has been made -->
+                    <?php if ($selection) { ?>
+                        collection: <span id="span_selection" class="label label-primary"></span>
+                        API client function: <span id="span_function" class="label label-primary"></span>
+                    <?php } ?>
+                    <!-- /selection -->
+                    output: <span id="span_output_format" class="label label-primary"></span>
+                    <!-- objects_count, only to be displayed when we have results -->
+                    <?php if ($objects_count !== '') { ?>
+                        # of objects: <span id="span_objects_count" class="badge"></span>
+                    <?php } ?>
+                    <!-- /objects_count -->
+                </div>
+                <div class="panel-body">
+                    <!--only display panel content when an action has been selected-->
+                    <?php if ($action !== '' && isset($_SESSION['unificookie'])) { ?>
+                        <!-- present the timing results using an HTML5 progress bar -->
+                        <span id="span_elapsed_time"></span>
+                        <br>
+                        <div class="progress">
+                            <div id="timing_login_perc" class="progress-bar progress-bar-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                            <div id="timing_load_perc" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                            <div id="timing_remain_perc" class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="bottom"></div>
+                        </div>
+                        <div id="toggle_buttons">
+                            <button id="toggle-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse</button>
+                            <button id="toggle-level2-btn" type="button" class="btn btn-primary btn-xs"><i id="i_toggle-level2-btn" class="fa fa-minus" aria-hidden="true"></i> Expand/collapse level 2</button>
+                            <br><br>
+                        </div>
+                        <div id="output" class="js-copy-container">
+                            <button id="copy_to_clipboard_button" class="btn btn-xs js-copy-trigger" data-original-title="Copy to clipboard" data-clipboard-target="#pre_output" data-toggle="tooltip" data-placement="top"><i class="fa fa-copy"></i></button>
+                            <pre id="pre_output" class="js-copy-target"><?php print_output($output_format, $data) ?></pre>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+            <?php } ?>
+            <!-- /data-panel -->
+        </div>
+        <!-- back-to-top button element -->
+        <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" title="Back to top" data-toggle="tooltip" data-placement="left"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+        <!-- /back-to-top button element -->
+        <!-- About modal -->
+        <div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"></i> About UniFi API browser</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                A tool for browsing the data collections which are exposed through Ubiquiti's UniFi Controller API.
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-browser"
+                            target="_blank">UniFi API browser on Github</a></div>
+                            <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651"
+                            target="_blank">UniFi API browser on Ubiquiti Community forum</a></div>
+                            <div class="col-sm-8 col-sm-offset-1"><a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-client"
+                            target="_blank">UniFi API client on Github</a></div>
+                        </div>
+                        <hr>
+                        <dl class="dl-horizontal col-sm-offset-2">
+                            <dt>API browser version</dt>
+                            <dd><span id="span_api_browser_version" class="label label-primary"></span> <span id="span_api_browser_update" class="label label-success"><i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span></dd>
+                            <dt>API client version</dt>
+                            <dd><span id="span_api_class_version" class="label label-primary"></span></dd>
+                        </dl>
+                        <hr>
+                        <dl class="dl-horizontal col-sm-offset-2">
+                            <dt>controller user</dt>
+                            <dd><span id="span_controller_user" class="label label-primary"></span></dd>
+                            <dt>controller URL</dt>
+                            <dd><span id="span_controller_url" class="label label-primary"></span></dd>
+                            <dt>version detected</dt>
+                            <dd><span id="span_controller_version" class="label label-primary"></span></dd>
+                        </dl>
+                        <hr>
+                        <dl class="dl-horizontal col-sm-offset-2">
+                            <dt>PHP version</dt>
+                            <dd><span id="span_php_version" class="label label-primary"></span></dd>
+                            <dt>PHP memory_limit</dt>
+                            <dd><span id="span_memory_limit" class="label label-primary"></span></dd>
+                            <dt>PHP memory used</dt>
+                            <dd><span id="span_memory_used" class="label label-primary"></span></dd>
+                            <dt>cURL version</dt>
+                            <dd><span id="span_curl_version" class="label label-primary"></span></dd>
+                            <dt>OpenSSL version</dt>
+                            <dd><span id="span_openssl_version" class="label label-primary"></span></dd>
+                            <dt>operating system</dt>
+                            <dd><span id="span_os_version" class="label label-primary"></span></dd>
+                        </dl>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
-<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha384-DmFpgjLdJIZgLscJ9DpCHynOVhvNfaTvPJA+1ijsbkMKhI/e8eKnBZp1AmHDVjrT" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha384-JbuAF+8+4FF8uR/7D07/5IWwIj2FoNw5jJQGg1s8GtGIfQXFxWPRdMNWYmU35KjP" crossorigin="anonymous"></script>
-<script>
-/**
- * populate some global Javascript variables with PHP output for cleaner code
- */
-var alert_message       = '<?php echo $alert_message ?>',
-    show_login          = '<?php echo $show_login ?>',
-    action              = '<?php echo $action ?>',
-    site_id             = '<?php echo $site_id ?>',
-    site_name           = '<?php echo htmlspecialchars($site_name) ?>',
-    controller_id       = '<?php echo $controller_id ?>',
-    output_format       = '<?php echo $output_format ?>',
-    selection           = '<?php echo $selection ?>',
-    objects_count       = '<?php echo $objects_count ?>',
-    timing_login_perc   = '<?php echo $login_perc ?>',
-    time_after_login    = '<?php echo $time_after_login ?>',
-    timing_load_perc    = '<?php echo $load_perc ?>',
-    time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
-    timing_remain_perc  = '<?php echo $remain_perc ?>',
-    timing_total_time   = '<?php echo $time_total ?>',
-    php_version         = '<?php echo (phpversion()) ?>',
-    memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
-    memory_used         = '<?php echo round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M' ?>',
-    curl_version        = '<?php echo $curl_version ?>',
-    openssl_version     = '<?php echo $openssl_version ?>',
-    os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
-    api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
-    api_class_version   = '<?php echo API_CLASS_VERSION ?>',
-    controller_user     = '<?php if (isset($controller['user'])) echo $controller['user'] ?>',
-    controller_url      = '<?php if (isset($controller['url'])) echo $controller['url'] ?>',
-    controller_version  = '<?php if (isset($detected_controller_version)) echo $detected_controller_version ?>';
-    theme               = 'bootstrap';
+        <!-- latest compiled and minified JavaScript versions, loaded from CDN's, now including Source Integrity hashes, just in case... -->
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js" integrity="sha384-DmFpgjLdJIZgLscJ9DpCHynOVhvNfaTvPJA+1ijsbkMKhI/e8eKnBZp1AmHDVjrT" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js" integrity="sha384-JbuAF+8+4FF8uR/7D07/5IWwIj2FoNw5jJQGg1s8GtGIfQXFxWPRdMNWYmU35KjP" crossorigin="anonymous"></script>
+        <script>
+            /**
+             * populate some global Javascript variables with PHP output for cleaner code
+             */
+            var alert_message       = '<?php echo $alert_message ?>',
+                show_login          = '<?php echo $show_login ?>',
+                action              = '<?php echo $action ?>',
+                site_id             = '<?php echo $site_id ?>',
+                site_name           = '<?php echo htmlspecialchars($site_name) ?>',
+                controller_id       = '<?php echo $controller_id ?>',
+                output_format       = '<?php echo $output_format ?>',
+                selection           = '<?php echo $selection ?>',
+                objects_count       = '<?php echo $objects_count ?>',
+                timing_login_perc   = '<?php echo $login_perc ?>',
+                time_after_login    = '<?php echo $time_after_login ?>',
+                timing_load_perc    = '<?php echo $load_perc ?>',
+                time_for_load       = '<?php echo ($time_after_load - $time_after_login) ?>',
+                timing_remain_perc  = '<?php echo $remain_perc ?>',
+                timing_total_time   = '<?php echo $time_total ?>',
+                php_version         = '<?php echo (phpversion()) ?>',
+                memory_limit        = '<?php echo (ini_get('memory_limit')) ?>',
+                memory_used         = '<?php echo round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M' ?>',
+                curl_version        = '<?php echo $curl_version ?>',
+                openssl_version     = '<?php echo $openssl_version ?>',
+                os_version          = '<?php echo (php_uname('s') . ' ' . php_uname('r')) ?>',
+                api_browser_version = '<?php echo API_BROWSER_VERSION ?>',
+                api_class_version   = '<?php echo API_CLASS_VERSION ?>',
+                controller_user     = '<?php if (isset($controller['user'])) echo $controller['user'] ?>',
+                controller_url      = '<?php if (isset($controller['url'])) echo $controller['url'] ?>',
+                controller_version  = '<?php if (isset($detected_controller_version)) echo $detected_controller_version ?>';
+                theme               = 'bootstrap';
 
-/**
- * check whether user has stored a custom theme, if yes we switch to the stored value
- */
-if (localStorage.getItem('API_browser_theme') == null || localStorage.getItem('API_browser_theme') === 'bootstrap') {
-    $('#bootstrap').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-} else {
-    var stored_theme = localStorage.getItem('API_browser_theme');
-    switchCSS(stored_theme);
-}
-
-/**
- * process a Bootswatch CSS stylesheet change
- */
-function switchCSS(new_theme) {
-    console.log('current theme: ' + theme + ' new theme: ' + new_theme);
-    if (new_theme === 'bootstrap') {
-        $('#bootswatch_theme_stylesheet').attr('href', '');
-    } else {
-        $('#bootswatch_theme_stylesheet').attr('href', 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' + new_theme + '/bootstrap.min.css');
-    }
-
-    $('#' + theme).removeClass('active').find('a').children('i').remove();
-    $('#' + new_theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-    theme = new_theme;
-    localStorage.setItem('API_browser_theme', theme);
-}
-
-$(document).ready(function () {
-    /**
-     * we hide the loading div and show the output panel
-     */
-    $('#output_panel_loading').hide();
-    $('#output_panel').show();
-
-    /**
-     * if needed we display the login form
-     */
-    if (show_login == 1 || show_login == 'true') {
-        $('#login_alert_placeholder').html(alert_message);
-        $('#login_alert_placeholder').show();
-        $('#login_form').fadeIn(500);
-    } else {
-        $('#alert_placeholder').html(alert_message);
-        $('#alert_placeholder').fadeIn(500);
-    }
-
-    /**
-     * update dynamic elements in the DOM using some of the above variables
-     */
-    $('#span_site_id').html(site_id);
-    $('#span_site_name').html(site_name);
-    $('#span_output_format').html(output_format);
-    $('#span_selection').html(selection);
-    $('#span_objects_count').html(objects_count);
-    $('#span_elapsed_time').html('total elapsed time: ' + timing_total_time + ' seconds');
-
-    $('#timing_login_perc').attr('aria-valuenow', timing_login_perc);
-    $('#timing_login_perc').css('width', timing_login_perc + '%');
-    $('#timing_login_perc').attr('data-original-title', time_after_login + ' seconds');
-    $('#timing_login_perc').html('API login time');
-    $('#timing_load_perc').attr('aria-valuenow', timing_load_perc);
-    $('#timing_load_perc').css('width', timing_load_perc + '%');
-    $('#timing_load_perc').attr('data-original-title', time_for_load + ' seconds');
-    $('#timing_load_perc').html('data load time');
-    $('#timing_remain_perc').attr('aria-valuenow', timing_remain_perc);
-    $('#timing_remain_perc').css('width', timing_remain_perc + '%');
-    $('#timing_remain_perc').attr('data-original-title', 'PHP overhead: ' + timing_remain_perc + '%');
-    $('#timing_remain_perc').html('PHP overhead');
-
-    $('#span_api_browser_version').html(api_browser_version);
-    $('#span_api_class_version').html(api_class_version);
-    $('#span_controller_user').html(controller_user);
-    $('#span_controller_url').html(controller_url);
-    $('#span_controller_version').html(controller_version);
-    $('#span_php_version').html(php_version);
-    $('#span_curl_version').html(curl_version);
-    $('#span_openssl_version').html(openssl_version);
-    $('#span_os_version').html(os_version);
-    $('#span_memory_limit').html(memory_limit);
-    $('#span_memory_used').html(memory_used);
-
-    /**
-     * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
-     *
-     * NOTE:
-     * these actions are performed conditionally
-     */
-    (action != '') ? $('#' + action).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    (site_id != '') ? $('#' + site_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-    (controller_id != '') ? $('#controller_' + controller_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
-
-    /**
-     * these two options have default values so no tests needed here
-     */
-    $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
-
-    /**
-     * initialise the jquery-jsonview library, only when required
-     */
-    if (output_format == 'json_color') {
-        $('#toggle_buttons').show();
-        $('#pre_output').JSONView($('#pre_output').text());
-
-        /**
-         * the expand/collapse toggle buttons to control the json view
-         */
-        $('#toggle-btn').on('click', function () {
-            $('#pre_output').JSONView('toggle');
-            $('#i_toggle-btn').toggleClass('fa-plus').toggleClass('fa-minus');
-            $(this).blur();
-        });
-
-        $('#toggle-level2-btn').on('click', function () {
-            $('#pre_output').JSONView('toggle', 2);
-            $('#i_toggle-level2-btn').toggleClass('fa-plus').toggleClass('fa-minus');
-            $(this).blur();
-        });
-    }
-
-    /**
-     * only now do we display the output
-     */
-    $('#output').show();
-
-    /**
-     * check latest version of API browser tool and inform user when it's more recent than the current,
-     * but only when the "about" modal is opened
-     */
-    $('#about_modal').on('shown.bs.modal', function (e) {
-        $.getJSON('https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest', function (external) {
-            if (api_browser_version != '' && typeof(external.tag_name) !== 'undefined') {
-                if (api_browser_version < external.tag_name.substring(1)) {
-                    $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));
-                    $('#span_api_browser_update').removeClass('label-success').addClass('label-warning');
-                } else if (api_browser_version == external.tag_name.substring(1)) {
-                    $('#span_api_browser_update').html('up to date');
-                } else {
-                    $('#span_api_browser_update').html('bleeding edge!');
-                    $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
-                }
+            /**
+             * check whether user has stored a custom theme, if yes we switch to the stored value
+             */
+            if (localStorage.getItem('API_browser_theme') == null || localStorage.getItem('API_browser_theme') === 'bootstrap') {
+                $('#bootstrap').addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+            } else {
+                var stored_theme = localStorage.getItem('API_browser_theme');
+                switchCSS(stored_theme);
             }
-        }).fail(function (d, textStatus, error) {
-            $('#span_api_browser_update').html('error checking updates');
-            $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
-            console.error('getJSON failed, status: ' + textStatus + ', error: ' + error);
-        });;
-    })
 
-    /**
-     * and reset the span again when the "about" modal is closed
-     */
-    $('#about_modal').on('hidden.bs.modal', function (e) {
-        $('#span_api_browser_update').html('<i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span>');
-        $('#span_api_browser_update').removeClass('label-warning').removeClass('label-danger').addClass('label-success');
-    })
-
-    /**
-     * initialize the "copy to clipboard" function, "borrowed" from the UserFrosting framework
-     */
-    if (typeof $.uf === 'undefined') {
-        $.uf = {};
-    }
-
-    $.uf.copy = function (button) {
-        var _this = this;
-
-        var clipboard = new ClipboardJS(button, {
-            text: function (trigger) {
-                var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
-                if (el.is(':input')) {
-                    return el.val();
+            /**
+             * process a Bootswatch CSS stylesheet change
+             */
+            function switchCSS(new_theme) {
+                console.log('current theme: ' + theme + ' new theme: ' + new_theme);
+                if (new_theme === 'bootstrap') {
+                    $('#bootswatch_theme_stylesheet').attr('href', '');
                 } else {
-                    return el.html();
+                    $('#bootswatch_theme_stylesheet').attr('href', 'https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/' + new_theme + '/bootstrap.min.css');
                 }
+
+                $('#' + theme).removeClass('active').find('a').children('i').remove();
+                $('#' + new_theme).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
+                theme = new_theme;
+                localStorage.setItem('API_browser_theme', theme);
             }
-        });
 
-        clipboard.on('success', function (e) {
-            setTooltip(e.trigger, 'Copied!');
-            hideTooltip(e.trigger);
-        });
+            $(document).ready(function () {
+                /**
+                 * we hide the loading div and show the output panel
+                 */
+                $('#output_panel_loading').hide();
+                $('#output_panel').show();
 
-        clipboard.on('error', function (e) {
-            setTooltip(e.trigger, 'Failed!');
-            hideTooltip(e.trigger);
-            console.log('Copy to clipboard failed, most probably the selection is too large');
-        });
+                /**
+                 * if needed we display the login form
+                 */
+                if (show_login == 1 || show_login == 'true') {
+                    $('#login_alert_placeholder').html(alert_message);
+                    $('#login_alert_placeholder').show();
+                    $('#login_form').fadeIn(500);
+                } else {
+                    $('#alert_placeholder').html(alert_message);
+                    $('#alert_placeholder').fadeIn(500);
+                }
 
-        function setTooltip(btn, message) {
-            $(btn)
-            .attr('data-original-title', message)
-            .tooltip('show');
-        }
+                /**
+                 * update dynamic elements in the DOM using some of the above variables
+                 */
+                $('#span_site_id').html(site_id);
+                $('#span_site_name').html(site_name);
+                $('#span_output_format').html(output_format);
+                $('#span_selection').html(selection);
 
-        function hideTooltip(btn) {
-            setTimeout(function () {
-                $(btn).tooltip('hide')
-                .attr('data-original-title', 'Copy to clipboard');
-            }, 500);
-        }
+                if (action.includes('(') || action.includes('(')) {
+                    $('#span_function').html(action);
+                } else {
+                    $('#span_function').html(action + '()');
+                }
 
-        /**
-         * tooltip trigger
-         */
-        $(button).tooltip({
-            trigger: 'hover'
-        });
-    };
+                $('#span_objects_count').html(objects_count);
+                $('#span_elapsed_time').html('total elapsed time: ' + timing_total_time + ' seconds');
 
-    /**
-     * link the copy button
-     */
-    $.uf.copy('.js-copy-trigger');
+                $('#timing_login_perc').attr('aria-valuenow', timing_login_perc);
+                $('#timing_login_perc').css('width', timing_login_perc + '%');
+                $('#timing_login_perc').attr('data-original-title', time_after_login + ' seconds');
+                $('#timing_login_perc').html('API login time');
+                $('#timing_load_perc').attr('aria-valuenow', timing_load_perc);
+                $('#timing_load_perc').css('width', timing_load_perc + '%');
+                $('#timing_load_perc').attr('data-original-title', time_for_load + ' seconds');
+                $('#timing_load_perc').html('data load time');
+                $('#timing_remain_perc').attr('aria-valuenow', timing_remain_perc);
+                $('#timing_remain_perc').css('width', timing_remain_perc + '%');
+                $('#timing_remain_perc').attr('data-original-title', 'PHP overhead: ' + timing_remain_perc + '%');
+                $('#timing_remain_perc').html('PHP overhead');
 
-    /**
-     * hide "copy to clipboard" button if the ClipboardJS function isn't supported or the output format isn't supported
-     */
-    var unsupported_formats = [
-        'json',
-        'php_array',
-        'php_var_dump',
-        'php_var_export'
-    ];
-    if (!ClipboardJS.isSupported() || $.inArray(output_format, unsupported_formats) === -1) {
-        $('.js-copy-trigger').hide();
-    }
+                $('#span_api_browser_version').html(api_browser_version);
+                $('#span_api_class_version').html(api_class_version);
+                $('#span_controller_user').html(controller_user);
+                $('#span_controller_url').html(controller_url);
+                $('#span_controller_version').html(controller_version);
+                $('#span_php_version').html(php_version);
+                $('#span_curl_version').html(curl_version);
+                $('#span_openssl_version').html(openssl_version);
+                $('#span_os_version').html(os_version);
+                $('#span_memory_limit').html(memory_limit);
+                $('#span_memory_used').html(memory_used);
 
-    /**
-     * manage display of the "back to top" button element
-     */
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 50) {
-            $('#back-to-top').fadeIn();
-        } else {
-            $('#back-to-top').fadeOut();
-        }
-    });
+                /**
+                 * highlight and mark the selected options in the dropdown menus for $controller_id, $action, $site_id, $theme and $output_format
+                 *
+                 * NOTE:
+                 * these actions are performed conditionally
+                 */
+                (action != '') ? $('#' + action).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+                (site_id != '') ? $('#' + site_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
+                (controller_id != '') ? $('#controller_' + controller_id).addClass('active').find('a').append(' <i class="fa fa-check"></i>') : false;
 
-    /**
-     * scroll body to 0px (top) on click on the "back to top" button
-     */
-    $('#back-to-top').click(function () {
-        $('#back-to-top').tooltip('hide');
-        $('body,html').animate({
-            scrollTop: 0
-        }, 500);
-        return false;
-    });
+                /**
+                 * these two options have default values so no tests needed here
+                 */
+                $('#' + output_format).addClass('active').find('a').append(' <i class="fa fa-check"></i>');
 
-    $('#back-to-top').tooltip('show');
+                /**
+                 * initialise the jquery-jsonview library, only when required
+                 */
+                if (output_format == 'json_color') {
+                    $('#toggle_buttons').show();
+                    $('#pre_output').JSONView($('#pre_output').text());
 
-    /**
-     * enable Bootstrap tooltips
-     */
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
-});
-</script>
-</body>
+                    /**
+                     * the expand/collapse toggle buttons to control the json view
+                     */
+                    $('#toggle-btn').on('click', function () {
+                        $('#pre_output').JSONView('toggle');
+                        $('#i_toggle-btn').toggleClass('fa-plus').toggleClass('fa-minus');
+                        $(this).blur();
+                    });
+
+                    $('#toggle-level2-btn').on('click', function () {
+                        $('#pre_output').JSONView('toggle', 2);
+                        $('#i_toggle-level2-btn').toggleClass('fa-plus').toggleClass('fa-minus');
+                        $(this).blur();
+                    });
+                }
+
+                /**
+                 * only now do we display the output
+                 */
+                $('#output').show();
+
+                /**
+                 * check latest version of API browser tool and inform user when it's more recent than the current,
+                 * but only when the "about" modal is opened
+                 */
+                $('#about_modal').on('shown.bs.modal', function (e) {
+                    $.getJSON('https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest', function (external) {
+                        if (api_browser_version != '' && typeof(external.tag_name) !== 'undefined') {
+                            if (api_browser_version < external.tag_name.substring(1)) {
+                                $('#span_api_browser_update').html('an update is available: ' + external.tag_name.substring(1));
+                                $('#span_api_browser_update').removeClass('label-success').addClass('label-warning');
+                            } else if (api_browser_version == external.tag_name.substring(1)) {
+                                $('#span_api_browser_update').html('up to date');
+                            } else {
+                                $('#span_api_browser_update').html('bleeding edge!');
+                                $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
+                            }
+                        }
+                    }).fail(function (d, textStatus, error) {
+                        $('#span_api_browser_update').html('error checking updates');
+                        $('#span_api_browser_update').removeClass('label-success').addClass('label-danger');
+                        console.error('getJSON failed, status: ' + textStatus + ', error: ' + error);
+                    });;
+                })
+
+                /**
+                 * and reset the span again when the "about" modal is closed
+                 */
+                $('#about_modal').on('hidden.bs.modal', function (e) {
+                    $('#span_api_browser_update').html('<i class="fa fa-spinner fa-spin fa-fw"></i> checking for updates</span>');
+                    $('#span_api_browser_update').removeClass('label-warning').removeClass('label-danger').addClass('label-success');
+                })
+
+                /**
+                 * initialize the "copy to clipboard" function, "borrowed" from the UserFrosting framework
+                 */
+                if (typeof $.uf === 'undefined') {
+                    $.uf = {};
+                }
+
+                $.uf.copy = function (button) {
+                    var _this = this;
+
+                    var clipboard = new ClipboardJS(button, {
+                        text: function (trigger) {
+                            var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
+                            if (el.is(':input')) {
+                                return el.val();
+                            } else {
+                                return el.html();
+                            }
+                        }
+                    });
+
+                    clipboard.on('success', function (e) {
+                        setTooltip(e.trigger, 'Copied!');
+                        hideTooltip(e.trigger);
+                    });
+
+                    clipboard.on('error', function (e) {
+                        setTooltip(e.trigger, 'Failed!');
+                        hideTooltip(e.trigger);
+                        console.log('Copy to clipboard failed, most probably the selection is too large');
+                    });
+
+                    function setTooltip(btn, message) {
+                        $(btn)
+                        .attr('data-original-title', message)
+                        .tooltip('show');
+                    }
+
+                    function hideTooltip(btn) {
+                        setTimeout(function () {
+                            $(btn).tooltip('hide')
+                            .attr('data-original-title', 'Copy to clipboard');
+                        }, 500);
+                    }
+
+                    /**
+                     * tooltip trigger
+                     */
+                    $(button).tooltip({
+                        trigger: 'hover'
+                    });
+                };
+
+                /**
+                 * link the copy button
+                 */
+                $.uf.copy('.js-copy-trigger');
+
+                /**
+                 * hide "copy to clipboard" button if the ClipboardJS function isn't supported or the output format isn't supported
+                 */
+                var unsupported_formats = [
+                    'json',
+                    'php_array',
+                    'php_var_dump',
+                    'php_var_export'
+                ];
+                if (!ClipboardJS.isSupported() || $.inArray(output_format, unsupported_formats) === -1) {
+                    $('.js-copy-trigger').hide();
+                }
+
+                /**
+                 * manage display of the "back to top" button element
+                 */
+                $(window).scroll(function () {
+                    if ($(this).scrollTop() > 50) {
+                        $('#back-to-top').fadeIn();
+                    } else {
+                        $('#back-to-top').fadeOut();
+                    }
+                });
+
+                /**
+                 * scroll body to 0px (top) on click on the "back to top" button
+                 */
+                $('#back-to-top').click(function () {
+                    $('#back-to-top').tooltip('hide');
+                    $('body,html').animate({
+                        scrollTop: 0
+                    }, 500);
+                    return false;
+                });
+
+                $('#back-to-top').tooltip('show');
+
+                /**
+                 * enable Bootstrap tooltips
+                 */
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
+            });
+        </script>
+    </body>
 </html>
