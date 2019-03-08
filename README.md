@@ -6,6 +6,17 @@
 >$ git remote set-url origin https://github.com/Art-of-WiFi/UniFi-API-browser.git
 >```
 
+## Quick start
+
+If you don't want to install PHP and all the dependencies on your host machine, you can quickly install and run it inside docker, just copy and paste these instructions in your terminal.
+
+```
+apt install -y docker.io # On Ubuntu/Debian if you don't have Docker 
+cd /usr/src; mkdir Art-of-WiFi; cd Art-of-WiFi; git clone --depth 1 https://github.com/Art-of-WiFi/UniFi-API-browser.git
+docker run --rm -ti -p 8000:8000 -v /usr/src/Art-of-WiFi/UniFi-API-browser:/usr/src alpine sh -c "cd /usr/src && apk update && apk add php php-session php-curl composer && composer install && php -S 0:8000 || sh"
+```
+Point your browser to: http://127.0.0.1:8000 and just enter your Unifi Controller login details. (This creates a temporary Docker container - if you want it to persist, remove the "--rm".)
+
 ## UniFi API browser
 This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
 
