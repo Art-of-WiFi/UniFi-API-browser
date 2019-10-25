@@ -1,0 +1,32 @@
+{# here we need to construct the menu structure for the collections array #}
+    <ul id="collection_dropdown" class="navbar-nav mr-auto mt-2 mt-lg-0 d-none">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-none d-lg-block" href="#" id="navbar_collection_dropdown_link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Collections
+            </a>
+            <a class="nav-link dropdown-toggle d-lg-none" href="#" id="navbar_collection_dropdown_link_small" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Collections
+            </a>
+            <ul class="dropdown-menu shadow" aria-labelledby="navbarDropdownMenuLink">
+                <h5 class="dropdown-header">Select a collection</h5>
+
+{% for menu in collections %}
+
+                <li class="dropdown-submenu">
+                    <a class="dropdown-item" data-toggle="dropdown" href="#">{{menu.label}}</a>
+                    <ul class="dropdown-menu scrollable-menu shadow">
+{% for option in menu.options %}
+{% if option.type == 'collection' %}
+                        <li><a id="collection_{{option.key}}" class="dropdown-item collection_idx" href="#" data-method="{{option.method}}" data-params='{{option.params|json_encode()}}' data-key="{{option.key}}"> {{option.label}}</a></li>
+{% else %}
+                        <div class="dropdown-divider"></div>
+{% endif %}
+{% endfor %}
+                    </ul>
+                </li>
+
+{% endfor %}
+
+            </ul>
+        </li>
+    </ul>

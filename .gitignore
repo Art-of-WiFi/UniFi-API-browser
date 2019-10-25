@@ -1,2 +1,14 @@
 # Ignore personal config file
-config.php
+config/config.php
+config/users.php
+
+# ignore these files
+desktop.ini
+*.sublime-workspace
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

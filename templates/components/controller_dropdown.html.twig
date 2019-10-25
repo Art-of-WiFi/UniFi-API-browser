@@ -1,0 +1,23 @@
+            {% if controllers | length > 0 %}
+                <ul id="controller_dropdown" class="navbar-nav mt-2 mt-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbar_controller_dropdown_link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% if controller | length > 0 %}
+                            {{controller.name}}
+                        {% else %}
+                            Controllers
+                        {% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-left scrollable-menu shadow" aria-labelledby="navbar_controller_dropdown_link">
+                            <h5 class="dropdown-header">Select a controller</h5>
+
+                    {% for item in controllers %}
+                            <a class="controller_idx dropdown-item{% if loop.index == controller.idx %} active{% endif %}" id="controller_{{loop.index}}" data-idx="{{loop.index}}" data-value="{{item.name}}" href="#">
+                                {{item.name}}{% if loop.index == controller.idx %} <i class="fas fa-check fa-fw"></i>{% endif %}
+                            </a>
+                    {% endfor %}
+
+                        </div>
+                    </li>
+                </ul>
+            {% endif %}

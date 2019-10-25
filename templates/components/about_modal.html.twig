@@ -1,0 +1,76 @@
+{# About modal #}
+
+<div class="modal fade" id="about_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"><i class="fas fa-info-circle"></i> About UniFi API browser</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-8 offset-sm-2">
+                        A tool for browsing the data collections which are exposed through Ubiquiti's UniFi Controller API, created by <a href="http://www.dereferer.org/?https://artofwifi.net/portfolio/unifi-api-browser/" target="_blank">Art of WiFi</a>.
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-sm-8 offset-sm-2">
+                        <a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-browser"target="_blank">UniFi API browser on Github</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8 offset-sm-2">
+                        <a href="http://www.dereferer.org/?http://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-updates-and-discussion/m-p/1392651#U1392651" target="_blank">UniFi API browser on Ubiquiti Community forum</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8 offset-sm-2">
+                        <a href="http://www.dereferer.org/?https://github.com/Art-of-WiFi/UniFi-API-client" target="_blank">UniFi API client on Github</a>
+                    </div>
+                </div>
+
+                <hr>
+                <dl class="row">
+                    <dt class="col-5 text-right">UniFi API Browser version</dt>
+                    <dd class="col-7"><span id="span_api_browser_version" class="badge badge-primary">{{about_modal_params.api_browser_version | default('unknown')}}</span>
+                        <span id="span_api_browser_update" class="badge badge-success">
+                            &nbsp;<i class="fas fa-spinner fa-spin fa-fw"></i> checking for updates
+                        </span>
+                    </dd>
+                    <dt class="col-5 text-right">PHP API client version</dt>
+                    <dd class="col-7"><span id="span_api_client_version" class="badge badge-primary">{{about_modal_params.api_client_version | default('unknown')}}</span></dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <dt class="col-5 text-right">Controller URL</dt>
+                    <dd class="col-7"><span id="span_controller_url" class="badge badge-primary">{{controller.url | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">Controller user name</dt>
+                    <dd class="col-7"><span id="span_controller_user" class="badge badge-primary">{{controller.user | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">Controller version</dt>
+                    <dd class="col-7"><span id="span_controller_version" class="badge badge-primary">{{controller.detected_version | default('not detected')}}</span></dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <dt class="col-5 text-right">PHP version</dt>
+                    <dd class="col-7"><span id="span_php_version" class="badge badge-primary">{{about_modal_params.php_version | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">PHP memory_limit</dt>
+                    <dd class="col-7"><span id="span_memory_limit" class="badge badge-primary">{{about_modal_params.memory_limit | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">peak PHP memory used</dt>
+                    <dd class="col-7"><span id="span_memory_used" class="badge badge-primary">{{about_modal_params.memory_used | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">cURL version</dt>
+                    <dd class="col-7"><span id="span_curl_version" class="badge badge-primary">{{about_modal_params.curl_version | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">OpenSSL version</dt>
+                    <dd class="col-7"><span id="span_openssl_version" class="badge badge-primary">{{about_modal_params.openssl_version | default('unknown')}}</span></dd>
+                    <dt class="col-5 text-right">operating system</dt>
+                    <dd class="col-7"><span id="span_os_version" class="badge badge-primary">{{about_modal_params.os_version | default('unknown')}}</span></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

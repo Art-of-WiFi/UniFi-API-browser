@@ -1,5 +1,6 @@
 {
     "require": {
+        "twig/twig": "^2.0",
         "kint-php/kint": "2.2",
         "art-of-wifi/unifi-api-client": "^1.1"
     }

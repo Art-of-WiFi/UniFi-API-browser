@@ -1,0 +1,125 @@
+{% block page %}
+<!doctype html>
+<html lang="en">
+    {% block head %}
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Art of WiFi">
+        <title>UniFi API Browser Gen2</title>
+
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <!-- placeholder to dynamically load the appropriate Bootswatch CSS file from CDN unless we already have a selected theme -->
+        <link rel="stylesheet" href="{% if session.theme not in ['', 'bootstrap'] %}https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/{{session.theme}}/bootstrap.min.css{% endif %}" id="bootswatch_theme_stylesheet">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+
+        <!-- load the CSS file for Highlight.js from CDN -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/github.min.css" integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous">
+
+        <!-- custom CSS file and favicon -->
+        <link rel="stylesheet" href="css/custom.css?{{tool_version}}">
+        <link rel="shortcut icon" type="image/png" href="favicon.ico">
+
+        <!-- global vars for use with Javascript -->
+        <script type='text/javascript' >
+            window.debug               = {{debug | default('false')}};
+            window.api_browser_version = '{{tool_version}}';
+        </script>
+
+    </head>
+    {% endblock %}
+    <body>
+        <nav class="navbar navbar-expand-md navbar-{{navbar_class|default('dark')}} fixed-top bg-{{navbar_bg_class|default('dark')}}">
+            <a class="navbar-brand{% if page != 'login' %} d-none d-lg-block{% endif %}" href=""><i class="fas fa-search"></i> UniFi API Browser</a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+
+                {% block controller_dropdown %}
+                {% endblock %}
+
+                {% block site_dropdown %}
+                {% endblock %}
+
+                {% block collection_dropdown %}
+                {% endblock %}
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-sliders-h fa-lg"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right scrollable-menu shadow" aria-labelledby="navbarDropdown">
+                        {% if session.logged_in == true %}
+                            <a class="dropdown-item" id="logout" href="logout.php"><i class="fas fa-sign-out-alt"></i> Log out</a>
+                            <div class="dropdown-divider"></div>
+                        {% else %}
+                            <a class="dropdown-item" id="reset_session" href="?reset_session=true" data-toggle="tooltip" data-placement="left"
+                                    title="In some cases this can fix login errors and/or an empty sites list"><i class="fas fa-refresh"></i> Reset PHP session</a>
+                            <div class="dropdown-divider"></div>
+                        {% endif %}
+                        {# prevent the about modal from being available on certain pages #}
+                        {% if page not in ['login', 'config_error'] %}
+                            <a class="dropdown-item" id="info" data-toggle="modal" data-target="#about_modal" href="#"><i class="fas fa-info-circle"></i> About this tool</a>
+                            <div class="dropdown-divider"></div>
+                        {% endif %}
+                            <h5 class="dropdown-header">Select a theme</h5>
+                            <a class="dropdown-item theme_option active" id="bootstrap" href="#" data-theme_name="bootstrap">Bootstrap (default) <i class="fas fa-check"></i></a>
+                            <a class="dropdown-item theme_option" id="cerulean" href="#" data-theme_name="cerulean">Cerulean</a>
+                            <a class="dropdown-item theme_option" id="cosmo" href="#" data-theme_name="cosmo">Cosmo</a>
+                            <a class="dropdown-item theme_option" id="cyborg" href="#" data-theme_name="cyborg">Cyborg</a>
+                            <a class="dropdown-item theme_option" id="darkly" href="#" data-theme_name="darkly">Darkly</a>
+                            <a class="dropdown-item theme_option" id="flatly" href="#" data-theme_name="flatly">Flatly</a>
+                            <a class="dropdown-item theme_option" id="journal" href="#" data-theme_name="journal">Journal</a>
+                            <a class="dropdown-item theme_option" id="litera" href="#" data-theme_name="litera">Litera</a>
+                            <a class="dropdown-item theme_option" id="lumen" href="#" data-theme_name="lumen">Lumen</a>
+                            <a class="dropdown-item theme_option" id="lux" href="#" data-theme_name="lux">Lux</a>
+                            <a class="dropdown-item theme_option" id="materia" href="#" data-theme_name="materia">Materia</a>
+                            <a class="dropdown-item theme_option" id="minty" href="#" data-theme_name="minty">Minty</a>
+                            <a class="dropdown-item theme_option" id="pulse" href="#" data-theme_name="pulse">Pulse</a>
+                            <a class="dropdown-item theme_option" id="sandstone" href="#" data-theme_name="sandstone">Sandstone</a>
+                            <a class="dropdown-item theme_option" id="simplex" href="#" data-theme_name="simplex">Simplex</a>
+                            <a class="dropdown-item theme_option" id="sketchy" href="#" data-theme_name="sketchy">Sketchy</a>
+                            <a class="dropdown-item theme_option" id="slate" href="#" data-theme_name="slate">Slate</a>
+                            <a class="dropdown-item theme_option" id="solar" href="#" data-theme_name="solar">Solar</a>
+                            <a class="dropdown-item theme_option" id="spacelab" href="#" data-theme_name="spacelab">Spacelab</a>
+                            <a class="dropdown-item theme_option" id="superhero" href="#" data-theme_name="superhero">Superhero</a>
+                            <a class="dropdown-item theme_option" id="united" href="#" data-theme_name="united">United</a>
+                            <a class="dropdown-item theme_option" id="yeti" href="#" data-theme_name="yeti">Yeti</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+    {# block to insert the main page content #}
+    {% block content %}
+    {% endblock %}
+
+    {# back-to-top button element #}
+    <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" title="Back to top" data-toggle="tooltip" data-placement="left"><i class="fas fa-chevron-up" aria-hidden="true"></i></a>    {# /back-to-top button element #}
+
+    {% if page not in ['login', 'config_error'] %}
+        {% include 'components/about_modal.html.twig' %}
+    {% endif %}
+
+        <!-- load various Javascript files from CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha256-fzFFyH01cBVPYzl16KT40wqjhgPtq6FFUB6ckN2+GGw=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js" integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script>
+
+        <!-- load our custom Javascript file -->
+        <script src="js/custom.js?{{tool_version}}"></script>
+
+    {# This block allows you to create page-specific Javascript in a child template #}
+    {% block page_scripts %}
+    {% endblock %}
+    </body>
+</html>
+{% endblock %}

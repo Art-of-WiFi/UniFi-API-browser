@@ -1,0 +1,120 @@
+/**
+ * custom CSS goes here
+ */
+
+/**
+ * Show it is fixed to the top
+ */
+body {
+    padding-top: 4.5rem;
+    font-size: 14px;
+}
+
+.form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+
+.form-signin .checkbox {
+    font-weight: 400;
+}
+
+.form-signin .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.form-signin .form-control:focus {
+    z-index: 2;
+}
+
+.form-signin input[type="text"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/**
+ * fix for DataTables issues with browsers on OSX,
+ * needs to be combined with the 100% width tag in the table element
+ *
+ * NOTE:
+ * can cause issues with long content in columns in other browsers
+ */
+table {
+    table-layout: fixed;
+}
+
+/**
+ * make menus scrollable
+ */
+.scrollable-menu {
+    height: auto;
+    max-height: 80vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/**
+ * to implement sub menus within the dropdown menus
+ */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu>a:after {
+  content: "\f0da";
+  float: right;
+  border: none;
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+}
+
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: 0px;
+  margin-left: 0px;
+}
+
+/**
+ * the back-to-top button
+ */
+.back-to-top {
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display:none;
+}
+.results_badge {
+    font-size: 1rem;
+}
+
+/**
+ * the copy to clipboard button
+ */
+#copy_to_clipboard_button {
+     position: absolute;
+     top: 0;
+     right: 0;
+}
+
+/**
+ * the output container
+ */
+#output_pre {
+    min-height: 50px;
+    overflow-x: auto;
+}

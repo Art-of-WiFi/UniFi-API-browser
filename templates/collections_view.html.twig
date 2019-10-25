@@ -1,0 +1,165 @@
+{# login page #}
+{% extends "layout/main.html.twig" %}
+
+{% set page = 'collections_view' %}
+
+{% block controller_dropdown %}
+    {% include 'components/controller_dropdown.html.twig' %}
+{% endblock %}
+
+{% block site_dropdown %}
+    {% include 'components/site_dropdown.html.twig' %}
+{% endblock %}
+
+{% block collection_dropdown %}
+    {% include 'components/collection_dropdown.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<br>
+<div id="fetching_sites_alert_wrapper" class="col-sm-12 d-none alert_wrapper">
+    <br>
+    <div id="fetching_sites_alert" class="alert alert-primary" role="alert">
+        <span id="fetching_sites_alert_span">
+            Fetching sites from the controller <i class="fas fa-sync fa-spin"></i>
+        </span>
+    </div>
+</div>
+
+<div id="select_site_alert_wrapper" class="col-sm-12 d-none alert_wrapper">
+    <div id="select_site_alert" class="alert alert-primary" role="alert">
+        <span id="select_site_alert_select">
+            Please select a site from the dropdown menu <i class="fas fa-arrow-circle-up"></i>
+        </span>
+    </div>
+</div>
+
+<div id="site_load_error_alert_wrapper" class="col-sm-12 d-none alert_wrapper">
+    <div id="site_load_error_alert" class="alert alert-danger" role="alert">
+        <span id="site_load_error">
+            Error loading sites or no sites available <i class="fas fa-exclamation"></i>
+        </span>
+    </div>
+</div>
+
+<div id="select_collection_alert_wrapper" class="col-sm-12 d-none alert_wrapper">
+    <div id="select_collection_alert" class="alert alert-primary" role="alert">
+        <span id="select_site_alert_select">
+            Please select a collection from the dropdown menu <i class="fas fa-arrow-circle-up"></i>
+        </span>
+    </div>
+</div>
+
+<div id="general_error_alert_wrapper" class="col-sm-12 d-none alert_wrapper">
+    <div id="general_error_alert" class="alert alert-danger" role="alert">
+        <span id="general_error">
+        </span>
+    </div>
+</div>
+
+<div id="output_buttons_container_outer_div" class="col-sm-12 mb-2 mt-0 d-none">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-secondary active btn-sm output_radio_button">
+            <input class="" type="radio" name="options" id="output_json" value="json" autocomplete="off" checked> JSON
+        </label>
+        <label class="btn btn-secondary btn-sm output_radio_button" data-toggle="tooltip" data-placement="top" title="nice, but slower with large collections, fits better with lighter themes">
+            <input class="" type="radio" name="options" id="output_json_highlighted" value="json_highlighted" autocomplete="off"> JSON highlighted
+        </label>
+        <label class="btn btn-secondary btn-sm output_radio_button" data-toggle="tooltip" data-placement="top" title="cool, but slower with large collections">
+            <input class="" type="radio" name="options" id="output_kint" value="kint" autocomplete="off"> PHP array, interactive
+        </label>
+        <label class="btn btn-secondary btn-sm output_radio_button">
+            <input class="" type="radio" name="options" id="output_kint_plain" value="kint_plain" autocomplete="off"> PHP array, hightlighted
+        </label>
+    </div>
+</div>
+
+<div id="output_container_outer_div" class="col-sm-12 d-none">
+    <div class="card bg-light">
+        <div class="card-header">
+            <span id="results_summary_placeholder" class="results_badge"></span> <span class="results_badge">objects: </span><span id="objects_count" class="badge badge-secondary results_badge"></span>
+        </div>
+        <div class="card-body">
+            <span id="results_stats_placeholder"></span>
+            <br>
+            <div id="output_container" class="card bg-light">
+                <div id="output" class="js-copy-container">
+                    <button id="copy_to_clipboard_button" class="btn btn-xs js-copy-trigger" data-original-title="Copy to clipboard" data-clipboard-target="#copy_container" data-toggle="tooltip" data-placement="top"><i class="far fa-copy"></i></button>
+                    <pre id="output_pre" class="mb-0"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/json.min.js" integrity="sha256-KPdGtw3AdDen/v6+9ue/V3m+9C2lpNiuirroLsHrJZM=" crossorigin="anonymous"></script>
+<script type="text/javascript" class="init">
+/**
+ * initialize the "copy to clipboard" function, "borrowed" from the UserFrosting framework
+ */
+if (typeof $.uf === 'undefined') {
+    $.uf = {};
+}
+
+$.uf.copy = function (button) {
+    var _this = this;
+
+    var clipboard = new ClipboardJS(button, {
+        text: function (trigger) {
+            var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
+            if (el.is(':input')) {
+                return el.val();
+            } else {
+                return el.html();
+            }
+        }
+    });
+
+    clipboard.on('success', function (e) {
+        setTooltip(e.trigger, 'Copied!');
+        hideTooltip(e.trigger);
+    });
+
+    clipboard.on('error', function (e) {
+        setTooltip(e.trigger, 'Failed!');
+        hideTooltip(e.trigger);
+        console.log('Copy to clipboard failed, most probably the selection is too large');
+    });
+
+    function setTooltip(btn, message) {
+        $(btn)
+        .attr('data-original-title', message)
+        .tooltip('show');
+    }
+
+    function hideTooltip(btn) {
+        setTimeout(function () {
+            $(btn).tooltip('hide')
+            .attr('data-original-title', 'Copy to clipboard');
+        }, 500);
+    }
+
+    /**
+     * tooltip trigger
+     */
+    $(button).tooltip({
+        trigger: 'hover'
+    });
+};
+
+/**
+ * link the copy button
+ */
+$.uf.copy('.js-copy-trigger');
+
+$(document).ready(function() {
+    //
+});
+</script>
+{% endblock %}

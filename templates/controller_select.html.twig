@@ -1,0 +1,17 @@
+{# login page #}
+{% extends "layout/main.html.twig" %}
+
+{% set page = 'controller_select' %}
+
+{% block controller_dropdown %}
+    {% include 'components/controller_dropdown.html.twig' %}
+{% endblock %}
+
+{% block content %}
+<br>
+<div id="select_controller_alert_wrapper" class="col-sm-12">
+    <div id="select_controller_alert" class="alert alert-primary" role="alert">
+        Please select a controller from the dropdown menu <i class="fas fa-arrow-circle-up"></i>
+    </div>
+</div>
+{% endblock %}

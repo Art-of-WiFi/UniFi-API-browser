@@ -1,0 +1,38 @@
+{# login page #}
+{% extends "layout/main.html.twig" %}
+
+{% set page = 'login' %}
+
+{% block content %}
+<br>
+<br>
+<br>
+<div class="container h-100">
+    <div class="row align-items-center h-100">
+        <div class="col-sm-6 mx-auto">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <form class="form-signin" autocomplete="off" action="login.php" method="post">
+                        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+
+                        <label for="inputUserName" class="sr-only">User name</label>
+                        <input type="text" id="inputUserName" name="user_name" class="form-control" placeholder="User name" required autofocus autocomplete="new-password">
+
+                        <label for="inputPassword" class="sr-only">Password</label>
+                        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required autocomplete="new-password">
+
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                    {% if login_error != '' %}
+                        <br>
+                        <div class="alert alert-danger" role="alert">
+                            {{login_error}}
+                        </div>
+                    {% endif %}
+                        {% include 'components/credits_footer.html.twig' %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
