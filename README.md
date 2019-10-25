@@ -161,26 +161,31 @@ It is your own responsibility to implement the necessary additional controls in 
 
 Here are a couple of screenshots of the tool in action.
 
+The Login form when user authentication is enabled:
+
+![Login form](https://user-images.githubusercontent.com/12016131/67584170-527d5a00-f74d-11e9-85a9-1e7dbbf33766.png "Login form")
+
 The controller selection dropdown menu:
 
-![Controller selection](https://user-images.githubusercontent.com/12016131/48832366-45a3f980-ed79-11e8-82a4-e66225fba71e.png "Controller selection")
+![Controller selection](https://user-images.githubusercontent.com/12016131/67584184-59a46800-f74d-11e9-88b4-36e333f388a1.png "Controller selection")
 
 The site selection dropdown menu:
 
-![Site selection](https://user-images.githubusercontent.com/12016131/48832367-45a3f980-ed79-11e8-8a91-70f505720ea1.png "Site selection")
+![Site selection](https://user-images.githubusercontent.com/12016131/67584192-5d37ef00-f74d-11e9-906d-69c11f046037.png "Site selection")
 
-Showing the online device data collection using the default Bootstrap theme:
+The collection dropdown menu:
 
-![Online device collection](https://user-images.githubusercontent.com/12016131/48832368-463c9000-ed79-11e8-9d17-4005cf142cbe.png "Online device collection")
+![Select collection](https://user-images.githubusercontent.com/12016131/67584206-64f79380-f74d-11e9-8d3d-6cb414179653.png "Select a collection")
 
-With one of the Bootswatch themes selected:
+Showing the site settings collection in JSON format:
 
-![Slate theme selected](https://user-images.githubusercontent.com/12016131/48832369-463c9000-ed79-11e8-841b-07e7842a23a5.png "Slate theme selected")
+![Site settings in JSON format](https://user-images.githubusercontent.com/12016131/67584222-6cb73800-f74d-11e9-99fb-e1726944bd24.png "JSON format")
+
+Showing the site settings collection in interactive PHP format:
+
+![Site settings in PHP format](https://user-images.githubusercontent.com/12016131/67584232-704abf00-f74d-11e9-9907-a1cadd00bf1b.png "Interactive PHP format")
 
 The "About" modal:
 
-![About modal](https://user-images.githubusercontent.com/12016131/48832371-463c9000-ed79-11e8-90f4-faee7958cd2c.png "About modal")
+![About modal](https://user-images.githubusercontent.com/12016131/67584663-6d9c9980-f74e-11e9-8926-6346fb214bdd.png "About modal")
 
-The Login form when a controller password has not been configured in the config.php file:
-
-![Login form](https://user-images.githubusercontent.com/12016131/48832373-463c9000-ed79-11e8-990f-04e9ae36e171.png "Login form")
