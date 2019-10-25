@@ -187,5 +187,5 @@ Showing the site settings collection in interactive PHP format:
 
 The "About" modal:
 
-![About modal](https://user-images.githubusercontent.com/12016131/67584663-6d9c9980-f74e-11e9-8926-6346fb214bdd.png "About modal")
+![About modal](https://user-images.githubusercontent.com/12016131/67586311-9e320280-f751-11e9-9576-c0590c951edc.png "About modal")
 
