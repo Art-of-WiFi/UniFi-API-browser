@@ -163,7 +163,7 @@ Here are a couple of screenshots of the tool in action.
 
 The Login form when user authentication is enabled:
 
-![Login form](https://user-images.githubusercontent.com/12016131/67584170-527d5a00-f74d-11e9-85a9-1e7dbbf33766.png "Login form")
+![Login form](https://user-images.githubusercontent.com/12016131/67685140-cfe6db80-f994-11e9-872f-286701df7aee.png "Login form")
 
 The controller selection dropdown menu:
 
