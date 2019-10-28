@@ -140,12 +140,13 @@ and the API as published by Ubiquiti:
 Other included libraries:
 
 - Bootstrap 4 (version 4.3.1) https://getbootstrap.com
-- Bootswatch themes (version 4.3.1) https://bootswatch.com/
-- Font Awesome icons (version 5.11.2) https://fontawesome.com/
+- Bootswatch themes (version 4.3.1) https://bootswatch.com
+- Font Awesome icons (version 5.11.2) https://fontawesome.com
 - jQuery (version 3.4.1) https://jquery.com
-- Highlight.js (version 9.15.10) https://highlightjs.org/
+- Twig template engine (version 2.12.1) https://twig.symfony.com
+- Highlight.js (version 9.15.10) https://highlightjs.org
 - Kint (version 2.2) https://kint-php.github.io/kint
-- clipboard.js (2.0.4) https://clipboardjs.com/
+- clipboard.js (2.0.4) https://clipboardjs.com
 
 
 ### Security notice
