@@ -112,7 +112,7 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 
 ### Installation using Docker
 
-@scyto maintains docker containers for quick and easy deployment of the UniFi API browser tool. Please refer to [this Wiki page](https://github.com/Art-of-WiFi/UniFi-API-browser/wiki/Docker-Hosting) within the repository for more details:
+@scyto maintains Docker containers for quick and easy deployment of the UniFi API browser tool. Please refer to [this Wiki page](https://github.com/Art-of-WiFi/UniFi-API-browser/wiki/Docker-Hosting) within the repository for more details:
 
 
 ### Configuration
