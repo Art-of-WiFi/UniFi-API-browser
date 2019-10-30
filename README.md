@@ -110,6 +110,11 @@ git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
 
 
+### Installation using Docker
+
+@scyto maintains docker containers for quick and easy deployment of the UniFi API browser tool. Please refer to [this Wiki page](https://github.com/Art-of-WiFi/UniFi-API-browser/wiki/Docker-Hosting) within the repository for more details:
+
+
 ### Configuration
 
 - credentials for access to the UniFi Controller API can be configured, in part or in whole, in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
