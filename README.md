@@ -93,7 +93,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 
 ### Requirements
 
-- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.5 and cURL 7.60.0)
+- a web server with PHP and cURL modules installed (confirmed to work on Apache with PHP Version 5.6.32 and cURL 7.29.0 and with PHP 7.2.5 and cURL 7.60.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because several CSS and JS files are loaded from public CDNs.
 
@@ -156,7 +156,7 @@ Other included libraries:
 
 ### Security notice
 
-We highly recommend enabling user name/password authentication by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, please make sure to use strong random passwords.
+We **highly recommend** enabling the user name/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, please make sure to use **strong random passwords**.
 
 Please refer to the instructions in the `config/users-template.php` file for further details
 

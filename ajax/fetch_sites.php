@@ -103,8 +103,15 @@ if (!empty($_SESSION['controller'])) {
                         ];
                     }
 
+                    /**
+                     * sort the sites array by full name
+                     */
                     usort($results['data'], function($a, $b) {
-                        return $a['site_full_name'] <=> $b['site_full_name'];
+                        if ($a['site_full_name'] == $b['site_full_name']) {
+                            return 0;
+                        }
+
+                        return ($a['site_full_name'] < $b['site_full_name']) ? -1 : 1;
                     });
 
                     /**
