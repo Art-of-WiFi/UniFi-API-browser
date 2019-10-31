@@ -12,7 +12,6 @@
 namespace Twig\TokenParser;
 
 use Twig\Error\SyntaxError;
-use Twig\Node\Node;
 use Twig\Parser;
 use Twig\Token;
 
@@ -31,7 +30,7 @@ interface TokenParserInterface
     /**
      * Parses a token and returns a node.
      *
-     * @return Node
+     * @return \Twig_NodeInterface
      *
      * @throws SyntaxError
      */

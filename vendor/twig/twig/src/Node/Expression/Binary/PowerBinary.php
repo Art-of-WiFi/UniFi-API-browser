@@ -15,6 +15,21 @@ use Twig\Compiler;
 
 class PowerBinary extends AbstractBinary
 {
+    public function compile(Compiler $compiler)
+    {
+        if (\PHP_VERSION_ID >= 50600) {
+            return parent::compile($compiler);
+        }
+
+        $compiler
+            ->raw('pow(')
+            ->subcompile($this->getNode('left'))
+            ->raw(', ')
+            ->subcompile($this->getNode('right'))
+            ->raw(')')
+        ;
+    }
+
     public function operator(Compiler $compiler)
     {
         return $compiler->raw('**');

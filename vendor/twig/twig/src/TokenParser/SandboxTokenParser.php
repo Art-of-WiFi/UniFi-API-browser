@@ -25,15 +25,17 @@ use Twig\Token;
  *    {% endsandbox %}
  *
  * @see https://twig.symfony.com/doc/api.html#sandbox-extension for details
+ *
+ * @final
  */
-final class SandboxTokenParser extends AbstractTokenParser
+class SandboxTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
         $stream = $this->parser->getStream();
-        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
+        $stream->expect(Token::BLOCK_END_TYPE);
         $body = $this->parser->subparse([$this, 'decideBlockEnd'], true);
-        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
+        $stream->expect(Token::BLOCK_END_TYPE);
 
         // in a sandbox tag, only include tags are allowed
         if (!$body instanceof IncludeNode) {

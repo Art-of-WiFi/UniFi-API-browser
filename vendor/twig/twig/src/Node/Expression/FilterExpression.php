@@ -13,11 +13,11 @@
 namespace Twig\Node\Expression;
 
 use Twig\Compiler;
-use Twig\Node\Node;
+use Twig\TwigFilter;
 
 class FilterExpression extends CallExpression
 {
-    public function __construct(Node $node, ConstantExpression $filterName, Node $arguments, int $lineno, string $tag = null)
+    public function __construct(\Twig_NodeInterface $node, ConstantExpression $filterName, \Twig_NodeInterface $arguments, $lineno, $tag = null)
     {
         parent::__construct(['node' => $node, 'filter' => $filterName, 'arguments' => $arguments], [], $lineno, $tag);
     }
@@ -29,11 +29,16 @@ class FilterExpression extends CallExpression
 
         $this->setAttribute('name', $name);
         $this->setAttribute('type', 'filter');
+        $this->setAttribute('thing', $filter);
         $this->setAttribute('needs_environment', $filter->needsEnvironment());
         $this->setAttribute('needs_context', $filter->needsContext());
         $this->setAttribute('arguments', $filter->getArguments());
-        $this->setAttribute('callable', $filter->getCallable());
-        $this->setAttribute('is_variadic', $filter->isVariadic());
+        if ($filter instanceof \Twig_FilterCallableInterface || $filter instanceof TwigFilter) {
+            $this->setAttribute('callable', $filter->getCallable());
+        }
+        if ($filter instanceof TwigFilter) {
+            $this->setAttribute('is_variadic', $filter->isVariadic());
+        }
 
         $this->compileCallable($compiler);
     }

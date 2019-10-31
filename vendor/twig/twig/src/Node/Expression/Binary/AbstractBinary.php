@@ -14,11 +14,10 @@ namespace Twig\Node\Expression\Binary;
 
 use Twig\Compiler;
 use Twig\Node\Expression\AbstractExpression;
-use Twig\Node\Node;
 
 abstract class AbstractBinary extends AbstractExpression
 {
-    public function __construct(Node $left, Node $right, int $lineno)
+    public function __construct(\Twig_NodeInterface $left, \Twig_NodeInterface $right, $lineno)
     {
         parent::__construct(['left' => $left, 'right' => $right], [], $lineno);
     }

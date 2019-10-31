@@ -12,13 +12,21 @@
 namespace Twig\Extension {
 use Twig\TwigFunction;
 
-final class StringLoaderExtension extends AbstractExtension
+/**
+ * @final
+ */
+class StringLoaderExtension extends AbstractExtension
 {
     public function getFunctions()
     {
         return [
             new TwigFunction('template_from_string', 'twig_template_from_string', ['needs_environment' => true]),
         ];
+    }
+
+    public function getName()
+    {
+        return 'string_loader';
     }
 }
 
@@ -39,7 +47,7 @@ use Twig\TemplateWrapper;
  *
  * @return TemplateWrapper
  */
-function twig_template_from_string(Environment $env, $template, string $name = null)
+function twig_template_from_string(Environment $env, $template, $name = null)
 {
     return $env->createTemplate((string) $template, $name);
 }

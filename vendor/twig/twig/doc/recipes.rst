@@ -6,6 +6,9 @@ Recipes
 Displaying Deprecation Notices
 ------------------------------
 
+.. versionadded:: 1.21
+    This works as of Twig 1.21.
+
 Deprecated features generate deprecation notices (via a call to the
 ``trigger_error()`` PHP function). By default, they are silenced and never
 displayed nor logged.
@@ -158,7 +161,7 @@ syntax. But for specific projects, it can make sense to change the defaults.
 
 To change the block delimiters, you need to create your own lexer object::
 
-    $twig = new \Twig\Environment(...);
+    $twig = new \Twig\Environment();
 
     $lexer = new \Twig\Lexer($twig, [
         'tag_comment'   => ['{#', '#}'],
@@ -323,6 +326,10 @@ If you iterate over a set of files, you can pass the filename to the
         }
     }
 
+.. versionadded:: 1.27
+    ``\Twig\Source`` was introduced in version 1.27, pass the source and the
+    identifier directly on previous versions.
+
 .. note::
 
     This method won't catch any sandbox policy violations because the policy
@@ -343,6 +350,25 @@ To get around this, force Twig to invalidate the bytecode cache::
         // ...
     ]);
 
+.. note::
+
+    Before Twig 1.22, you should extend ``\Twig\Environment`` instead::
+
+        class OpCacheAwareTwigEnvironment extends \Twig\Environment
+        {
+            protected function writeCacheFile($file, $content)
+            {
+                parent::writeCacheFile($file, $content);
+
+                // Compile cached file into bytecode cache
+                if (function_exists('opcache_invalidate') && filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOLEAN)) {
+                    opcache_invalidate($file, true);
+                } elseif (function_exists('apc_compile_file')) {
+                    apc_compile_file($file);
+                }
+            }
+        }
+
 Reusing a stateful Node Visitor
 -------------------------------
 
@@ -354,7 +380,7 @@ This can be achieved with the following code::
 
     protected $someTemplateState = [];
 
-    public function enterNode(\Twig\Node\Node $node, \Twig\Environment $env)
+    public function enterNode(Twig_NodeInterface $node, \Twig\Environment $env)
     {
         if ($node instanceof \Twig\Node\ModuleNode) {
             // reset the state as we are entering a new template
@@ -391,7 +417,7 @@ We have created a simple ``templates`` table that hosts two templates:
 
 Now, let's define a loader able to use this database::
 
-    class DatabaseTwigLoader implements \Twig\Loader\LoaderInterface
+    class DatabaseTwigLoader implements \Twig\Loader\LoaderInterface, \Twig\Loader\ExistsLoaderInterface, \Twig\Loader\SourceContextLoaderInterface
     {
         protected $dbh;
 
@@ -400,6 +426,16 @@ Now, let's define a loader able to use this database::
             $this->dbh = $dbh;
         }
 
+        public function getSource($name)
+        {
+            if (false === $source = $this->getValue('source', $name)) {
+                throw new \Twig\Error\LoaderError(sprintf('Template "%s" does not exist.', $name));
+            }
+
+            return $source;
+        }
+
+        // \Twig\Loader\SourceContextLoaderInterface as of Twig 1.27
         public function getSourceContext($name)
         {
             if (false === $source = $this->getValue('source', $name)) {
@@ -409,6 +445,7 @@ Now, let's define a loader able to use this database::
             return new \Twig\Source($source, $name);
         }
 
+        // \Twig\Loader\ExistsLoaderInterface as of Twig 1.11
         public function exists($name)
         {
             return $name === $this->getValue('name', $name);
@@ -475,7 +512,7 @@ Loading a Template from a String
 --------------------------------
 
 From a template, you can load a template stored in a string via the
-``template_from_string`` function (via the
+``template_from_string`` function (available as of Twig 1.11 via the
 ``\Twig\Extension\StringLoaderExtension`` extension):
 
 .. code-block:: twig
@@ -483,10 +520,14 @@ From a template, you can load a template stored in a string via the
     {{ include(template_from_string("Hello {{ name }}")) }}
 
 From PHP, it's also possible to load a template stored in a string via
-``\Twig\Environment::createTemplate()``::
+``\Twig\Environment::createTemplate()`` (available as of Twig 1.18)::
 
     $template = $twig->createTemplate('hello {{ name }}');
     echo $template->render(['name' => 'Fabien']);
+
+.. note::
+
+    Never use the ``Twig_Loader_String`` loader, which has severe limitations.
 
 Using Twig and AngularJS in the same Templates
 ----------------------------------------------

@@ -21,7 +21,7 @@ use Twig\Compiler;
  */
 class TextNode extends Node implements NodeOutputInterface
 {
-    public function __construct(string $data, int $lineno)
+    public function __construct($data, $lineno)
     {
         parent::__construct([], ['data' => $data], $lineno);
     }

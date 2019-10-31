@@ -21,7 +21,7 @@ use Twig\Node\Node;
  */
 class LeaveProfileNode extends Node
 {
-    public function __construct(string $varName)
+    public function __construct($varName)
     {
         parent::__construct([], ['var_name' => $varName]);
     }

@@ -18,12 +18,14 @@ use Twig\Token;
  * Flushes the output to the client.
  *
  * @see flush()
+ *
+ * @final
  */
-final class FlushTokenParser extends AbstractTokenParser
+class FlushTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
-        $this->parser->getStream()->expect(/* Token::BLOCK_END_TYPE */ 3);
+        $this->parser->getStream()->expect(Token::BLOCK_END_TYPE);
 
         return new FlushNode($token->getLine(), $this->getTag());
     }

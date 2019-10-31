@@ -14,7 +14,7 @@ namespace Twig\Profiler;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @final since Twig 2.4.0
+ * @final
  */
 class Profile implements \IteratorAggregate, \Serializable
 {
@@ -30,12 +30,8 @@ class Profile implements \IteratorAggregate, \Serializable
     private $ends = [];
     private $profiles = [];
 
-    public function __construct(string $template = 'main', string $type = self::ROOT, string $name = 'main')
+    public function __construct($template = 'main', $type = self::ROOT, $name = 'main')
     {
-        if (__CLASS__ !== \get_class($this)) {
-            @trigger_error('Overriding '.__CLASS__.' is deprecated since Twig 2.4.0 and the class will be final in 3.0.', E_USER_DEPRECATED);
-        }
-
         $this->template = $template;
         $this->type = $type;
         $this->name = 0 === strpos($name, '__internal_') ? 'INTERNAL' : $name;

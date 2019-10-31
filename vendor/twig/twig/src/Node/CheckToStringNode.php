@@ -33,13 +33,10 @@ class CheckToStringNode extends AbstractExpression
 
     public function compile(Compiler $compiler)
     {
-        $expr = $this->getNode('expr');
         $compiler
             ->raw('$this->sandbox->ensureToStringAllowed(')
-            ->subcompile($expr)
-            ->raw(', ')
-            ->repr($expr->getTemplateLine())
-            ->raw(', $this->source)')
+            ->subcompile($this->getNode('expr'))
+            ->raw(')')
         ;
     }
 }

@@ -26,14 +26,16 @@ use Twig\Node\PrintNode;
 use Twig\Node\SetNode;
 
 /**
+ * @final
+ *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class SandboxNodeVisitor extends AbstractNodeVisitor
+class SandboxNodeVisitor extends AbstractNodeVisitor
 {
-    private $inAModule = false;
-    private $tags;
-    private $filters;
-    private $functions;
+    protected $inAModule = false;
+    protected $tags;
+    protected $filters;
+    protected $functions;
 
     private $needsToStringWrap = false;
 
@@ -110,7 +112,7 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         return $node;
     }
 
-    private function wrapNode(Node $node, string $name)
+    private function wrapNode(Node $node, $name)
     {
         $expr = $node->getNode($name);
         if ($expr instanceof NameExpression || $expr instanceof GetAttrExpression) {
@@ -118,7 +120,7 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    private function wrapArrayNode(Node $node, string $name)
+    private function wrapArrayNode(Node $node, $name)
     {
         $args = $node->getNode($name);
         foreach ($args as $name => $_) {

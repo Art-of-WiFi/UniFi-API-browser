@@ -20,8 +20,10 @@ use Twig\Token;
  * Extends a template by another one.
  *
  *  {% extends "base.html" %}
+ *
+ * @final
  */
-final class ExtendsTokenParser extends AbstractTokenParser
+class ExtendsTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {

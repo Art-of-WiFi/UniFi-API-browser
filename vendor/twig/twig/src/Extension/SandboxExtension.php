@@ -12,17 +12,17 @@
 namespace Twig\Extension;
 
 use Twig\NodeVisitor\SandboxNodeVisitor;
-use Twig\Sandbox\SecurityNotAllowedMethodError;
-use Twig\Sandbox\SecurityNotAllowedPropertyError;
 use Twig\Sandbox\SecurityPolicyInterface;
-use Twig\Source;
 use Twig\TokenParser\SandboxTokenParser;
 
-final class SandboxExtension extends AbstractExtension
+/**
+ * @final
+ */
+class SandboxExtension extends AbstractExtension
 {
-    private $sandboxedGlobally;
-    private $sandboxed;
-    private $policy;
+    protected $sandboxedGlobally;
+    protected $sandboxed;
+    protected $policy;
 
     public function __construct(SecurityPolicyInterface $policy, $sandboxed = false)
     {
@@ -77,48 +77,32 @@ final class SandboxExtension extends AbstractExtension
         }
     }
 
-    public function checkMethodAllowed($obj, $method, int $lineno = -1, Source $source = null)
+    public function checkMethodAllowed($obj, $method)
     {
         if ($this->isSandboxed()) {
-            try {
-                $this->policy->checkMethodAllowed($obj, $method);
-            } catch (SecurityNotAllowedMethodError $e) {
-                $e->setSourceContext($source);
-                $e->setTemplateLine($lineno);
-
-                throw $e;
-            }
+            $this->policy->checkMethodAllowed($obj, $method);
         }
     }
 
-    public function checkPropertyAllowed($obj, $method, int $lineno = -1, Source $source = null)
+    public function checkPropertyAllowed($obj, $method)
     {
         if ($this->isSandboxed()) {
-            try {
-                $this->policy->checkPropertyAllowed($obj, $method);
-            } catch (SecurityNotAllowedPropertyError $e) {
-                $e->setSourceContext($source);
-                $e->setTemplateLine($lineno);
-
-                throw $e;
-            }
+            $this->policy->checkPropertyAllowed($obj, $method);
         }
     }
 
-    public function ensureToStringAllowed($obj, int $lineno = -1, Source $source = null)
+    public function ensureToStringAllowed($obj)
     {
         if ($this->isSandboxed() && \is_object($obj) && method_exists($obj, '__toString')) {
-            try {
-                $this->policy->checkMethodAllowed($obj, '__toString');
-            } catch (SecurityNotAllowedMethodError $e) {
-                $e->setSourceContext($source);
-                $e->setTemplateLine($lineno);
-
-                throw $e;
-            }
+            $this->policy->checkMethodAllowed($obj, '__toString');
         }
 
         return $obj;
+    }
+
+    public function getName()
+    {
+        return 'sandbox';
     }
 }
 

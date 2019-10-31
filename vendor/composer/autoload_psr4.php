@@ -8,6 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'UniFi_API\\' => array($vendorDir . '/art-of-wifi/unifi-api-client/src'),
     'Twig\\' => array($vendorDir . '/twig/twig/src'),
-    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
 );

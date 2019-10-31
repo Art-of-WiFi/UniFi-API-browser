@@ -7,12 +7,7 @@ Filters
     abs
     batch
     capitalize
-    column
     convert_encoding
-    country_name
-    currency_name
-    currency_symbol
-    data_uri
     date
     date_modify
     default
@@ -20,24 +15,13 @@ Filters
     filter
     first
     format
-    format_currency
-    format_date
-    format_datetime
-    format_number
-    format_time
-    html_to_markdown
-    inline_css
-    inky_to_html
     join
     json_encode
     keys
-    language_name
     last
     length
-    locale_name
     lower
     map
-    markdown_to_html
     merge
     nl2br
     number_format
@@ -51,7 +35,6 @@ Filters
     spaceless
     split
     striptags
-    timezone_name
     title
     trim
     upper

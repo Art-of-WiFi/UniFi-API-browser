@@ -19,7 +19,8 @@ to have multiple environments side by side, with different configurations.
 The typical way to configure Twig to load templates for an application looks
 roughly like this::
 
-    require_once '/path/to/vendor/autoload.php';
+    require_once '/path/to/lib/Twig/Autoloader.php';
+    Twig_Autoloader::register();
 
     $loader = new \Twig\Loader\FilesystemLoader('/path/to/templates');
     $twig = new \Twig\Environment($loader, [
@@ -48,6 +49,11 @@ returns a ``\Twig\TemplateWrapper`` instance::
 
     $template = $twig->load('index.html');
 
+.. note::
+
+    Before Twig 1.28, use ``loadTemplate()`` instead which returns a
+    ``\Twig\Template`` instance.
+
 To render the template with some variables, call the ``render()`` method::
 
     echo $template->render(['the' => 'variables', 'go' => 'here']);
@@ -59,6 +65,9 @@ To render the template with some variables, call the ``render()`` method::
 You can also load and render the template in one fell swoop::
 
     echo $twig->render('index.html', ['the' => 'variables', 'go' => 'here']);
+
+.. versionadded:: 1.28
+    The possibility to render blocks from the API was added in Twig 1.28.
 
 If a template defines blocks, they can be rendered individually via the
 ``renderBlock()`` call::
@@ -111,16 +120,23 @@ The following options are available:
   replace them with a ``null`` value. When set to ``true``, Twig throws an
   exception instead (default to ``false``).
 
-* ``autoescape`` *string*
+* ``autoescape`` *string* or *boolean*
 
-  Sets the default auto-escaping strategy (``name``, ``html``, ``js``, ``css``,
-  ``url``, ``html_attr``, or a PHP callback that takes the template "filename"
-  and returns the escaping strategy to use -- the callback cannot be a function
-  name to avoid collision with built-in escaping strategies); set it to
-  ``false`` to disable auto-escaping. The ``name`` escaping strategy determines
-  the escaping strategy to use for a template based on the template filename
-  extension (this strategy does not incur any overhead at runtime as
-  auto-escaping is done at compilation time.)
+  If set to ``true``, HTML auto-escaping will be enabled by
+  default for all templates (default to ``true``).
+
+  As of Twig 1.8, you can set the escaping strategy to use (``html``, ``js``,
+  ``false`` to disable).
+
+  As of Twig 1.9, you can set the escaping strategy to use (``css``, ``url``,
+  ``html_attr``, or a PHP callback that takes the template name and must
+  return the escaping strategy to use -- the callback cannot be a function name
+  to avoid collision with built-in escaping strategies).
+
+  As of Twig 1.17, the ``filename`` escaping strategy (renamed to ``name`` as
+  of Twig 1.27) determines the escaping strategy to use for a template based on
+  the template filename extension (this strategy does not incur any overhead at
+  runtime as auto-escaping is done at compilation time.)
 
 * ``optimizations`` *integer*
 
@@ -150,6 +166,12 @@ Here is a list of the built-in loaders:
 
 ``\Twig\Loader\FilesystemLoader``
 .................................
+
+.. versionadded:: 1.10
+    The ``prependPath()`` and support for namespaces were added in Twig 1.10.
+
+.. versionadded:: 1.27
+    Relative paths support was added in Twig 1.27.
 
 ``\Twig\Loader\FilesystemLoader`` loads templates from the file system. This loader
 can find templates in folders on the file system and is the preferred way to
@@ -215,11 +237,11 @@ projects where storing all templates in a single PHP file might make sense.
 
 .. tip::
 
-    When using the ``Array`` loader with a cache mechanism, you should know that
-    a new cache key is generated each time a template content "changes" (the
-    cache key being the source code of the template). If you don't want to see
-    your cache grows out of control, you need to take care of clearing the old
-    cache file by yourself.
+    When using the ``Array`` loaders with a cache mechanism, you should know
+    that a new cache key is generated each time a template content "changes"
+    (the cache key being the source code of the template). If you don't want to
+    see your cache grows out of control, you need to take care of clearing the
+    old cache file by yourself.
 
 ``\Twig\Loader\ChainLoader``
 ............................
@@ -252,56 +274,49 @@ Create your own Loader
 
 All loaders implement the ``\Twig\Loader\LoaderInterface``::
 
-    interface \Twig\Loader\LoaderInterface
+    interface Twig_LoaderInterface
     {
         /**
-         * Returns the source context for a given template logical name.
+         * Gets the source code of a template, given its name.
          *
-         * @param string $name The template logical name
+         * @param  string $name string The name of the template to load
          *
-         * @return \Twig\Source
+         * @return string The template source code
          *
-         * @throws \Twig\Error\LoaderError When $name is not found
+         * @deprecated since 1.27 (to be removed in 2.0), implement \Twig\Loader\SourceContextLoaderInterface
          */
-        public function getSourceContext($name);
+        function getSource($name);
 
         /**
          * Gets the cache key to use for the cache for a given template name.
          *
-         * @param string $name The name of the template to load
+         * @param  string $name string The name of the template to load
          *
          * @return string The cache key
-         *
-         * @throws \Twig\Error\LoaderError When $name is not found
          */
-        public function getCacheKey($name);
+        function getCacheKey($name);
 
         /**
          * Returns true if the template is still fresh.
          *
          * @param string    $name The template name
          * @param timestamp $time The last modification time of the cached template
-         *
-         * @return bool    true if the template is fresh, false otherwise
-         *
-         * @throws \Twig\Error\LoaderError When $name is not found
          */
-        public function isFresh($name, $time);
-
-        /**
-         * Check if we have the source code of a template, given its name.
-         *
-         * @param string $name The name of the template to check if we can load
-         *
-         * @return bool    If the template source code is handled by this loader or not
-         */
-        public function exists($name);
+        function isFresh($name, $time);
     }
 
 The ``isFresh()`` method must return ``true`` if the current cached template
 is still fresh, given the last modification time, or ``false`` otherwise.
 
-The ``getSourceContext()`` method must return an instance of ``\Twig\Source``.
+.. note::
+
+    As of Twig 1.27, you should also implement
+    ``\Twig\Loader\SourceContextLoaderInterface`` to avoid deprecation notices.
+
+.. tip::
+
+    As of Twig 1.11.0, you can also implement ``\Twig\Loader\ExistsLoaderInterface``
+    to make your loader faster when used with the chain loader.
 
 Using Extensions
 ----------------
@@ -324,7 +339,8 @@ Twig comes bundled with the following extensions:
 * *Twig\Extension\SandboxExtension*: Adds a sandbox mode to the default Twig
   environment, making it safe to evaluate untrusted code.
 
-* *Twig\Extension\ProfilerExtension*: Enabled the built-in Twig profiler.
+* *Twig\Extension\ProfilerExtension*: Enabled the built-in Twig profiler (as of
+  Twig 1.18).
 
 * *Twig\Extension\OptimizerExtension*: Optimizes the node tree before
   compilation.
@@ -373,7 +389,9 @@ escaping strategy), except those using the ``raw`` filter:
 
     {{ article.to_html|raw }}
 
-You can also change the escaping mode locally by using the ``autoescape`` tag:
+You can also change the escaping mode locally by using the ``autoescape`` tag
+(see the :doc:`autoescape<tags/autoescape>` doc for the syntax used before
+Twig 1.8):
 
 .. code-block:: twig
 
@@ -414,24 +432,6 @@ The escaping rules are implemented as follows:
 
         {% set text = "Twig<br />" %}
         {{ foo ? text|escape : "<br />Twig" }} {# the result of the expression won't be escaped #}
-
-* Objects with a ``__toString`` method are converted to strings and
-  escaped. You can mark some classes and/or interfaces as being safe for some
-  strategies via ``EscaperExtension::addSafeClass()``:
-
-  .. code-block:: twig
-
-        // mark object of class Foo as safe for the HTML strategy
-        $escaper->addSafeClass('Foo', ['html']);
-
-        // mark object of interface Foo as safe for the HTML strategy
-        $escaper->addSafeClass('FooInterface', ['html']);
-
-        // mark object of class Foo as safe for the HTML and JS strategies
-        $escaper->addSafeClass('Foo', ['html', 'js']);
-
-        // mark object of class Foo as safe for all strategies
-        $escaper->addSafeClass('Foo', ['all']);
 
 * Escaping is applied before printing, after any other filter is applied:
 
@@ -515,6 +515,9 @@ the extension constructor::
 
 Profiler Extension
 ~~~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.18
+    The Profile extension was added in Twig 1.18.
 
 The ``profiler`` extension enables a profiler for Twig templates; it should
 only be used on your development machines as it adds some overhead::

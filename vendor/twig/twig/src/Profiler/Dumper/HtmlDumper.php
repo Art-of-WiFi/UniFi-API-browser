@@ -15,8 +15,10 @@ use Twig\Profiler\Profile;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @final
  */
-final class HtmlDumper extends BaseDumper
+class HtmlDumper extends BaseDumper
 {
     private static $colors = [
         'block' => '#dfd',

@@ -16,13 +16,13 @@ use Twig\Compiler;
 
 class NameExpression extends AbstractExpression
 {
-    private $specialVars = [
-        '_self' => '$this->getTemplateName()',
+    protected $specialVars = [
+        '_self' => '$this',
         '_context' => '$context',
         '_charset' => '$this->env->getCharset()',
     ];
 
-    public function __construct(string $name, int $lineno)
+    public function __construct($name, $lineno)
     {
         parent::__construct([], ['name' => $name, 'is_defined_test' => false, 'ignore_strict_check' => false, 'always_defined' => false], $lineno);
     }
@@ -60,25 +60,45 @@ class NameExpression extends AbstractExpression
                 ->raw(']')
             ;
         } else {
-            if ($this->getAttribute('ignore_strict_check') || !$compiler->getEnvironment()->isStrictVariables()) {
+            if (\PHP_VERSION_ID >= 70000) {
+                // use PHP 7 null coalescing operator
                 $compiler
                     ->raw('($context[')
                     ->string($name)
-                    ->raw('] ?? null)')
+                    ->raw('] ?? ')
                 ;
-            } else {
+
+                if ($this->getAttribute('ignore_strict_check') || !$compiler->getEnvironment()->isStrictVariables()) {
+                    $compiler->raw('null)');
+                } else {
+                    $compiler->raw('$this->getContext($context, ')->string($name)->raw('))');
+                }
+            } elseif (\PHP_VERSION_ID >= 50400) {
+                // PHP 5.4 ternary operator performance was optimized
                 $compiler
                     ->raw('(isset($context[')
                     ->string($name)
-                    ->raw(']) || array_key_exists(')
+                    ->raw(']) ? $context[')
                     ->string($name)
-                    ->raw(', $context) ? $context[')
+                    ->raw('] : ')
+                ;
+
+                if ($this->getAttribute('ignore_strict_check') || !$compiler->getEnvironment()->isStrictVariables()) {
+                    $compiler->raw('null)');
+                } else {
+                    $compiler->raw('$this->getContext($context, ')->string($name)->raw('))');
+                }
+            } else {
+                $compiler
+                    ->raw('$this->getContext($context, ')
                     ->string($name)
-                    ->raw('] : (function () { throw new RuntimeError(\'Variable ')
-                    ->string($name)
-                    ->raw(' does not exist.\', ')
-                    ->repr($this->lineno)
-                    ->raw(', $this->source); })()')
+                ;
+
+                if ($this->getAttribute('ignore_strict_check')) {
+                    $compiler->raw(', true');
+                }
+
+                $compiler
                     ->raw(')')
                 ;
             }

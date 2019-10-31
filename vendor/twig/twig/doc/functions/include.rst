@@ -1,6 +1,9 @@
 ``include``
 ===========
 
+.. versionadded:: 1.12
+    The ``include`` function was added in Twig 1.12.
+
 The ``include`` function returns the rendered content of a template:
 
 .. code-block:: twig
@@ -39,6 +42,10 @@ And if the expression evaluates to a ``\Twig\Template`` or a
 
     // {{ include(template) }}
 
+    // deprecated as of Twig 1.28
+    $template = $twig->loadTemplate('some_template.twig');
+
+    // as of Twig 1.28
     $template = $twig->load('some_template.twig');
 
     $twig->display('template.twig', ['template' => $template]);

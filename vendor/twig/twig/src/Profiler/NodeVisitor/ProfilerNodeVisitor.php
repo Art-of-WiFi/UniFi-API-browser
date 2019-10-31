@@ -24,12 +24,14 @@ use Twig\Profiler\Profile;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @final
  */
-final class ProfilerNodeVisitor extends AbstractNodeVisitor
+class ProfilerNodeVisitor extends AbstractNodeVisitor
 {
     private $extensionName;
 
-    public function __construct(string $extensionName)
+    public function __construct($extensionName)
     {
         $this->extensionName = $extensionName;
     }
@@ -64,7 +66,7 @@ final class ProfilerNodeVisitor extends AbstractNodeVisitor
         return $node;
     }
 
-    private function getVarName(): string
+    private function getVarName()
     {
         return sprintf('__internal_%s', hash('sha256', $this->extensionName));
     }

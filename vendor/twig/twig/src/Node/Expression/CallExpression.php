@@ -22,36 +22,30 @@ abstract class CallExpression extends AbstractExpression
 
     protected function compileCallable(Compiler $compiler)
     {
-        $callable = $this->getAttribute('callable');
-
         $closingParenthesis = false;
         $isArray = false;
-        if (\is_string($callable) && false === strpos($callable, '::')) {
-            $compiler->raw($callable);
-        } else {
-            list($r, $callable) = $this->reflectCallable($callable);
-            if ($r instanceof \ReflectionMethod && \is_string($callable[0])) {
-                if ($r->isStatic()) {
-                    $compiler->raw(sprintf('%s::%s', $callable[0], $callable[1]));
-                } else {
-                    $compiler->raw(sprintf('$this->env->getRuntime(\'%s\')->%s', $callable[0], $callable[1]));
-                }
-            } elseif ($r instanceof \ReflectionMethod && $callable[0] instanceof ExtensionInterface) {
-                // For BC/FC with namespaced aliases
-                $class = (new \ReflectionClass(\get_class($callable[0])))->name;
-                if (!$compiler->getEnvironment()->hasExtension($class)) {
-                    // Compile a non-optimized call to trigger a \Twig\Error\RuntimeError, which cannot be a compile-time error
-                    $compiler->raw(sprintf('$this->env->getExtension(\'%s\')', $class));
-                } else {
-                    $compiler->raw(sprintf('$this->extensions[\'%s\']', ltrim($class, '\\')));
-                }
-
-                $compiler->raw(sprintf('->%s', $callable[1]));
+        if ($this->hasAttribute('callable') && $callable = $this->getAttribute('callable')) {
+            if (\is_string($callable) && false === strpos($callable, '::')) {
+                $compiler->raw($callable);
             } else {
-                $closingParenthesis = true;
-                $isArray = true;
-                $compiler->raw(sprintf('call_user_func_array($this->env->get%s(\'%s\')->getCallable(), ', ucfirst($this->getAttribute('type')), $this->getAttribute('name')));
+                list($r, $callable) = $this->reflectCallable($callable);
+                if ($r instanceof \ReflectionMethod && \is_string($callable[0])) {
+                    if ($r->isStatic()) {
+                        $compiler->raw(sprintf('%s::%s', $callable[0], $callable[1]));
+                    } else {
+                        $compiler->raw(sprintf('$this->env->getRuntime(\'%s\')->%s', $callable[0], $callable[1]));
+                    }
+                } elseif ($r instanceof \ReflectionMethod && $callable[0] instanceof ExtensionInterface) {
+                    $compiler->raw(sprintf('$this->env->getExtension(\'%s\')->%s', \get_class($callable[0]), $callable[1]));
+                } else {
+                    $type = ucfirst($this->getAttribute('type'));
+                    $compiler->raw(sprintf('call_user_func_array($this->env->get%s(\'%s\')->getCallable(), ', $type, $this->getAttribute('name')));
+                    $closingParenthesis = true;
+                    $isArray = true;
+                }
             }
+        } else {
+            $compiler->raw($this->getAttribute('thing')->compile());
         }
 
         $this->compileArguments($compiler, $isArray);
@@ -99,8 +93,10 @@ abstract class CallExpression extends AbstractExpression
         }
 
         if ($this->hasNode('arguments')) {
-            $callable = $this->getAttribute('callable');
+            $callable = $this->hasAttribute('callable') ? $this->getAttribute('callable') : null;
+
             $arguments = $this->getArguments($callable, $this->getNode('arguments'));
+
             foreach ($arguments as $node) {
                 if (!$first) {
                     $compiler->raw(', ');
@@ -113,7 +109,7 @@ abstract class CallExpression extends AbstractExpression
         $compiler->raw($isArray ? ']' : ')');
     }
 
-    protected function getArguments($callable = null, $arguments)
+    protected function getArguments($callable, $arguments)
     {
         $callType = $this->getAttribute('type');
         $callName = $this->getAttribute('name');
@@ -146,7 +142,7 @@ abstract class CallExpression extends AbstractExpression
             throw new \LogicException($message);
         }
 
-        list($callableParameters, $isPhpVariadic) = $this->getCallableParameters($callable, $isVariadic);
+        $callableParameters = $this->getCallableParameters($callable, $isVariadic);
         $arguments = [];
         $names = [];
         $missingArguments = [];
@@ -191,7 +187,7 @@ abstract class CallExpression extends AbstractExpression
         }
 
         if ($isVariadic) {
-            $arbitraryArguments = $isPhpVariadic ? new VariadicExpression([], -1) : new ArrayExpression([], -1);
+            $arbitraryArguments = new ArrayExpression([], -1);
             foreach ($parameters as $key => $value) {
                 if (\is_int($key)) {
                     $arbitraryArguments->addElement($value);
@@ -234,11 +230,11 @@ abstract class CallExpression extends AbstractExpression
         return strtolower(preg_replace(['/([A-Z]+)([A-Z][a-z])/', '/([a-z\d])([A-Z])/'], ['\\1_\\2', '\\1_\\2'], $name));
     }
 
-    private function getCallableParameters($callable, bool $isVariadic): array
+    private function getCallableParameters($callable, $isVariadic)
     {
         list($r) = $this->reflectCallable($callable);
         if (null === $r) {
-            return [[], false];
+            return [];
         }
 
         $parameters = $r->getParameters();
@@ -256,14 +252,10 @@ abstract class CallExpression extends AbstractExpression
                 array_shift($parameters);
             }
         }
-        $isPhpVariadic = false;
         if ($isVariadic) {
             $argument = end($parameters);
             if ($argument && $argument->isArray() && $argument->isDefaultValueAvailable() && [] === $argument->getDefaultValue()) {
                 array_pop($parameters);
-            } elseif ($argument && $argument->isVariadic()) {
-                array_pop($parameters);
-                $isPhpVariadic = true;
             } else {
                 $callableName = $r->name;
                 if ($r instanceof \ReflectionMethod) {
@@ -274,7 +266,7 @@ abstract class CallExpression extends AbstractExpression
             }
         }
 
-        return [$parameters, $isPhpVariadic];
+        return $parameters;
     }
 
     private function reflectCallable($callable)

@@ -12,16 +12,19 @@
 namespace Twig\Loader;
 
 use Twig\Error\LoaderError;
+use Twig\Source;
 
 /**
  * Loads templates from other loaders.
  *
+ * @final
+ *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class ChainLoader implements LoaderInterface, ExistsLoaderInterface, SourceContextLoaderInterface
+class ChainLoader implements LoaderInterface, ExistsLoaderInterface, SourceContextLoaderInterface
 {
     private $hasSourceCache = [];
-    private $loaders = [];
+    protected $loaders = [];
 
     /**
      * @param LoaderInterface[] $loaders
@@ -47,16 +50,40 @@ final class ChainLoader implements LoaderInterface, ExistsLoaderInterface, Sourc
         return $this->loaders;
     }
 
-    public function getSourceContext($name)
+    public function getSource($name)
     {
+        @trigger_error(sprintf('Calling "getSource" on "%s" is deprecated since 1.27. Use getSourceContext() instead.', \get_class($this)), E_USER_DEPRECATED);
+
         $exceptions = [];
         foreach ($this->loaders as $loader) {
-            if (!$loader->exists($name)) {
+            if ($loader instanceof ExistsLoaderInterface && !$loader->exists($name)) {
                 continue;
             }
 
             try {
-                return $loader->getSourceContext($name);
+                return $loader->getSource($name);
+            } catch (LoaderError $e) {
+                $exceptions[] = $e->getMessage();
+            }
+        }
+
+        throw new LoaderError(sprintf('Template "%s" is not defined%s.', $name, $exceptions ? ' ('.implode(', ', $exceptions).')' : ''));
+    }
+
+    public function getSourceContext($name)
+    {
+        $exceptions = [];
+        foreach ($this->loaders as $loader) {
+            if ($loader instanceof ExistsLoaderInterface && !$loader->exists($name)) {
+                continue;
+            }
+
+            try {
+                if ($loader instanceof SourceContextLoaderInterface) {
+                    return $loader->getSourceContext($name);
+                }
+
+                return new Source($loader->getSource($name), $name);
             } catch (LoaderError $e) {
                 $exceptions[] = $e->getMessage();
             }
@@ -67,13 +94,30 @@ final class ChainLoader implements LoaderInterface, ExistsLoaderInterface, Sourc
 
     public function exists($name)
     {
+        $name = (string) $name;
+
         if (isset($this->hasSourceCache[$name])) {
             return $this->hasSourceCache[$name];
         }
 
         foreach ($this->loaders as $loader) {
-            if ($loader->exists($name)) {
+            if ($loader instanceof ExistsLoaderInterface) {
+                if ($loader->exists($name)) {
+                    return $this->hasSourceCache[$name] = true;
+                }
+
+                continue;
+            }
+
+            try {
+                if ($loader instanceof SourceContextLoaderInterface) {
+                    $loader->getSourceContext($name);
+                } else {
+                    $loader->getSource($name);
+                }
+
                 return $this->hasSourceCache[$name] = true;
+            } catch (LoaderError $e) {
             }
         }
 
@@ -84,7 +128,7 @@ final class ChainLoader implements LoaderInterface, ExistsLoaderInterface, Sourc
     {
         $exceptions = [];
         foreach ($this->loaders as $loader) {
-            if (!$loader->exists($name)) {
+            if ($loader instanceof ExistsLoaderInterface && !$loader->exists($name)) {
                 continue;
             }
 
@@ -102,7 +146,7 @@ final class ChainLoader implements LoaderInterface, ExistsLoaderInterface, Sourc
     {
         $exceptions = [];
         foreach ($this->loaders as $loader) {
-            if (!$loader->exists($name)) {
+            if ($loader instanceof ExistsLoaderInterface && !$loader->exists($name)) {
                 continue;
             }
 

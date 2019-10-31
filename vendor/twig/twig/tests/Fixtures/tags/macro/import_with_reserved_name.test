@@ -1,0 +1,10 @@
+--TEST--
+"from" tag with reserved name
+--TEMPLATE--
+{% import 'forms.twig' as macros %}
+
+{{ macros.parent() }}
+--DATA--
+return []
+--EXCEPTION--
+Twig\Error\SyntaxError: "parent" cannot be called as macro as it is a reserved keyword in "index.twig" at line 4.

@@ -18,9 +18,9 @@ use Twig\Compiler;
  */
 class CheckSecurityNode extends Node
 {
-    private $usedFilters;
-    private $usedTags;
-    private $usedFunctions;
+    protected $usedFilters;
+    protected $usedTags;
+    protected $usedFunctions;
 
     public function __construct(array $usedFilters, array $usedTags, array $usedFunctions)
     {
@@ -61,7 +61,7 @@ class CheckSecurityNode extends Node
             ->outdent()
             ->write("} catch (SecurityError \$e) {\n")
             ->indent()
-            ->write("\$e->setSourceContext(\$this->source);\n\n")
+            ->write("\$e->setSourceContext(\$this->getSourceContext());\n\n")
             ->write("if (\$e instanceof SecurityNotAllowedTagError && isset(\$tags[\$e->getTagName()])) {\n")
             ->indent()
             ->write("\$e->setTemplateLine(\$tags[\$e->getTagName()]);\n")

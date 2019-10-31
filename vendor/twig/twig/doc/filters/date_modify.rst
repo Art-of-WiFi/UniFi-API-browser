@@ -1,6 +1,9 @@
 ``date_modify``
 ===============
 
+.. versionadded:: 1.9.0
+    The date_modify filter has been added in Twig 1.9.0.
+
 The ``date_modify`` filter modifies a date with a given modifier string:
 
 .. code-block:: twig

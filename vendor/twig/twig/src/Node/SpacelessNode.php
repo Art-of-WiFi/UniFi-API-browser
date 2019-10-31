@@ -18,13 +18,11 @@ use Twig\Compiler;
  *
  * It removes spaces between HTML tags.
  *
- * @deprecated since Twig 2.7, to be removed in 3.0
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class SpacelessNode extends Node implements NodeOutputInterface
+class SpacelessNode extends Node
 {
-    public function __construct(Node $body, int $lineno, string $tag = 'spaceless')
+    public function __construct(\Twig_NodeInterface $body, $lineno, $tag = 'spaceless')
     {
         parent::__construct(['body' => $body], [], $lineno, $tag);
     }

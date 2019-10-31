@@ -24,8 +24,7 @@
         }
     ],
     "require": {
-        "php": "^7.0",
-        "symfony/polyfill-mbstring": "^1.3",
+        "php": ">=5.5.0",
         "symfony/polyfill-ctype": "^1.8"
     },
     "require-dev": {
@@ -43,12 +42,12 @@
     },
     "autoload-dev": {
         "psr-4" : {
-            "Twig\\Tests\\" : "tests/"
+            "Twig\\Tests\\" : "tests"
         }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.12-dev"
+            "dev-master": "1.42-dev"
         }
     }
 }

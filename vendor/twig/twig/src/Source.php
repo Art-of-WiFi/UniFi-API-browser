@@ -14,9 +14,11 @@ namespace Twig;
 /**
  * Holds information about a non-compiled Twig template.
  *
+ * @final
+ *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class Source
+class Source
 {
     private $code;
     private $name;
@@ -27,14 +29,14 @@ final class Source
      * @param string $name The template logical name
      * @param string $path The filesystem path of the template if any
      */
-    public function __construct(string $code, string $name, string $path = '')
+    public function __construct($code, $name, $path = '')
     {
         $this->code = $code;
         $this->name = $name;
         $this->path = $path;
     }
 
-    public function getCode(): string
+    public function getCode()
     {
         return $this->code;
     }
@@ -44,7 +46,7 @@ final class Source
         return $this->name;
     }
 
-    public function getPath(): string
+    public function getPath()
     {
         return $this->path;
     }

@@ -34,7 +34,7 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $rootPath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct($paths = [], string $rootPath = null)
+    public function __construct($paths = [], $rootPath = null)
     {
         $this->rootPath = (null === $rootPath ? getcwd() : $rootPath).\DIRECTORY_SEPARATOR;
         if (false !== $realPath = realpath($rootPath)) {
@@ -136,6 +136,17 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
         }
     }
 
+    public function getSource($name)
+    {
+        @trigger_error(sprintf('Calling "getSource" on "%s" is deprecated since 1.27. Use getSourceContext() instead.', \get_class($this)), E_USER_DEPRECATED);
+
+        if (null === ($path = $this->findTemplate($name)) || false === $path) {
+            return '';
+        }
+
+        return file_get_contents($path);
+    }
+
     public function getSourceContext($name)
     {
         if (null === ($path = $this->findTemplate($name)) || false === $path) {
@@ -166,7 +177,13 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
             return true;
         }
 
-        return null !== ($path = $this->findTemplate($name, false)) && false !== $path;
+        try {
+            return null !== ($path = $this->findTemplate($name, false)) && false !== $path;
+        } catch (LoaderError $e) {
+            @trigger_error(sprintf('In %s::findTemplate(), you must accept a second argument that when set to "false" returns "false" instead of throwing an exception. Not supporting this argument is deprecated since version 1.27.', \get_class($this)), E_USER_DEPRECATED);
+
+            return false;
+        }
     }
 
     public function isFresh($name, $time)
@@ -182,15 +199,13 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
     /**
      * Checks if the template can be found.
      *
-     * In Twig 3.0, findTemplate must return a string or null (returning false won't work anymore).
-     *
-     * @param string $name  The template name
-     * @param bool   $throw Whether to throw an exception when an error occurs
+     * @param string $name The template name
      *
      * @return string|false|null The template name or false/null
      */
-    protected function findTemplate($name, $throw = true)
+    protected function findTemplate($name)
     {
+        $throw = \func_num_args() > 1 ? func_get_arg(1) : true;
         $name = $this->normalizeName($name);
 
         if (isset($this->cache[$name])) {
@@ -250,12 +265,7 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
         throw new LoaderError($this->errorCache[$name]);
     }
 
-    private function normalizeName($name)
-    {
-        return preg_replace('#/{2,}#', '/', str_replace('\\', '/', $name));
-    }
-
-    private function parseName($name, $default = self::MAIN_NAMESPACE)
+    protected function parseName($name, $default = self::MAIN_NAMESPACE)
     {
         if (isset($name[0]) && '@' == $name[0]) {
             if (false === $pos = strpos($name, '/')) {
@@ -271,7 +281,12 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
         return [$default, $name];
     }
 
-    private function validateName($name)
+    protected function normalizeName($name)
+    {
+        return preg_replace('#/{2,}#', '/', str_replace('\\', '/', (string) $name));
+    }
+
+    protected function validateName($name)
     {
         if (false !== strpos($name, "\0")) {
             throw new LoaderError('A template name cannot contain NUL bytes.');
@@ -297,7 +312,7 @@ class FilesystemLoader implements LoaderInterface, ExistsLoaderInterface, Source
     {
         return strspn($file, '/\\', 0, 1)
             || (\strlen($file) > 3 && ctype_alpha($file[0])
-                && ':' === $file[1]
+                && ':' === substr($file, 1, 1)
                 && strspn($file, '/\\', 2, 1)
             )
             || null !== parse_url($file, PHP_URL_SCHEME)

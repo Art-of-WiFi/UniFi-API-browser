@@ -27,6 +27,20 @@ class SyntaxError extends Error
      */
     public function addSuggestions($name, array $items)
     {
+        if (!$alternatives = self::computeAlternatives($name, $items)) {
+            return;
+        }
+
+        $this->appendMessage(sprintf(' Did you mean "%s"?', implode('", "', $alternatives)));
+    }
+
+    /**
+     * @internal
+     *
+     * To be merged with the addSuggestions() method in 2.0.
+     */
+    public static function computeAlternatives($name, $items)
+    {
         $alternatives = [];
         foreach ($items as $item) {
             $lev = levenshtein($name, $item);
@@ -34,14 +48,9 @@ class SyntaxError extends Error
                 $alternatives[$item] = $lev;
             }
         }
-
-        if (!$alternatives) {
-            return;
-        }
-
         asort($alternatives);
 
-        $this->appendMessage(sprintf(' Did you mean "%s"?', implode('", "', array_keys($alternatives))));
+        return array_keys($alternatives);
     }
 }
 

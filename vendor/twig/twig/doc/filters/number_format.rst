@@ -1,6 +1,9 @@
 ``number_format``
 =================
 
+.. versionadded:: 1.5
+    The ``number_format`` filter was added in Twig 1.5
+
 The ``number_format`` filter formats numbers.  It is a wrapper around PHP's
 `number_format`_ function:
 
@@ -15,16 +18,13 @@ separator using the additional arguments:
 
     {{ 9800.333|number_format(2, '.', ',') }}
 
-To format negative numbers or math calculation, wrap the previous statement
-with parentheses (needed because of Twig's :ref:`precedence of operators
-<twig-expressions>`:
+To format negative numbers, wrap the number with parentheses (needed because of
+Twig's :ref:`precedence of operators <twig-expressions>`:
 
 .. code-block:: twig
 
     {{ -9800.333|number_format(2, '.', ',') }} {# outputs : -9 #}
     {{ (-9800.333)|number_format(2, '.', ',') }} {# outputs : -9,800.33 #}
-    {{  1 + 0.2|number_format(2) }} {# outputs : 1.2 #}
-    {{ (1 + 0.2)|number_format(2) }} {# outputs : 1.20 #}
 
 If no formatting options are provided then Twig will use the default formatting
 options of:
@@ -38,7 +38,10 @@ These defaults can be changed through the core extension:
 .. code-block:: php
 
     $twig = new \Twig\Environment($loader);
-    $twig->getExtension(\Twig\Extension\CoreExtension::class)->setNumberFormat(3, '.', ',');
+    $twig->getExtension('\Twig\Extension\CoreExtension')->setNumberFormat(3, '.', ',');
+
+    // before Twig 1.26
+    $twig->getExtension('core')->setNumberFormat(3, '.', ',');
 
 The defaults set for ``number_format`` can be over-ridden upon each call using the
 additional parameters.

@@ -25,6 +25,26 @@ template to be escaped or not by using the ``autoescape`` tag:
         Everything will be outputted as is in this block
     {% endautoescape %}
 
+.. note::
+
+    Before Twig 1.8, the syntax was different:
+
+    .. code-block:: twig
+
+        {% autoescape true %}
+            Everything will be automatically escaped in this block
+            using the HTML strategy
+        {% endautoescape %}
+
+        {% autoescape false %}
+            Everything will be outputted as is in this block
+        {% endautoescape %}
+
+        {% autoescape true js %}
+            Everything will be automatically escaped in this block
+            using the js escaping strategy
+        {% endautoescape %}
+
 When automatic escaping is enabled everything is escaped by default except for
 values explicitly marked as safe. Those can be marked in the template by using
 the :doc:`raw<../filters/raw>` filter:

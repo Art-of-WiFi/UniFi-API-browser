@@ -13,6 +13,7 @@ namespace Twig\Node;
 
 use Twig\Compiler;
 use Twig\Node\Expression\ConstantExpression;
+use Twig\Node\Expression\FilterExpression;
 
 /**
  * Adds a check for the __toString() method when the variable is an object and the sandbox is activated.
@@ -41,13 +42,27 @@ class SandboxedPrintNode extends PrintNode
             ;
         } else {
             $compiler
-                ->write('$this->extensions[SandboxExtension::class]->ensureToStringAllowed(')
+                ->write('$this->env->getExtension(\'\Twig\Extension\SandboxExtension\')->ensureToStringAllowed(')
                 ->subcompile($expr)
-                ->raw(', ')
-                ->repr($expr->getTemplateLine())
-                ->raw(", \$this->source);\n")
+                ->raw(");\n")
             ;
         }
+    }
+
+    /**
+     * Removes node filters.
+     *
+     * This is mostly needed when another visitor adds filters (like the escaper one).
+     *
+     * @return Node
+     */
+    protected function removeNodeFilter(Node $node)
+    {
+        if ($node instanceof FilterExpression) {
+            return $this->removeNodeFilter($node->getNode('node'));
+        }
+
+        return $node;
     }
 }
 

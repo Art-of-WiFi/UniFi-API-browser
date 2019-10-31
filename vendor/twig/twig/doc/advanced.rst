@@ -1,6 +1,12 @@
 Extending Twig
 ==============
 
+.. caution::
+
+    This section describes how to extend Twig as of **Twig 1.12**. If you are
+    using an older version, read the :doc:`legacy<advanced_legacy>` chapter
+    instead.
+
 Twig can be extended in many ways; you can add extra tags, filters, tests,
 operators, global variables, and functions. You can even extend the parser
 itself with node visitors.
@@ -138,9 +144,9 @@ Creating a filter consists of associating a name with a PHP callable::
     // the one below needs a runtime implementation (see below for more information)
     $filter = new \Twig\TwigFilter('rot13', ['SomeClass', 'rot13Filter']);
 
-The first argument passed to the ``\Twig\TwigFilter`` constructor is the name of the
-filter you will use in templates and the second one is the PHP callable to
-associate with it.
+The first argument passed to the ``\Twig\TwigFilter`` constructor is the name
+of the filter you will use in templates and the second one is the PHP callable
+to associate with it.
 
 Then, add the filter to the Twig environment::
 
@@ -171,7 +177,8 @@ is compiled to something like the following::
     <?php echo strtolower('TWIG') ?>
     <?php echo twig_date_format_filter($now, 'd/m/Y') ?>
 
-The ``\Twig\TwigFilter`` class takes an array of options as its last argument::
+The ``\Twig\TwigFilter`` class takes an array of options as its last
+argument::
 
     $filter = new \Twig\TwigFilter('rot13', 'str_rot13', $options);
 
@@ -225,6 +232,9 @@ through your filter::
 Variadic Filters
 ~~~~~~~~~~~~~~~~
 
+.. versionadded:: 1.19
+    Support for variadic filters was added in Twig 1.19.
+
 When a filter should accept an arbitrary number of arguments, set the
 ``is_variadic`` option to ``true``; Twig will pass the extra arguments as the
 last argument to the filter call as an array::
@@ -265,6 +275,9 @@ filter: ``('a', 'b', 'foo')``.
 
 Deprecated Filters
 ~~~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.21
+    Support for deprecated filters was added in Twig 1.21.
 
 You can mark a filter as being deprecated by setting the ``deprecated`` option
 to ``true``. You can also give an alternative filter that replaces the
@@ -330,7 +343,7 @@ This is used by many of the tests built into Twig::
     $test = new \Twig\TwigTest(
         'odd',
         null,
-        ['node_class' => \Twig\Node\Expression\Test\OddTest::class]);
+        ['node_class' => '\Twig\Node\Expression\Test\OddTest']);
     $twig->addTest($test);
 
     class Twig_Node_Expression_Test_Odd extends \Twig\Node\Expression\TestExpression
@@ -358,8 +371,8 @@ The ``node`` sub-node will contain an expression of ``my_value``. Node-based
 tests also have access to the ``arguments`` node. This node will contain the
 various other arguments that have been provided to your test.
 
-.. versionadded:: 2.6
-    Dynamic tests support was added in Twig 2.6.
+.. versionadded:: 1.36
+    Dynamic tests support was added in Twig 1.36.
 
 If you want to pass a variable number of positional or named arguments to the
 test, set the ``is_variadic`` option to ``true``. Tests support dynamic
@@ -399,7 +412,7 @@ Most of the time though, a tag is not needed:
 
  .. note::
 
-      The ``apply`` tag was introduced in Twig 2.9; use the ``filter`` tag with
+      The ``apply`` tag was introduced in Twig 1.40; use the ``filter`` tag with
       previous versions.
 
 * If your tag does not output anything, but only exists because of a side
@@ -578,49 +591,76 @@ to host all the specific tags and filters you want to add to Twig.
 
 An extension is a class that implements the following interface::
 
-    interface \Twig\Extension\ExtensionInterface
+    interface Twig_ExtensionInterface
     {
+        /**
+         * Initializes the runtime environment.
+         *
+         * This is where you can load some file that contains filter functions for instance.
+         *
+         * @deprecated since 1.23 (to be removed in 2.0), implement \Twig\Extension\InitRuntimeInterface instead
+         */
+        function initRuntime(\Twig\Environment $environment);
+
         /**
          * Returns the token parser instances to add to the existing list.
          *
-         * @return \Twig\TokenParser\TokenParserInterface[]
+         * @return (Twig_TokenParserInterface|Twig_TokenParserBrokerInterface)[]
          */
-        public function getTokenParsers();
+        function getTokenParsers();
 
         /**
          * Returns the node visitor instances to add to the existing list.
          *
          * @return \Twig\NodeVisitor\NodeVisitorInterface[]
          */
-        public function getNodeVisitors();
+        function getNodeVisitors();
 
         /**
          * Returns a list of filters to add to the existing list.
          *
          * @return \Twig\TwigFilter[]
          */
-        public function getFilters();
+        function getFilters();
 
         /**
          * Returns a list of tests to add to the existing list.
          *
          * @return \Twig\TwigTest[]
          */
-        public function getTests();
+        function getTests();
 
         /**
          * Returns a list of functions to add to the existing list.
          *
          * @return \Twig\TwigFunction[]
          */
-        public function getFunctions();
+        function getFunctions();
 
         /**
          * Returns a list of operators to add to the existing list.
          *
          * @return array<array> First array of unary operators, second array of binary operators
          */
-        public function getOperators();
+        function getOperators();
+
+        /**
+         * Returns a list of global variables to add to the existing list.
+         *
+         * @return array An array of global variables
+         *
+         * @deprecated since 1.23 (to be removed in 2.0), implement \Twig\Extension\GlobalsInterface instead
+         */
+        function getGlobals();
+
+        /**
+         * Returns the name of the extension.
+         *
+         * @return string The extension name
+         *
+         * @deprecated since 1.26 (to be removed in 2.0), not used anymore internally
+         */
+        function getName();
     }
 
 To keep your extension class clean and lean, inherit from the built-in
@@ -632,6 +672,11 @@ empty implementations for all methods:
     }
 
 This extension does nothing for now. We will customize it in the next sections.
+
+.. note::
+
+    Prior to Twig 1.26, you must implement the ``getName()`` method which must
+    return a unique identifier for the extension.
 
 You can save your extension anywhere on the filesystem, as all extensions must
 be registered explicitly to be available in your templates.
@@ -734,11 +779,11 @@ the ``!``, ``||``, and ``&&`` operators::
         {
             return [
                 [
-                    '!' => ['precedence' => 50, 'class' => \Twig\Node\Expression\Unary\NotUnary::class],
+                    '!' => ['precedence' => 50, 'class' => '\Twig\Node\Expression\Unary\NotUnary'],
                 ],
                 [
-                    '||' => ['precedence' => 10, 'class' => \Twig\Node\Expression\Binary\OrBinary::class, 'associativity' => \Twig\ExpressionParser::OPERATOR_LEFT],
-                    '&&' => ['precedence' => 15, 'class' => \Twig\Node\Expression\Binary\AndBinary::class, 'associativity' => \Twig\ExpressionParser::OPERATOR_LEFT],
+                    '||' => ['precedence' => 10, 'class' => '\Twig\Node\Expression\Binary\OrBinary', 'associativity' => \Twig\ExpressionParser::OPERATOR_LEFT],
+                    '&&' => ['precedence' => 15, 'class' => '\Twig\Node\Expression\Binary\AndBinary', 'associativity' => \Twig\ExpressionParser::OPERATOR_LEFT],
                 ],
             ];
         }
@@ -806,10 +851,10 @@ This is very convenient but not recommended as it makes template compilation
 depend on runtime dependencies even if they are not needed (think for instance
 as a dependency that connects to a database engine).
 
-You can decouple the extension definitions from their runtime implementations by
-registering a ``\Twig\RuntimeLoader\RuntimeLoaderInterface`` instance on the
-environment that knows how to instantiate such runtime classes (runtime classes
-must be autoload-able)::
+As of Twig 1.26, you can decouple the extension definitions from their
+runtime implementations by registering a ``\Twig\RuntimeLoader\RuntimeLoaderInterface``
+instance on the environment that knows how to instantiate such runtime classes
+(runtime classes must be autoload-able)::
 
     class RuntimeLoader implements \Twig\RuntimeLoader\RuntimeLoaderInterface
     {
@@ -830,7 +875,7 @@ must be autoload-able)::
 
 .. note::
 
-    Twig comes with a PSR-11 compatible runtime loader
+    As of Twig 1.32, Twig comes with a PSR-11 compatible runtime loader
     (``\Twig\RuntimeLoader\ContainerRuntimeLoader``).
 
 It is now possible to move the runtime logic to a new
@@ -912,6 +957,6 @@ Testing the node visitors can be complex, so extend your test cases from
 ``\Twig\Test\NodeTestCase``. Examples can be found in the Twig repository
 `tests/Twig/Node`_ directory.
 
-.. _`rot13`:               https://secure.php.net/manual/en/function.str-rot13.php
-.. _`tests/Twig/Fixtures`: https://github.com/twigphp/Twig/tree/2.x/tests/Fixtures
-.. _`tests/Twig/Node`:     https://github.com/twigphp/Twig/tree/2.x/tests/Node
+.. _`rot13`:                   https://secure.php.net/manual/en/function.str-rot13.php
+.. _`tests/Twig/Fixtures`:     https://github.com/twigphp/Twig/tree/1.x/tests/Fixtures
+.. _`tests/Twig/Node`:         https://github.com/twigphp/Twig/tree/1.x/tests/Node

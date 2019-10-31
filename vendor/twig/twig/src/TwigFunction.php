@@ -11,7 +11,6 @@
 
 namespace Twig;
 
-use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Node;
 
 /**
@@ -20,29 +19,16 @@ use Twig\Node\Node;
  * @final
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @see https://twig.symfony.com/doc/templates.html#functions
  */
 class TwigFunction
 {
-    private $name;
-    private $callable;
-    private $options;
-    private $arguments = [];
+    protected $name;
+    protected $callable;
+    protected $options;
+    protected $arguments = [];
 
-    /**
-     * Creates a template function.
-     *
-     * @param string        $name     Name of this function
-     * @param callable|null $callable A callable implementing the function. If null, you need to overwrite the "node_class" option to customize compilation.
-     * @param array         $options  Options array
-     */
-    public function __construct(string $name, $callable = null, array $options = [])
+    public function __construct($name, $callable, array $options = [])
     {
-        if (__CLASS__ !== \get_class($this)) {
-            @trigger_error('Overriding '.__CLASS__.' is deprecated since Twig 2.4.0 and the class will be final in 3.0.', E_USER_DEPRECATED);
-        }
-
         $this->name = $name;
         $this->callable = $callable;
         $this->options = array_merge([
@@ -51,7 +37,7 @@ class TwigFunction
             'is_variadic' => false,
             'is_safe' => null,
             'is_safe_callback' => null,
-            'node_class' => FunctionExpression::class,
+            'node_class' => '\Twig\Node\Expression\FunctionExpression',
             'deprecated' => false,
             'alternative' => null,
         ], $options);
@@ -62,11 +48,6 @@ class TwigFunction
         return $this->name;
     }
 
-    /**
-     * Returns the callable to execute for this function.
-     *
-     * @return callable|null
-     */
     public function getCallable()
     {
         return $this->callable;
@@ -104,7 +85,7 @@ class TwigFunction
         }
 
         if (null !== $this->options['is_safe_callback']) {
-            return $this->options['is_safe_callback']($functionArgs);
+            return \call_user_func($this->options['is_safe_callback'], $functionArgs);
         }
 
         return [];
@@ -131,10 +112,7 @@ class TwigFunction
     }
 }
 
-// For Twig 1.x compatibility
-class_alias('Twig\TwigFunction', 'Twig_SimpleFunction', false);
-
-class_alias('Twig\TwigFunction', 'Twig_Function');
+class_alias('Twig\TwigFunction', 'Twig_SimpleFunction');
 
 // Ensure that the aliased name is loaded to keep BC for classes implementing the typehint with the old aliased name.
 class_exists('Twig\Node\Node');

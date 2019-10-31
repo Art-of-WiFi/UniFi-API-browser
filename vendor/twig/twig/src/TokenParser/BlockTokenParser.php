@@ -26,14 +26,16 @@ use Twig\Token;
  *    <link rel="stylesheet" href="style.css" />
  *    <title>{% block title %}{% endblock %} - My Webpage</title>
  *  {% endblock %}
+ *
+ * @final
  */
-final class BlockTokenParser extends AbstractTokenParser
+class BlockTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
         $lineno = $token->getLine();
         $stream = $this->parser->getStream();
-        $name = $stream->expect(/* Token::NAME_TYPE */ 5)->getValue();
+        $name = $stream->expect(Token::NAME_TYPE)->getValue();
         if ($this->parser->hasBlock($name)) {
             throw new SyntaxError(sprintf("The block '%s' has already been defined line %d.", $name, $this->parser->getBlock($name)->getTemplateLine()), $stream->getCurrent()->getLine(), $stream->getSourceContext());
         }
@@ -41,9 +43,9 @@ final class BlockTokenParser extends AbstractTokenParser
         $this->parser->pushLocalScope();
         $this->parser->pushBlockStack($name);
 
-        if ($stream->nextIf(/* Token::BLOCK_END_TYPE */ 3)) {
+        if ($stream->nextIf(Token::BLOCK_END_TYPE)) {
             $body = $this->parser->subparse([$this, 'decideBlockEnd'], true);
-            if ($token = $stream->nextIf(/* Token::NAME_TYPE */ 5)) {
+            if ($token = $stream->nextIf(Token::NAME_TYPE)) {
                 $value = $token->getValue();
 
                 if ($value != $name) {
@@ -55,7 +57,7 @@ final class BlockTokenParser extends AbstractTokenParser
                 new PrintNode($this->parser->getExpressionParser()->parseExpression(), $lineno),
             ]);
         }
-        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
+        $stream->expect(Token::BLOCK_END_TYPE);
 
         $block->setNode('body', $body);
         $this->parser->popBlockStack();

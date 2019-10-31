@@ -15,7 +15,7 @@ use Twig\Compiler;
 
 class TempNameExpression extends AbstractExpression
 {
-    public function __construct(string $name, int $lineno)
+    public function __construct($name, $lineno)
     {
         parent::__construct([], ['name' => $name], $lineno);
     }

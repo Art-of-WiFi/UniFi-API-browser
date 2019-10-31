@@ -81,12 +81,15 @@ Variable              Description
     implement the ``Countable`` interface. They are also not available when
     looping with a condition.
 
+.. versionadded:: 1.2
+    The ``if`` modifier support has been added in Twig 1.2.
+
 Adding a condition
 ------------------
 
 .. tip::
 
-    As of Twig 2.10, use the :doc:`filter <../filters/filter>` filter instead,
+    As of Twig 1.41, use the :doc:`filter <../filters/filter>` filter instead,
     or an ``if`` condition inside the ``for`` body (if your condition depends on
     a variable updated inside the loop and you are not using the ``loop``
     variable).

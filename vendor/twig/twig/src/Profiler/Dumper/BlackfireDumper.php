@@ -15,8 +15,10 @@ use Twig\Profiler\Profile;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @final
  */
-final class BlackfireDumper
+class BlackfireDumper
 {
     public function dump(Profile $profile)
     {
@@ -40,7 +42,7 @@ EOF;
         return $str;
     }
 
-    private function dumpChildren(string $parent, Profile $profile, &$data)
+    private function dumpChildren($parent, Profile $profile, &$data)
     {
         foreach ($profile as $p) {
             if ($p->isTemplate()) {
@@ -53,7 +55,7 @@ EOF;
         }
     }
 
-    private function dumpProfile(string $edge, Profile $profile, &$data)
+    private function dumpProfile($edge, Profile $profile, &$data)
     {
         if (isset($data[$edge])) {
             ++$data[$edge]['ct'];

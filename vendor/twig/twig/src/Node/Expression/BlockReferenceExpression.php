@@ -22,8 +22,17 @@ use Twig\Node\Node;
  */
 class BlockReferenceExpression extends AbstractExpression
 {
-    public function __construct(Node $name, Node $template = null, int $lineno, string $tag = null)
+    /**
+     * @param Node|null $template
+     */
+    public function __construct(\Twig_NodeInterface $name, $template = null, $lineno, $tag = null)
     {
+        if (\is_bool($template)) {
+            @trigger_error(sprintf('The %s method "$asString" argument is deprecated since version 1.28 and will be removed in 2.0.', __METHOD__), E_USER_DEPRECATED);
+
+            $template = null;
+        }
+
         $nodes = ['name' => $name];
         if (null !== $template) {
             $nodes['template'] = $template;
@@ -49,7 +58,7 @@ class BlockReferenceExpression extends AbstractExpression
         }
     }
 
-    private function compileTemplateCall(Compiler $compiler, string $method): Compiler
+    private function compileTemplateCall(Compiler $compiler, $method)
     {
         if (!$this->hasNode('template')) {
             $compiler->write('$this');
@@ -66,11 +75,12 @@ class BlockReferenceExpression extends AbstractExpression
         }
 
         $compiler->raw(sprintf('->%s', $method));
+        $this->compileBlockArguments($compiler);
 
-        return $this->compileBlockArguments($compiler);
+        return $compiler;
     }
 
-    private function compileBlockArguments(Compiler $compiler): Compiler
+    private function compileBlockArguments(Compiler $compiler)
     {
         $compiler
             ->raw('(')
