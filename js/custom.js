@@ -70,16 +70,15 @@ $('.controller_idx').on('click', function(){
         $('.controller_idx').removeClass('active').children('i').remove();
         $($(this)).addClass('active').append(' <i class="fas fa-check"></i>');
 
+        /**
+         * in #collection_dropdown menu we also clear any active elements
+         */
+        $('#collection_dropdown .dropdown-item').parent().find('.dropdown-item').removeClass('active');
 
         /**
          * if not yet hidden, we hide the alert
          */
         $('#select_controller_alert_wrapper').hide();
-
-        /**
-         * restore the label for the site dropdown "button"
-         */
-        $('#navbar_site_dropdown_link').html('Sites');
 
         /**
          * hide the output card
@@ -91,6 +90,11 @@ $('.controller_idx').on('click', function(){
          * hide all alerts
          */
         $('.alert_wrapper').addClass('d-none');
+
+        /**
+         * restore the label for the site dropdown "button"
+         */
+        $('#navbar_site_dropdown_link').html('Sites');
 
         /**
          * we also update the PHP $_SESSION variable with the new theme name using AJAX POST

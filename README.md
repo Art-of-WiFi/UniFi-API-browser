@@ -124,6 +124,60 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
 
 
+### Extending the dropdown menu
+
+Since version 2.0.0 you can extend the dropdown menu with your own options by adding them to the `config.php` file. Here's an example:
+```php
+/**
+ * adding a custom sub menu example
+ */
+$collections = array_merge($collections, [
+    [
+        'label' => 'Custom Menu', // length of this string is limited due to dropdown menu width
+        'options' => [
+            [
+                'type' => 'collection', // either collection or divider
+                'label' => 'hourly site stats past 24 hours', // string that is dosplayed in the dropdown menu
+                'method' => 'stat_hourly_site', // the method/function in the API client class that is called
+                'params' => [(time() - (24 * 60 *60)) * 1000, time() * 1000], // an array containing the parameters that are passed to the method/function
+                'key' => 'custom_0' // unique key for this menu option, may be required for future versions
+            ],
+            [
+                'type' => 'collection',
+                'label' => 'daily site stats past 31 days',
+                'method' => 'stat_daily_site',
+                'params' => [(time() - (31 * 24 * 60 *60)) * 1000, time() * 1000],
+                'key' => 'custom_1'
+            ],
+            [
+                'type' => 'divider', // dividers have no other properties
+            ],
+            [
+                'type' => 'collection',
+                'label' => 'enable the site LEDs',
+                'method' => 'site_leds', // don't go wild when adding such calls, this example is simply to show the flexibility
+                'params' => [true],
+                'key' => 'custom_2'
+            ],
+            [
+                'type' => 'collection',
+                'label' => 'disable the site LEDs',
+                'method' => 'site_leds', // don't go wild when adding such calls, this example is simply to show the flexibility
+                'params' => [false],
+                'key' => 'custom_3'
+            ],
+        ],
+    ],
+]);
+```
+
+Note: for a `collection` type menu option the `type`, `label`, `method`, `params` and `key` "properties" are required.
+
+This is what the result looks like:
+
+![Custom sub menu](https://user-images.githubusercontent.com/12016131/69611554-4fb4a400-102e-11ea-9175-99618c1e1f98.png "Custom sub menu")
+
+
 ### Updates
 
 If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.

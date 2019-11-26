@@ -33,6 +33,12 @@ require_once('common.php');
 require_once('collections.php');
 
 /**
+ * initialize the Twig loader early on in case we need to render the error page
+ */
+$loader = new \Twig\Loader\FilesystemLoader('templates');
+$twig   = new \Twig\Environment($loader);
+
+/**
  * load the configuration file, if readable
  * - if not, stop and display an error message
  */
@@ -50,6 +56,16 @@ if (is_file('config/config.php') && is_readable('config/config.php')) {
 }
 
 /**
+ * inject Twig global variables for use across the templates
+ */
+$twig->addGlobal('tool_version', TOOL_VERSION);
+$twig->addGlobal('debug', $debug);
+$twig->addGlobal('session', $_SESSION);
+$twig->addGlobal('navbar_class', $navbar_class);
+$twig->addGlobal('navbar_bg_class', $navbar_bg_class);
+$twig->addGlobal('about_modal_params', $about_modal_params);
+
+/**
  * check whether the required PHP curl module is available
  * - if not, stop and display an error message
  */
@@ -65,20 +81,19 @@ if (!function_exists('curl_version')) {
 }
 
 /**
- * initialize the Twig loader
+ * check whether the minimum required PHP version (5.6.0) is met
+ * - if not, stop and display an error message
  */
-$loader = new \Twig\Loader\FilesystemLoader('templates');
-$twig   = new \Twig\Environment($loader);
+if (version_compare(PHP_VERSION, '5.6.0') < 0) {
+    /**
+     * render the config error page
+     */
+    echo $twig->render('config_error.html.twig', [
+        'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 5.6.0. Please upgrade before proceeding!<br>',
+    ]);
 
-/**
- * inject Twig global variables for use across the templates
- */
-$twig->addGlobal('tool_version', TOOL_VERSION);
-$twig->addGlobal('debug', $debug);
-$twig->addGlobal('session', $_SESSION);
-$twig->addGlobal('navbar_class', $navbar_class);
-$twig->addGlobal('navbar_bg_class', $navbar_bg_class);
-$twig->addGlobal('about_modal_params', $about_modal_params);
+    exit();
+}
 
 /**
  * load the file containing user accounts, if readable
