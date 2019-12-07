@@ -547,6 +547,7 @@ $('#about_modal').on('shown.bs.modal', function (e) {
                     $('#span_api_browser_update').removeClass('badge-success').addClass('badge-warning');
                 } else if (api_browser_version == json.tag_name.substring(1)) {
                     $('#span_api_browser_update').html('up to date');
+                    $('#span_api_browser_update').removeClass('badge-danger').addClass('badge-success');
                 } else {
                     $('#span_api_browser_update').html('bleeding edge!');
                     $('#span_api_browser_update').removeClass('badge-success').addClass('badge-danger');

@@ -72,7 +72,7 @@ if (!empty($_SESSION['controller'])) {
     $params = [];
 
     /**
-     * POSTed object:
+     * POSTed object properties:
      * selected_collection_method
      * selected_collection_label
      * selected_collection_key
@@ -97,15 +97,19 @@ if (!empty($_SESSION['controller'])) {
         $output_method = $_POST['selected_output_method'];
     }
 
-    switch ($method) {
-        case 'stat_5minutes_gateway':
-            $params = [null, null, $gateway_stats_attribs];
-            break;
-        case 'stat_hourly_gateway':
-            $params = [null, null, $gateway_stats_attribs];
-            break;
-        case 'stat_daily_gateway':
-            $params = [null, null, $gateway_stats_attribs];
+    if (empty($params)) {
+        switch ($method) {
+            case 'stat_5minutes_gateway':
+                $params = [null, null, $gateway_stats_attribs];
+
+                break;
+            case 'stat_hourly_gateway':
+                $params = [null, null, $gateway_stats_attribs];
+
+                break;
+            case 'stat_daily_gateway':
+                $params = [null, null, $gateway_stats_attribs];
+        }
     }
 
     if (!empty($method) && !empty($site_id)) {
@@ -162,17 +166,14 @@ if (!empty($_SESSION['controller'])) {
                     /**
                      * Plain render mode
                      */
+                    Kint_Renderer_Text::$decorations = false;
                     Kint::$display_called_from = false;
                     $results['data'] = @s($data_array);
                 } else {
                     $results['data'] = $data_array;
                 }
-
-                /**
-                 * for other future output methods
-                 */
-                //$results['data']  = print_r($data_array, true);
             }
+
             /**
              * execute timing of data collection from UniFi controller
              */

@@ -14,7 +14,8 @@
 session_start();
 
 /**
- * check whether user has requested to clear (force expiry) the PHP session
+ * check whether user has requested to clear (force expiry) the PHP session, if so we
+ * clear the session and reload the page without the query string
  * - this feature can be useful when login errors occur, mostly after upgrades or credential changes
  */
 if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
@@ -22,6 +23,9 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
     session_unset();
     session_destroy();
     session_start();
+    $current_url = $_SERVER['REQUEST_URI'];
+    $current_url = strtok($current_url, '?');
+    header("refresh: 0; url = $current_url");
 }
 
 /**
