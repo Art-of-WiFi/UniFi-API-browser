@@ -10,15 +10,11 @@
 <div class="container h-100">
     <div class="row align-items-center h-100">
         <div class="col-sm-6 mx-auto">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <br>
-                    <div class="alert alert-danger" role="alert">
-                        {{error_message | raw}}
-                    </div>
-                    <br>
-                </div>
+            <br>
+            <div class="alert alert-danger shadow-sm" role="alert">
+                <i class="fas fa-exclamation-circle fa-lg fa-fw"></i> {{error_message | raw}}
             </div>
+            <br>
         </div>
     </div>
 </div>

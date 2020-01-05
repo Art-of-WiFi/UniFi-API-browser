@@ -16,9 +16,14 @@ Please keep the following in mind:
 - please read the Security Notice below before installing this tool!
 
 
+### Demo ###
+
+A demo version that is connected to Ubiquiti's demo controller is available here: https://api-browser-demo.artofwifi.net/
+
+
 ### Upgrading from 1.X to 2.X
 
-Because the structure of the configuration file has changed slightly, we recommend creating a fresh install when upgrading from 1.X to 2.X.
+Because the structure of the configuration file has changed, we recommend creating a fresh install when upgrading from 1.X to 2.X.
 
 
 ### Features
@@ -117,7 +122,7 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 
 ### Configuration
 
-- credentials for access to the UniFi Controller API can be configured, in part or in whole, in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
+- credentials for access to the UniFi Controller API are configured in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
 - starting with version 1.0.3, you can store **multiple controller configurations** in an array inside the `config/config.php` file
 - please refer to the instructions in the `config/config-template.php` file for further configuration instructions
 - starting with API browser tool version 2.0.0 you can restrict access to the tool by creating user accounts and passwords, please refer to the instructions in the `config/users-template.php` file for further details
