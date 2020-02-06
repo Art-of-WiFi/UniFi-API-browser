@@ -39,6 +39,7 @@ if ($debug === true) {
          */
         $host = parse_url($controller['url'], PHP_URL_HOST);
         $port = parse_url($controller['url'], PHP_URL_PORT);
+        $port = $port ?: 443;
 
         if (!empty($host) && !empty($port)) {
             $fp = @fsockopen($host, $port, $errno, $errstr, 2);

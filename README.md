@@ -4,15 +4,16 @@ This tool is for browsing data that is exposed through Ubiquiti's UniFi Controll
 
 It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#methods-and-functions-supported) than the UniFi API browser tool does.
 
-If you plan to create your own PHP code leveraging the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
+If you plan on creating your own PHP code to leverage the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
 
 You will find examples and detailed instructions there.
 
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.11.50 has been confirmed to work)
-- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
+- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.12.35 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work)
+- when accessing UniFi OS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UniFi OS support
+- there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
 
@@ -127,6 +128,11 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 - please refer to the instructions in the `config/config-template.php` file for further configuration instructions
 - starting with API browser tool version 2.0.0 you can restrict access to the tool by creating user accounts and passwords, please refer to the instructions in the `config/users-template.php` file for further details
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
+
+
+### UniFi OS support
+
+Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
 
 
 ### Extending the dropdown menu

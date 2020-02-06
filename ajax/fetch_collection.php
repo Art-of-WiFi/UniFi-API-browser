@@ -46,7 +46,14 @@ $gateway_stats_attribs = [
     'lan-rx_packets',
     'lan-tx_packets',
     'lan-rx_dropped',
-    'lan-tx_dropped'
+    'lan-tx_dropped',
+    'wan-tx_bytes',
+    'wan-rx_bytes',
+    'wan2-tx_bytes',
+    'wan2-rx_bytes',
+    'latency_min',
+    'latency_avg',
+    'latency_max',
 ];
 
 /**

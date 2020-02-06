@@ -325,7 +325,8 @@ function fetchDebugDetails() {
                 }
             }
         });
-    }}
+    }
+}
 
 /**
  * function to fetch a collection

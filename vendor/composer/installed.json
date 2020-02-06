@@ -1,24 +1,24 @@
 [
     {
         "name": "art-of-wifi/unifi-api-client",
-        "version": "v1.1.42",
-        "version_normalized": "1.1.42.0",
+        "version": "v1.1.47",
+        "version_normalized": "1.1.47.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-            "reference": "c7d1eee3e3ae9da2bd4f67994a95ff571fdfb89a"
+            "reference": "17d895076fc8b8f1d0fa26c8f9d71c107360c884"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/c7d1eee3e3ae9da2bd4f67994a95ff571fdfb89a",
-            "reference": "c7d1eee3e3ae9da2bd4f67994a95ff571fdfb89a",
+            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/17d895076fc8b8f1d0fa26c8f9d71c107360c884",
+            "reference": "17d895076fc8b8f1d0fa26c8f9d71c107360c884",
             "shasum": ""
         },
         "require": {
             "ext-curl": "*",
             "php": ">=5.4.0"
         },
-        "time": "2019-10-15T12:41:16+00:00",
+        "time": "2020-02-06T07:52:49+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -110,8 +110,8 @@
     },
     {
         "name": "symfony/polyfill-ctype",
-        "version": "v1.13.0",
-        "version_normalized": "1.13.0.0",
+        "version": "v1.13.1",
+        "version_normalized": "1.13.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-ctype.git",

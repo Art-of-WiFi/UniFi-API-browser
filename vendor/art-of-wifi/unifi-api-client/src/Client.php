@@ -2,7 +2,7 @@
 /**
  * This file is part of the art-of-wifi/unifi-api-client package
  *
- * This UniFi API client is based on the work done by the following developers:
+ * This UniFi API client Class is based on the work done by the following developers:
  *    domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
  *    fbagnol: https://github.com/fbagnol/class.unifi.php
  * and the API as published by Ubiquiti:
@@ -17,40 +17,44 @@
 namespace UniFi_API;
 
 /**
- * the UniFi API client class
+ * the UniFi API client Class
  */
 class Client
 {
     /**
-     * private properties
+     * private and protected properties
      */
-    protected $baseurl            = 'https://127.0.0.1:8443';
-    protected $user               = '';
-    protected $password           = '';
-    protected $site               = 'default';
-    protected $version            = '5.6.39';
-    protected $debug              = false;
-    protected $is_loggedin        = false;
-    private $cookies              = '';
-    private $request_type         = 'POST';
-    private $connect_timeout      = 10;
-    private $last_results_raw     = null;
-    private $last_error_message   = null;
-    private $curl_ssl_verify_peer = false;
-    private $curl_ssl_verify_host = false;
+    protected $baseurl             = 'https://127.0.0.1:8443';
+    protected $user                = '';
+    protected $password            = '';
+    protected $site                = 'default';
+    protected $version             = '5.6.39';
+    protected $debug               = false;
+    protected $is_loggedin         = false;
+    protected $is_unifi_os         = false;
+    private $cookies               = '';
+    private $request_type          = 'GET';
+    private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
+    private $connect_timeout       = 10;
+    private $last_results_raw      = null;
+    private $last_error_message    = null;
+    private $curl_ssl_verify_peer  = false;
+    private $curl_ssl_verify_host  = false;
 
     /**
-     * Construct an instance of the UniFi API client class
+     * Construct an instance of the UniFi API client Class
      * ---------------------------------------------------
      * return a new class instance
      * required parameter <user>       = string; user name to use when connecting to the UniFi controller
      * required parameter <password>   = string; password to use when connecting to the UniFi controller
-     * optional parameter <baseurl>    = string; base URL of the UniFi controller, *must* include "https://" prefix and port suffix (:8443)
+     * optional parameter <baseurl>    = string; base URL of the UniFi controller which *must* include "https://" prefix,
+     *                                   a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
+     *                                   do not add trailing slashes
      * optional parameter <site>       = string; short site name to access, defaults to "default"
      * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
      * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, a value of true is
      *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
-     *                                   is to not validate the controller certificate
+     *                                   disables validation of the controller certificate
      */
     public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -73,7 +77,7 @@ class Client
             $this->version = trim($version);
         }
 
-        if ($ssl_verify === true) {
+        if ((boolean)$ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
             $this->curl_ssl_verify_host = 2;
         }
@@ -83,10 +87,18 @@ class Client
         $this->update_unificookie();
     }
 
+    /**
+     * This method is be called as soon as there are no other references to the Class instance
+     * https://www.php.net/manual/en/language.oop5.decon.php
+     *
+     * NOTES:
+     * to force the Class instance to log out automatically upon destruct, simply call logout() or unset
+     * $_SESSION['unificookie'] at the end of your code
+     */
     public function __destruct()
     {
         /**
-         * if user has $_SESSION['unificookie'] set, do not logout here
+         * if $_SESSION['unificookie'] is set, do not logout here
          */
         if (isset($_SESSION['unificookie'])) {
             return;
@@ -101,70 +113,102 @@ class Client
     }
 
     /**
-     * Login to UniFi Controller
-     * -------------------------
+     * Login to the UniFi controller
+     * -----------------------------
      * returns true upon success
      */
     public function login()
     {
         /**
-         * if $_SESSION['unificookie'] is set, skip the login
+         * if already logged in we skip the login process
          */
-        if (isset($_SESSION['unificookie'])) {
-            return $this->is_loggedin = true;
+        if ($this->is_loggedin === true) {
+            return true;
         }
 
+        /**
+         * check we have a "regular" controller or one based on UniFi OS
+         */
         if (!is_resource($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
-            curl_setopt($ch, CURLOPT_HEADER, 1);
-            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
+            curl_setopt($ch, CURLOPT_HEADER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/');
 
             /**
-             * execute the cURL request
+             * execute the cURL request and get the HTTP response code
              */
-            $content = curl_exec($ch);
+            $content   = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                trigger_error('cURL error: ' . curl_error($ch));
+            }
+
+            if ($http_code === 200) {
+                $this->is_unifi_os = true;
+            }
+
+            if ($this->is_unifi_os) {
+                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/login');
+            } else {
+                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+            }
+
+            curl_setopt($ch, CURLOPT_NOBODY, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
+
+            /**
+             * execute the cURL request and get the HTTP response code
+             */
+            $content   = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if (curl_errno($ch)) {
                 trigger_error('cURL error: ' . curl_error($ch));
             }
 
             if ($this->debug) {
-                curl_setopt($ch, CURLOPT_VERBOSE, true);
-
-                print '<pre>';
+                print PHP_EOL . '<pre>';
                 print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
                 print_r(curl_getinfo($ch));
                 print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
                 print $content;
                 print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>';
+                print '</pre>' . PHP_EOL;
+            }
+
+            /**
+             * based on the HTTP response code we either trigger an error or
+             * extract the cookie from the headers
+             */
+            if ($http_code === 400) {
+                trigger_error('We received an HTTP response status: 400. Probably a controller login failure');
+
+                return $http_code;
             }
 
             $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $headers     = substr($content, 0, $header_size);
             $body        = trim(substr($content, $header_size));
-            $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             curl_close($ch);
 
-            preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
+            if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
+                preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
+                if (isset($results[1])) {
+                    $this->cookies = implode(';', $results[1]);
 
-            if (isset($results[1])) {
-                $this->cookies = implode(';', $results[1]);
-                if (!empty($body)) {
-                    if (($http_code >= 200) && ($http_code < 400)) {
-                        if (strpos($this->cookies, 'unifises') !== false) {
-                            return $this->is_loggedin = true;
-                        }
-                    }
-
-                    if ($http_code === 400) {
-                        trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
-
-                        return $http_code;
+                    /**
+                     * accept cookies from UniFi OS or from regular UNiFI controllers
+                     */
+                    if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
+                        return $this->is_loggedin = true;
                     }
                 }
             }
@@ -174,8 +218,8 @@ class Client
     }
 
     /**
-     * Logout from UniFi Controller
-     * ----------------------------
+     * Logout from the UniFi controller
+     * --------------------------------
      * returns true upon success
      */
     public function logout()
@@ -184,7 +228,14 @@ class Client
             return false;
         }
 
-        $this->exec_curl('/logout');
+        if ($this->is_unifi_os) {
+            $logout_url = '/api/auth/logout';
+        } else {
+            $logout_url = '/logout';
+        }
+
+        $this->exec_curl($logout_url, []);
+
         $this->is_loggedin = false;
         $this->cookies     = '';
 
@@ -317,7 +368,8 @@ class Client
      * required parameter <macs> = array of client MAC addresses
      *
      * NOTE:
-     * only supported with controller versions 5.9.X and higher
+     * only supported with controller versions 5.9.X and higher, can be
+     * slow (up to 5 minutes) on larger controllers
      */
     public function forget_sta($macs)
     {
@@ -348,7 +400,6 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
         $new_user           = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
         if (!is_null($name)) {
             $new_user['name'] = $name;
@@ -537,9 +588,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -567,9 +619,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -597,9 +650,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -1088,9 +1142,8 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
-        $payload            = ['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)];
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $payload);
+        $payload  = ['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $payload);
 
         return $this->process_response($response);
     }
@@ -1179,7 +1232,6 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
         $payload            = ['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members];
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $payload);
 
@@ -1374,6 +1426,27 @@ class Client
         }
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/rest/rogueknown');
+
+        return $this->process_response($response);
+    }
+
+    /**
+     * Generate backup
+     * ---------------------------
+     * returns a URL from where the backup file can be downloaded once generated
+     *
+     * NOTES:
+     * this is an experimental function, please do not use unless you know exactly
+     * what you're doing
+     */
+    public function generate_backup()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['cmd' => 'backup'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', $payload);
 
         return $this->process_response($response);
     }
@@ -1739,12 +1812,8 @@ class Client
      *                                       restart devices, default value is false. With versions < 5.9.X this only applies
      *                                       when readonly is true.
      */
-    public function assign_existing_admin(
-        $admin_id,
-        $readonly       = false,
-        $device_adopt   = false,
-        $device_restart = false
-    ) {
+    public function assign_existing_admin($admin_id, $readonly = false, $device_adopt = false, $device_restart = false)
+    {
         if (!$this->is_loggedin) {
             return false;
         }
@@ -1905,8 +1974,7 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
-        $payload            = ['name' => $name, 'x_password' => $x_password];
+        $payload = ['name' => $name, 'x_password' => $x_password];
         if (isset($note)) {
             $payload['note'] = trim($note);
         }
@@ -2056,6 +2124,32 @@ class Client
     }
 
     /**
+     * List filtered DPI stats
+     * -----------------------
+     * returns an array of fileterd DPI stats
+     * optional parameter <type>       = whether to returns stats by app or by category, valid values:
+     *                                   'by_cat' or 'by_app'
+     * optional parameter <cat_filter> = an array containing numeric category ids to filter by,
+     *                                   only to be combined with a "by_app" value for $type
+     */
+    public function list_dpi_stats_filtered($type = 'by_cat', $cat_filter = null)
+    {
+        if (!$this->is_loggedin || !in_array($type, ['by_cat', 'by_app'])) {
+            return false;
+        }
+
+        $payload = ['type' => $type];
+
+        if ($cat_filter !== null && $type == 'by_app' && is_array($cat_filter)) {
+            $payload['cats'] = $cat_filter;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sitedpi', $payload);
+
+        return $this->process_response($response);
+    }
+
+    /**
      * List current channels
      * ---------------------
      * returns an array of currently allowed channels
@@ -2190,19 +2284,66 @@ class Client
     }
 
     /**
-     * Reboot an access point
+     * Reboot a device
      * ----------------------
      * return true on success
-     * required parameter <mac> = device MAC address
+     * required parameter <mac>  = device MAC address
+     * optional parameter <type> = string; two options: 'soft' or 'hard', defaults to soft
+     *                             soft can be used for all devices, requests a plain restart of that device
+     *                             hard is special for PoE switches and besides the restart also requests a
+     *                             power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
+     *                             does *NOT* trigger a factory-reset, as it somehow could suggest.
      */
-    public function restart_ap($mac)
+    public function restart_device($mac, $type = 'soft')
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $payload  = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        if (!is_null($type) && in_array($type, ['soft', 'hard'])) {
+            $payload['type'] = strtolower($type);
+        }
+
         $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Force provision of a device
+     * ---------------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function force_provision($mac)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Reboot a UniFi CloudKey
+     * -----------------------
+     * return true on success
+     *
+     * This API call does nothing on UniFi controllers *not* running on a UniFi CloudKey device
+     */
+    public function reboot_cloudkey()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['cmd' => 'reboot'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/system', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2353,24 +2494,25 @@ class Client
      * Assign access point to another WLAN group
      * -----------------------------------------
      * return true on success
-     * required parameter <wlantype_id>  = string; WLAN type, can be either 'ng' (for WLANs 2G (11n/b/g)) or 'na' (WLANs 5G (11n/a/ac))
-     * required parameter <device_id>    = string; _id value of the access point to be modified
-     * required parameter <wlangroup_id> = string; _id value of the WLAN group to assign device to
-     *
-     * NOTES:
-     * - can for example be used to turn WiFi off
+     * required parameter <type_id>   = string; WLAN type, can be either 'ng' (for WLANs 2G (11n/b/g)) or 'na' (WLANs 5G (11n/a/ac))
+     * required parameter <device_id> = string; _id value of the access point to be modified
+     * required parameter <group_id>  = string; _id value of the WLAN group to assign device to
      */
-    public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id)
+    public function set_ap_wlangroup($type_id, $device_id, $group_id)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        if (!in_array($wlantype_id, ['ng', 'na'])) {
+        if (!in_array($type_id, ['ng', 'na'])) {
             return false;
         }
 
-        $payload  = ['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id];
+        $payload = [
+            'wlan_overrides'           => [],
+            'wlangroup_id_' . $type_id => $group_id
+        ];
+
         $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
@@ -2380,14 +2522,15 @@ class Client
      * Update guest login settings
      * ---------------------------
      * return true on success
-     * required parameter <portal_enabled>
-     * required parameter <portal_customized>
-     * required parameter <redirect_enabled>
-     * required parameter <redirect_url>
-     * required parameter <x_password>
-     * required parameter <expire_number>
-     * required parameter <expire_unit>
-     * required parameter <site_id>
+     * required parameter <portal_enabled>    = boolean; enable/disable the captive portal
+     * required parameter <portal_customized> = boolean; enable/disable captive portal customizations
+     * required parameter <redirect_enabled>  = boolean; enable/disable captive portal redirect
+     * required parameter <redirect_url>      = string; url to redirect to, must include the http/https prefix, no trailing slashes
+     * required parameter <x_password>        = string; the captive portal (simple) password
+     * required parameter <expire_number>     = numeric; number of units for the authorization expiry
+     * required parameter <expire_unit>       = numeric; number of minutes within a unit (a value 60 is required for hours)
+     * required parameter <section_id>        = 24 char string; value of _id for the site settings section where key = "guest_access", settings can be obtained
+     *                                          using the list_settings() function
      *
      * NOTES:
      * - both portal parameters are set to the same value!
@@ -2400,8 +2543,9 @@ class Client
         $x_password,
         $expire_number,
         $expire_unit,
-        $site_id
-    ) {
+        $section_id
+    )
+    {
         if (!$this->is_loggedin) {
             return false;
         }
@@ -2414,7 +2558,7 @@ class Client
             'x_password'        => $x_password,
             'expire_number'     => $expire_number,
             'expire_unit'       => $expire_unit,
-            'site_id'           => $site_id
+            '_id'               => $section_id
         ];
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
@@ -2605,8 +2749,7 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', $payload);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', $payload);
 
         return $this->process_response($response);
     }
@@ -2706,7 +2849,8 @@ class Client
         $uapsd_enabled    = false,
         $schedule_enabled = false,
         $schedule         = []
-    ) {
+    )
+    {
         if (!$this->is_loggedin) {
             return false;
         }
@@ -2925,8 +3069,7 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
-        $payload            = ['cmd' => 'archive-all-alarms'];
+        $payload = ['cmd' => 'archive-all-alarms'];
         if (!is_null($alarm_id)) {
             $payload = ['_id' => $alarm_id, 'cmd' => 'archive-alarm'];
         }
@@ -3186,7 +3329,6 @@ class Client
             return false;
         }
 
-        $this->request_type = 'POST';
         $payload = [
             'name'               => $name,
             'x_password'         => $x_password,
@@ -3248,18 +3390,19 @@ class Client
     }
 
     /**
-     * Execute specific command
-     * ------------------------
+     * Execute specific stats command
+     * ------------------------------
      * return true on success
      * required parameter <command>  = string; command to execute, known valid values
      *                                 'reset-dpi': reset all DPI counters for the current site
-     *
-     * NOTE:
-     * the provided <command> parameter isn't validated so make sure you're using a correct value
      */
     public function cmd_stat($command)
     {
         if (!$this->is_loggedin) {
+            return false;
+        }
+
+        if (!in_array($command, ['reset-dpi'])) {
             return false;
         }
 
@@ -3356,6 +3499,23 @@ class Client
     }
 
     /**
+     * Reboot an access point
+     * ----------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function restart_ap($mac)
+    {
+        trigger_error(
+            'Function restart_ap() has been deprecated, use restart_device() instead.',
+            E_USER_DEPRECATED
+        );
+
+        return $this->restart_device($mac);
+    }
+
+
+    /**
      * Custom API request
      * ------------------
      * returns results as requested, returns false on incorrect parameters
@@ -3371,6 +3531,10 @@ class Client
     public function custom_api_request($path, $request_type = 'GET', $payload = null, $return = 'array')
     {
         if (!$this->is_loggedin) {
+            return false;
+        }
+
+        if (!in_array($request_type, $this->request_types_allowed)) {
             return false;
         }
 
@@ -3452,7 +3616,7 @@ class Client
      * --------------------
      * returns the raw results of the last method called, returns false if unavailable
      * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format,
-     *                                    PHP stdClass Object format is returned by default
+     *                                    false returns PHP stdClass Object format (default)
      */
     public function get_last_results_raw($return_json = false)
     {
@@ -3482,15 +3646,17 @@ class Client
     }
 
     /**
-     * Get Cookie from UniFi Controller
+     * Get Cookie from UniFi controller
      * --------------------------------
      * returns the UniFi controller cookie
      *
      * NOTES:
-     * - when the results from this method are stored in $_SESSION['unificookie'], the class will initially not
+     * - when the results from this method are stored in $_SESSION['unificookie'], the Class will initially not
      *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
-     *   overall request considerably. If that subsequent request fails (e.g. cookies have expired), a new login
-     *   is executed automatically and the value of $_SESSION['unificookie'] is updated.
+     *   overall request considerably. Only when a subsequent request fails (e.g. cookies have expired) is a new login
+     *   executed and the value of $_SESSION['unificookie'] updated.
+     * - to force the Class instance to log out automatically upon destruct, simply call logout() or unset
+     *   $_SESSION['unificookie'] at the end of your code
      */
     public function get_cookie()
     {
@@ -3531,7 +3697,14 @@ class Client
 
     public function set_request_type($request_type)
     {
+
+        if (!in_array($request_type, $this->request_types_allowed)) {
+            return false;
+        }
+
         $this->request_type = $request_type;
+
+        return true;
     }
 
     public function set_connection_timeout($timeout)
@@ -3549,17 +3722,34 @@ class Client
         $this->last_error_message = $last_error_message;
     }
 
+    /**
+     * set the value for cURL option CURLOPT_SSL_VERIFYPEER, should be 0/false or 1/true
+     * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html
+     */
     public function set_ssl_verify_peer($ssl_verify_peer)
     {
+        if (!in_array($ssl_verify_peer, [0, false, 1, true])) {
+            return false;
+        }
+
         $this->curl_ssl_verify_peer = $ssl_verify_peer;
+
+        return true;
     }
 
     /**
      * set the value for cURL option CURLOPT_SSL_VERIFYHOST, should be 0/false or 2
+     * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
      */
     public function set_ssl_verify_host($ssl_verify_host)
     {
+        if (!in_array($ssl_verify_host, [0, false, 2])) {
+            return false;
+        }
+
         $this->curl_ssl_verify_host = $ssl_verify_host;
+
+        return true;
     }
 
     /****************************************************************
@@ -3644,13 +3834,13 @@ class Client
                     $error = 'The maximum stack depth has been exceeded';
                     break;
                 case JSON_ERROR_STATE_MISMATCH:
-                    $error = 'Invalid or malformed JSON.';
+                    $error = 'Invalid or malformed JSON';
                     break;
                 case JSON_ERROR_CTRL_CHAR:
                     $error = 'Control character error, possibly incorrectly encoded';
                     break;
                 case JSON_ERROR_SYNTAX:
-                    $error = 'Syntax error, malformed JSON.';
+                    $error = 'Syntax error, malformed JSON';
                     break;
                 case JSON_ERROR_UTF8:
                     // PHP >= 5.3.3
@@ -3677,7 +3867,7 @@ class Client
                     break;
                 default:
                     // we have an unknown error
-                    $error = 'Unknown JSON error occured.';
+                    $error = 'Unknown JSON error occured';
                     break;
             }
 
@@ -3692,20 +3882,13 @@ class Client
     }
 
     /**
-     * Check the submitted base URL
+     * validate the submitted base URL
      */
     private function check_base_url()
     {
         $url_valid = filter_var($this->baseurl, FILTER_VALIDATE_URL);
         if (!$url_valid) {
             trigger_error('The URL provided is incomplete or invalid!');
-
-            return false;
-        }
-
-        $base_url_components = parse_url($this->baseurl);
-        if (empty($base_url_components['port'])) {
-            trigger_error('The URL provided does not have a port suffix, normally this is :8443');
 
             return false;
         }
@@ -3718,9 +3901,13 @@ class Client
      */
     private function check_site($site)
     {
-        if ($this->debug && strlen($site) !== 8 && $site !== 'default') {
-            error_log('The provided (short) site name is probably incorrect');
+        if ($this->debug && preg_match("/\s/", $site)) {
+            trigger_error('The provided (short) site name may not contain any spaces');
+
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -3728,40 +3915,110 @@ class Client
      */
     private function update_unificookie()
     {
-        if (isset($_SESSION['unificookie'])) {
+        if (isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
+            $this->is_loggedin = true;
+
+            /**
+             * if we have a JWT in our cookie we know we're dealing with a UniFi OS controller
+             */
+            if (strpos($this->cookies, 'TOKEN') !== false) {
+                $this->is_unifi_os = true;
+            }
+
+            return true;
         }
+
+        return false;
+    }
+
+    /**
+     * Extract the CSRF token from our Cookie string
+     */
+    private function extract_csrf_token_from_cookie()
+    {
+        if ($this->cookies !== '') {
+            $cookie_bits = explode('=', $this->cookies);
+            if (!empty($cookie_bits) && array_key_exists(1, $cookie_bits)) {
+                $jwt = $cookie_bits[1];
+            } else {
+                return false;
+            }
+
+            $jwt_components = explode('.', $jwt);
+            if (!empty($jwt_components) && array_key_exists(1, $jwt_components)) {
+                $jwt_payload = $jwt_components[1];
+            } else {
+                return false;
+            }
+
+            return json_decode(base64_decode($jwt_payload))->csrfToken;
+        }
+
+        return false;
     }
 
     /**
      * Execute the cURL request
      */
-    protected function exec_curl($path, $payload = '')
+    protected function exec_curl($path, $payload = null)
     {
+        if (!in_array($this->request_type, $this->request_types_allowed)) {
+            trigger_error('an invalid HTTP request type was used: ' . $this->request_type);
+        }
+
         if (!is_resource($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
-            $json_payload = '';
-            $url          = $this->baseurl . $path;
+            $json_payload = [];
+
+            if ($this->is_unifi_os) {
+                $url = $this->baseurl . '/proxy/network' . $path;
+            } else {
+                $url = $this->baseurl . $path;
+            }
+
             curl_setopt($ch, CURLOPT_URL, $url);
 
-            if (!empty($payload)) {
+            if ($payload !== null) {
+                curl_setopt($ch, CURLOPT_POST, true);
                 $json_payload = json_encode($payload, JSON_UNESCAPED_SLASHES);
-
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
 
+                $headers = [
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($json_payload),
+                    'Accept: application/json'
+                ];
+
+                if ($this->is_unifi_os) {
+                    $csrf_token = $this->extract_csrf_token_from_cookie();
+                    if ($csrf_token) {
+                        $headers[] = 'x-csrf-token: ' . $csrf_token;
+                    }
+                }
+
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+                /**
+                 * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
+                 * we switch to POST instead
+                 */
+                if ($this->request_type === 'GET' || $this->request_type === 'DELETE') {
+                    $this->request_type = 'POST';
+                }
+
                 if ($this->request_type === 'PUT') {
-                    curl_setopt($ch, CURLOPT_HTTPHEADER,
-                        ['Content-Type: application/json', 'Content-Length: ' . strlen($json_payload)]);
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-                } else {
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
                 }
-            } else {
-                curl_setopt($ch, CURLOPT_POST, false);
-                if ($this->request_type === 'DELETE') {
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+
+                if ($this->request_type === 'POST') {
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
                 }
+            }
+
+            if ($this->request_type === 'DELETE') {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             }
 
             /**
@@ -3773,7 +4030,7 @@ class Client
             }
 
             /**
-             * has the session timed out? If so, we need to login again.
+             * has the Cookie/Token expired? If so, we need to login again.
              */
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -3782,14 +4039,14 @@ class Client
 
                 if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
                     if ($this->debug) {
-                        error_log('cURL debug: Needed to reconnect to UniFi Controller');
+                        error_log('cURL debug: needed to reconnect to UniFi controller');
                     }
 
                     /**
-                     * explicitly unset the old cookie now
+                     * explicitly clear the expired Cookie/Token now
                      */
                     if (isset($_SESSION['unificookie'])) {
-                        unset($_SESSION['unificookie']);
+                        $_SESSION['unificookie'] = '';
                     }
 
                     /**
@@ -3840,7 +4097,7 @@ class Client
             /**
              * set request_type value back to default, just in case
              */
-            $this->request_type = 'POST';
+            $this->request_type = 'GET';
 
             return $content;
         }
@@ -3855,12 +4112,10 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
