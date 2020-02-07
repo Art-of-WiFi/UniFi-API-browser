@@ -84,7 +84,6 @@ class Client
 
         $this->check_base_url();
         $this->check_site($this->site);
-        $this->update_unificookie();
     }
 
     /**
@@ -126,10 +125,16 @@ class Client
             return true;
         }
 
+        if ($this->update_unificookie()) {
+            $this->is_loggedin = true;
+
+            return true;
+        }
+
         /**
-         * check we have a "regular" controller or one based on UniFi OS
+         * check whether we have a "regular" controller or one based on UniFi OS
          */
-        if (!is_resource($ch = $this->get_curl_resource())) {
+        if (!($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
             curl_setopt($ch, CURLOPT_HEADER, true);
@@ -140,7 +145,7 @@ class Client
             /**
              * execute the cURL request and get the HTTP response code
              */
-            $content   = curl_exec($ch);
+            curl_exec($ch);
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if (curl_errno($ch)) {
@@ -205,9 +210,16 @@ class Client
                     $this->cookies = implode(';', $results[1]);
 
                     /**
-                     * accept cookies from UniFi OS or from regular UNiFI controllers
+                     * accept cookies from regular UniFI controllers or from UniFi OS
                      */
                     if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
+                        /**
+                         * update the cookie value in $_SESSION['unificookie'], if it exists
+                         */
+                        if (isset($_SESSION['unificookie'])) {
+                            $_SESSION['unificookie'] = $this->cookies;
+                        }
+
                         return $this->is_loggedin = true;
                     }
                 }
@@ -393,14 +405,16 @@ class Client
      *                                      can be obtained from the output of list_usergroups()
      * optional parameter <name>          = name to be given to the new user/client-device
      * optional parameter <note>          = note to be applied to the new user/client-device
+     * optional parameter <is_guest>      = boolean; defines whether the new user/client-device is a guest or not
+     * optional parameter <is_wired>      = boolean; defines whether the new user/client-device is wired or not
      */
-    public function create_user($mac, $user_group_id, $name = null, $note = null)
+    public function create_user($mac, $user_group_id, $name = null, $note = null, $is_guest = null, $is_wired = null)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $new_user           = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
+        $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
         if (!is_null($name)) {
             $new_user['name'] = $name;
         }
@@ -408,6 +422,14 @@ class Client
         if (!is_null($note)) {
             $new_user['note']  = $note;
             $new_user['noted'] = true;
+        }
+
+        if (!is_null($is_guest) && is_bool($is_guest)) {
+            $new_user['is_guest'] = $is_guest;
+        }
+
+        if (!is_null($is_wired) && is_bool($is_wired)) {
+            $new_user['is_wired'] = $is_wired;
         }
 
         $payload  = ['objects' => [['data' => $new_user]]];
@@ -3911,13 +3933,12 @@ class Client
     }
 
     /**
-     * Update the unificookie
+     * Update the unificookie if sessions are enabled
      */
     private function update_unificookie()
     {
-        if (isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
+        if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
-            $this->is_loggedin = true;
 
             /**
              * if we have a JWT in our cookie we know we're dealing with a UniFi OS controller
@@ -3967,10 +3988,10 @@ class Client
             trigger_error('an invalid HTTP request type was used: ' . $this->request_type);
         }
 
-        if (!is_resource($ch = $this->get_curl_resource())) {
+        if (!($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
-            $json_payload = [];
+            $json_payload = '';
 
             if ($this->is_unifi_os) {
                 $url = $this->baseurl . '/proxy/network' . $path;
@@ -3986,9 +4007,8 @@ class Client
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
 
                 $headers = [
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($json_payload),
-                    'Accept: application/json'
+                    'Content-Type: application/json;charset=UTF-8',
+                    'Content-Length: ' . strlen($json_payload)
                 ];
 
                 if ($this->is_unifi_os) {
@@ -4030,76 +4050,63 @@ class Client
             }
 
             /**
-             * has the Cookie/Token expired? If so, we need to login again.
+             * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
+             * we need to login again.
              */
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
             if ($http_code == 401) {
-                $json_decoded_content = json_decode($content, true);
-
-                if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-                    if ($this->debug) {
-                        error_log('cURL debug: needed to reconnect to UniFi controller');
-                    }
-
-                    /**
-                     * explicitly clear the expired Cookie/Token now
-                     */
-                    if (isset($_SESSION['unificookie'])) {
-                        $_SESSION['unificookie'] = '';
-                    }
-
-                    /**
-                     * then login again
-                     */
-                    $this->login();
-
-                    /**
-                     * when login was successful, execute the same command again
-                     */
-                    if ($this->is_loggedin) {
-                        curl_close($ch);
-
-                        /**
-                         * setup the cookie for the user within $_SESSION, if $_SESSION['unificookie'] does not exist
-                         */
-                        if (!isset($_SESSION['unificookie']) && session_status() != PHP_SESSION_DISABLED) {
-                            $_SESSION['unificookie'] = $this->cookies;
-                        }
-
-                        return $this->exec_curl($path, $payload);
-                    }
+                curl_close($ch);
+                if ($this->debug) {
+                    error_log('cURL debug: needed to reconnect to UniFi controller');
                 }
 
-                unset($json_decoded_content);
-            }
-
-            if ($this->debug) {
-                print PHP_EOL . '<pre>';
-                print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
-                print_r(curl_getinfo($ch));
-                print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
-                print $url . PHP_EOL;
-                if (empty($json_payload)) {
-                    print 'empty payload';
-                } else {
-                    print $json_payload;
+                /**
+                 * explicitly clear the expired Cookie/Token before logging in again
+                 */
+                if (isset($_SESSION['unificookie'])) {
+                    $_SESSION['unificookie'] = '';
+                    $this->is_loggedin = false;
                 }
 
-                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-                print $content;
-                print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>' . PHP_EOL;
+                /**
+                 * then login again
+                 */
+                $this->login();
+
+                /**
+                 * when login was successful, execute the same command again
+                 */
+                if ($this->is_loggedin) {
+                    return $this->exec_curl($path, $payload);
+                }
+            } else {
+                if ($this->debug) {
+                    print PHP_EOL . '<pre>';
+                    print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+                    print_r(curl_getinfo($ch));
+                    print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+                    print $url . PHP_EOL;
+                    if (empty($json_payload)) {
+                        print 'empty payload';
+                    } else {
+                        print $json_payload;
+                    }
+
+                    print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                    print $content;
+                    print PHP_EOL . '-----------------------------' . PHP_EOL;
+                    print '</pre>' . PHP_EOL;
+                }
+
+                curl_close($ch);
+
+                /**
+                 * set request_type value back to default, just in case
+                 */
+                $this->request_type = 'GET';
+
+                return $content;
             }
-
-            curl_close($ch);
-
-            /**
-             * set request_type value back to default, just in case
-             */
-            $this->request_type = 'GET';
-
-            return $content;
         }
 
         return false;
@@ -4112,20 +4119,24 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        if (is_resource($ch)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
-        if ($this->debug) {
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
+            if ($this->debug) {
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
+            }
+
+            if ($this->cookies != '') {
+                curl_setopt($ch, CURLOPT_COOKIESESSION, true);
+                curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
+            }
+
+            return $ch;
         }
 
-        if ($this->cookies != '') {
-            curl_setopt($ch, CURLOPT_COOKIESESSION, true);
-            curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
-        }
-
-        return $ch;
+        return false;
     }
 }

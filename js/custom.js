@@ -24,7 +24,7 @@ var theme                  = 'bootstrap',
 /**
  * check whether user has stored a custom theme, if yes we switch to the stored value
  */
-if (localStorage.getItem('api_browser_tool_theme') == null || localStorage.getItem('api_browser_tool_theme') === 'bootstrap') {
+if (localStorage.getItem('api_browser_tool_theme') === null || localStorage.getItem('api_browser_tool_theme') === 'bootstrap') {
     $('#bootstrap').addClass('active').find('a').append(' <i class="fas fa-check"></i>');
 } else {
     var stored_theme = localStorage.getItem('api_browser_tool_theme');

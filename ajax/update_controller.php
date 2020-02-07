@@ -46,7 +46,7 @@ if (!empty($_POST['new_controller_idx'])) {
     /**
      * we also unset the cookie for access to the UniFi controller
      */
-    unset($_SESSION['unificookie']);
+    $_SESSION['unificookie'] = '';
 } else {
     $results['status']  = 'error';
     $results['message'] = 'empty POST';

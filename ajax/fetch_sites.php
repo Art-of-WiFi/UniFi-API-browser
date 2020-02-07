@@ -47,8 +47,7 @@ if (!empty($_SESSION['controller'])) {
      * we first check for connectivity to the host and port provided in the URL
      */
     $host = parse_url($controller['url'], PHP_URL_HOST);
-    $port = parse_url($controller['url'], PHP_URL_PORT);
-    $port = $port ?: 443;
+    $port = parse_url($controller['url'], PHP_URL_PORT) ?: 443;
 
     if (!empty($host) && !empty($port)) {
         $fp = @fsockopen($host, $port, $errno, $errstr, 2);

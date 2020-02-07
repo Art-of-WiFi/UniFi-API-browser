@@ -7,7 +7,7 @@
  * with this package in the file LICENSE.md
  *
  */
-define('TOOL_VERSION', '2.0.7');
+define('TOOL_VERSION', '2.0.8');
 
 /**
  * gather some basic information for the About modal
