@@ -1,24 +1,24 @@
 [
     {
         "name": "art-of-wifi/unifi-api-client",
-        "version": "v1.1.49",
-        "version_normalized": "1.1.49.0",
+        "version": "v1.1.52",
+        "version_normalized": "1.1.52.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-            "reference": "903d3e47d56f3d17a33e716051d947890a64966a"
+            "reference": "badb615627ce6b7f10872825aa2c8ab2bc8b98f3"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/903d3e47d56f3d17a33e716051d947890a64966a",
-            "reference": "903d3e47d56f3d17a33e716051d947890a64966a",
+            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/badb615627ce6b7f10872825aa2c8ab2bc8b98f3",
+            "reference": "badb615627ce6b7f10872825aa2c8ab2bc8b98f3",
             "shasum": ""
         },
         "require": {
             "ext-curl": "*",
             "php": ">=5.4.0"
         },
-        "time": "2020-02-07T07:27:39+00:00",
+        "time": "2020-04-14T12:59:00+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -110,17 +110,17 @@
     },
     {
         "name": "symfony/polyfill-ctype",
-        "version": "v1.13.1",
-        "version_normalized": "1.13.1.0",
+        "version": "v1.15.0",
+        "version_normalized": "1.15.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-ctype.git",
-            "reference": "f8f0b461be3385e56d6de3dbb5a0df24c0c275e3"
+            "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/f8f0b461be3385e56d6de3dbb5a0df24c0c275e3",
-            "reference": "f8f0b461be3385e56d6de3dbb5a0df24c0c275e3",
+            "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+            "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
             "shasum": ""
         },
         "require": {
@@ -129,11 +129,11 @@
         "suggest": {
             "ext-ctype": "For best performance"
         },
-        "time": "2019-11-27T13:56:44+00:00",
+        "time": "2020-02-27T09:26:54+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "1.13-dev"
+                "dev-master": "1.15-dev"
             }
         },
         "installation-source": "dist",
@@ -170,17 +170,17 @@
     },
     {
         "name": "twig/twig",
-        "version": "v1.42.4",
-        "version_normalized": "1.42.4.0",
+        "version": "v1.42.5",
+        "version_normalized": "1.42.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/twigphp/Twig.git",
-            "reference": "e587180584c3d2d6cb864a0454e777bb6dcb6152"
+            "reference": "87b2ea9d8f6fd014d0621ca089bb1b3769ea3f8e"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/twigphp/Twig/zipball/e587180584c3d2d6cb864a0454e777bb6dcb6152",
-            "reference": "e587180584c3d2d6cb864a0454e777bb6dcb6152",
+            "url": "https://api.github.com/repos/twigphp/Twig/zipball/87b2ea9d8f6fd014d0621ca089bb1b3769ea3f8e",
+            "reference": "87b2ea9d8f6fd014d0621ca089bb1b3769ea3f8e",
             "shasum": ""
         },
         "require": {
@@ -189,10 +189,9 @@
         },
         "require-dev": {
             "psr/container": "^1.0",
-            "symfony/debug": "^3.4|^4.2",
-            "symfony/phpunit-bridge": "^4.4@dev|^5.0"
+            "symfony/phpunit-bridge": "^4.4|^5.0"
         },
-        "time": "2019-11-11T16:49:32+00:00",
+        "time": "2020-02-11T05:59:23+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -221,7 +220,6 @@
             },
             {
                 "name": "Twig Team",
-                "homepage": "https://twig.symfony.com/contributors",
                 "role": "Contributors"
             },
             {

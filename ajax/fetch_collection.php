@@ -49,6 +49,8 @@ $gateway_stats_attribs = [
     'lan-tx_dropped',
     'wan-tx_bytes',
     'wan-rx_bytes',
+    'max_rx_bytes-r',
+    'max_tx_bytes-r',
     'wan2-tx_bytes',
     'wan2-rx_bytes',
     'latency_min',
@@ -196,8 +198,8 @@ if (!empty($_SESSION['controller'])) {
             $load_perc   = (($time_after_load - $time_after_login) / $time_total) * 100;
             $remain_perc = 100 - $login_perc - $load_perc;
 
-            $results['timings']['login'] = $time_after_login;
-            $results['timings']['load']  = $time_after_load;
+            $results['timings']['login']      = $time_after_login;
+            $results['timings']['load']       = $time_after_load;
             $results['timings']['login_perc'] = $login_perc;
             $results['timings']['load_perc']  = $load_perc;
         }

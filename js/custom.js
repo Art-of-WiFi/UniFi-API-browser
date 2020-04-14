@@ -392,9 +392,9 @@ function fetchCollection() {
                     'Total time: ' + (json.timings.load + json.timings.login) + ' seconds' +
                     '<div class="progress">' +
                         '<div class="progress-bar bg-warning" role="progressbar" style="width: ' + json.timings.login_perc +
-                            '%" aria-valuenow="' + json.timings.login_perc + ' aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="top" title="API login took ' + json.timings.login + ' seconds">API login time</div>' +
+                            '%" aria-valuenow="' + json.timings.login_perc + ' aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="top" title="API login and connect took ' + json.timings.login + ' seconds">API login</div>' +
                         '<div class="progress-bar bg-success" role="progressbar" style="width: ' + json.timings.load_perc +
-                            '%" aria-valuenow="'  + json.timings.load_perc + '" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="top" title="Data loading took ' + json.timings.load + ' seconds">data load time</div>' +
+                            '%" aria-valuenow="'  + json.timings.load_perc + '" aria-valuemin="0" aria-valuemax="100" data-toggle="tooltip" data-placement="top" title="Data transfer took ' + json.timings.load + ' seconds">data transfer</div>' +
                     '</div>'
                 )
 
