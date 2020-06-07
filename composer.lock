@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.52",
+            "version": "v1.1.54",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "badb615627ce6b7f10872825aa2c8ab2bc8b98f3"
+                "reference": "c77913fded208547591f4605c95b45cf2db06b96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/badb615627ce6b7f10872825aa2c8ab2bc8b98f3",
-                "reference": "badb615627ce6b7f10872825aa2c8ab2bc8b98f3",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/c77913fded208547591f4605c95b45cf2db06b96",
+                "reference": "c77913fded208547591f4605c95b45cf2db06b96",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "ubiquiti",
                 "unifi"
             ],
-            "time": "2020-04-14T12:59:00+00:00"
+            "time": "2020-06-07T12:23:44+00:00"
         },
         {
             "name": "kint-php/kint",
@@ -113,16 +113,16 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.15.0",
+            "version": "v1.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
+                "reference": "e94c8b1bbe2bc77507a1056cdb06451c75b427f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/e94c8b1bbe2bc77507a1056cdb06451c75b427f9",
+                "reference": "e94c8b1bbe2bc77507a1056cdb06451c75b427f9",
                 "shasum": ""
             },
             "require": {
@@ -134,7 +134,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.15-dev"
+                    "dev-master": "1.17-dev"
                 }
             },
             "autoload": {
@@ -167,7 +167,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2020-02-27T09:26:54+00:00"
+            "time": "2020-05-12T16:14:59+00:00"
         },
         {
             "name": "twig/twig",

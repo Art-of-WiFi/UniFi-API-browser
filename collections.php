@@ -127,10 +127,17 @@ $collections = [
             ],
             [
                 'type' => 'collection', // or divider
+                'label' => 'list static routes',
+                'method' => 'list_routing',
+                'params' => [],
+                'key' => 'configuration_13'
+            ],
+            [
+                'type' => 'collection', // or divider
                 'label' => 'dynamic DNS configuration',
                 'method' => 'list_dynamicdns',
                 'params' => [],
-                'key' => 'configuration_13'
+                'key' => 'configuration_14'
             ],
             [
                 'type' => 'divider', // or collection
@@ -140,7 +147,7 @@ $collections = [
                 'label' => 'list country codes',
                 'method' => 'list_country_codes',
                 'params' => [],
-                'key' => 'configuration_14'
+                'key' => 'configuration_15'
             ],
             [
                 'type' => 'divider', // or collection
@@ -150,7 +157,7 @@ $collections = [
                 'label' => 'list auto backups',
                 'method' => 'list_backups',
                 'params' => [],
-                'key' => 'configuration_15'
+                'key' => 'configuration_16'
             ],
             [
                 'type' => 'divider', // or collection
@@ -160,14 +167,14 @@ $collections = [
                 'label' => 'list Radius profiles',
                 'method' => 'list_radius_profiles',
                 'params' => [],
-                'key' => 'configuration_16'
+                'key' => 'configuration_17'
             ],
             [
                 'type' => 'collection', // or divider
                 'label' => 'list Radius accounts',
                 'method' => 'list_radius_accounts',
                 'params' => [],
-                'key' => 'configuration_17'
+                'key' => 'configuration_18'
             ],
 
         ],
@@ -265,10 +272,27 @@ $collections = [
             ],
             [
                 'type' => 'collection', // or divider
+                'label' => 'list available firmware',
+                'method' => 'list_firmware',
+                'params' => [],
+                'key' => 'devices_4'
+            ],
+            [
+                'type' => 'collection', // or divider
+                'label' => 'list cached firmware',
+                'method' => 'list_firmware',
+                'params' => ['cached'],
+                'key' => 'devices_5'
+            ],
+            [
+                'type' => 'divider', // or collection
+            ],
+            [
+                'type' => 'collection', // or divider
                 'label' => 'list tags', // supported from '5.5.0'
                 'method' => 'list_tags',
                 'params' => [],
-                'key' => 'devices_4'
+                'key' => 'devices_6'
             ],
         ],
     ],
