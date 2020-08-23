@@ -19,477 +19,423 @@
  */
 $collections = [
     [
-        'label' => 'Configuration',
+        'label'   => 'Configuration',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => 'list sites on this controller',
+                'type'   => 'collection', // or divider
+                'label'  => 'list sites on this controller',
                 'method' => 'list_sites',
-                'params' => [],
-                'key' => 'configuration_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'sysinfo',
+                'type'   => 'collection', // or divider
+                'label'  => 'sysinfo',
                 'method' => 'stat_sysinfo',
-                'params' => [],
-                'key' => 'configuration_1'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'self',
+                'type'   => 'collection', // or divider
+                'label'  => 'self',
                 'method' => 'list_self',
-                'params' => [],
-                'key' => 'configuration_2'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list site settings',
+                'type'   => 'collection', // or divider
+                'label'  => 'list site settings',
                 'method' => 'list_settings',
-                'params' => [],
-                'key' => 'configuration_3'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list admins for current site',
+                'type'   => 'collection', // or divider
+                'label'  => 'list admins for current site',
                 'method' => 'list_admins',
-                'params' => [],
-                'key' => 'configuration_4'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list all admins for this controller',
+                'type'   => 'collection', // or divider
+                'label'  => 'list all admins for this controller',
                 'method' => 'list_all_admins',
-                'params' => [],
-                'key' => 'configuration_5'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list wlan configuration',
+                'type'   => 'collection', // or divider
+                'label'  => 'list wlan configuration',
                 'method' => 'list_wlanconf',
-                'params' => [],
-                'key' => 'configuration_6'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list current channels',
+                'type'   => 'collection', // or divider
+                'label'  => 'list current channels',
                 'method' => 'list_current_channels',
-                'params' => [],
-                'key' => 'configuration_7'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list VoIP extensions',
+                'type'   => 'collection', // or divider
+                'label'  => 'list VoIP extensions',
                 'method' => 'list_extension',
-                'params' => [],
-                'key' => 'configuration_8'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
 
             [
-                'type' => 'collection', // or divider
-                'label' => 'list network configuration',
+                'type'   => 'collection', // or divider
+                'label'  => 'list network configuration',
                 'method' => 'list_networkconf',
                 'params' => [],
                 'key' => 'configuration_9'
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list port configuration',
+                'type'   => 'collection', // or divider
+                'label'  => 'list port configuration',
                 'method' => 'list_portconf',
-                'params' => [],
-                'key' => 'configuration_10'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list port forwarding rules',
+                'type'   => 'collection', // or divider
+                'label'  => 'list port forwarding rules',
                 'method' => 'list_portforwarding',
-                'params' => [],
-                'key' => 'configuration_11'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list firewall groups',
+                'type'   => 'collection', // or divider
+                'label'  => 'list firewall groups',
                 'method' => 'list_firewallgroups',
-                'params' => [],
-                'key' => 'configuration_12'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list static routes',
+                'type'   => 'collection', // or divider
+                'label'  => 'list static routes',
                 'method' => 'list_routing',
-                'params' => [],
-                'key' => 'configuration_13'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'dynamic DNS configuration',
+                'type'   => 'collection', // or divider
+                'label'  => 'dynamic DNS configuration',
                 'method' => 'list_dynamicdns',
-                'params' => [],
-                'key' => 'configuration_14'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list country codes',
+                'type'   => 'collection', // or divider
+                'label'  => 'list country codes',
                 'method' => 'list_country_codes',
-                'params' => [],
-                'key' => 'configuration_15'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list auto backups',
+                'type'   => 'collection', // or divider
+                'label'  => 'list auto backups',
                 'method' => 'list_backups',
-                'params' => [],
-                'key' => 'configuration_16'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list Radius profiles',
+                'type'   => 'collection', // or divider
+                'label'  => 'list Radius profiles',
                 'method' => 'list_radius_profiles',
-                'params' => [],
-                'key' => 'configuration_17'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list Radius accounts',
+                'type'   => 'collection', // or divider
+                'label'  => 'list Radius accounts',
                 'method' => 'list_radius_accounts',
-                'params' => [],
-                'key' => 'configuration_18'
+                'params' => []
             ],
 
         ],
     ],
     [
-        'label' => 'Clients',
+        'label'   => 'Clients',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => 'list online clients',
+                'type'   => 'collection', // or divider
+                'label'  => 'list online clients',
                 'method' => 'list_clients',
-                'params' => [],
-                'key' => 'clients_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list guests',
+                'type'   => 'collection', // or divider
+                'label'  => 'list guests',
                 'method' => 'list_guests',
-                'params' => [],
-                'key' => 'clients_1'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list users',
+                'type'   => 'collection', // or divider
+                'label'  => 'list users',
                 'method' => 'list_users',
-                'params' => [],
-                'key' => 'clients_2'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list user groups',
+                'type'   => 'collection', // or divider
+                'label'  => 'list user groups',
                 'method' => 'list_usergroups',
-                'params' => [],
-                'key' => 'clients_3'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'stat all users',
+                'type'   => 'collection', // or divider
+                'label'  => 'stat all users',
                 'method' => 'stat_allusers',
-                'params' => [],
-                'key' => 'clients_4'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'stat authorisations',
+                'type'   => 'collection', // or divider
+                'label'  => 'stat authorisations',
                 'method' => 'stat_auths',
-                'params' => [],
-                'key' => 'clients_5'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'stat sessions',
+                'type'   => 'collection', // or divider
+                'label'  => 'stat sessions',
                 'method' => 'stat_sessions',
-                'params' => [],
-                'key' => 'clients_6'
+                'params' => []
             ],
         ],
     ],
     [
-        'label' => 'Devices',
+        'label'   => 'Devices',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => 'list devices',
+                'type'   => 'collection', // or divider
+                'label'  => 'list devices',
                 'method' => 'list_devices',
-                'params' => [],
-                'key' => 'devices_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list wlan groups',
+                'type'   => 'collection', // or divider
+                'label'  => 'list wlan groups',
                 'method' => 'list_wlan_groups',
-                'params' => [],
-                'key' => 'devices_1'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list rogue access points',
+                'type'   => 'collection', // or divider
+                'label'  => 'list rogue access points',
                 'method' => 'list_rogueaps',
-                'params' => [],
-                'key' => 'devices_2'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list known rogue access points',
+                'type'   => 'collection', // or divider
+                'label'  => 'list known rogue access points',
                 'method' => 'list_known_rogueaps',
-                'params' => [],
-                'key' => 'devices_3'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list available firmware',
+                'type'   => 'collection', // or divider
+                'label'  => 'list available firmware',
                 'method' => 'list_firmware',
-                'params' => [],
-                'key' => 'devices_4'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list cached firmware',
+                'type'   => 'collection', // or divider
+                'label'  => 'list cached firmware',
                 'method' => 'list_firmware',
-                'params' => ['cached'],
-                'key' => 'devices_5'
+                'params' => ['cached']
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list tags', // supported from '5.5.0'
+                'type'   => 'collection', // or divider
+                'label'  => 'list tags', // supported from '5.5.0'
                 'method' => 'list_tags',
-                'params' => [],
-                'key' => 'devices_6'
+                'params' => []
             ],
         ],
     ],
     [
-        'label' => 'Stats',
+        'label'   => 'Stats',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => '5 minutes site stats',
+                'type'   => 'collection', // or divider
+                'label'  => '5 minutes site stats',
                 'method' => 'stat_5minutes_site',
-                'params' => [],
-                'key' => 'stats_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'hourly site stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'hourly site stats',
                 'method' => 'stat_hourly_site',
-                'params' => [],
-                'key' => 'stats_1'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'daily site stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'daily site stats',
                 'method' => 'stat_daily_site',
-                'params' => [],
-                'key' => 'stats_2'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'all sites stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'all sites stats',
                 'method' => 'stat_sites',
-                'params' => [],
-                'key' => 'stats_3'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => '5 minutes access point stats',
+                'type'   => 'collection', // or divider
+                'label'  => '5 minutes access point stats',
                 'method' => 'stat_5minutes_aps',
-                'params' => [],
-                'key' => 'stats_4'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'hourly access point stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'hourly access point stats',
                 'method' => 'stat_hourly_aps',
-                'params' => [],
-                'key' => 'stats_5'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'daily access point stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'daily access point stats',
                 'method' => 'stat_daily_aps',
-                'params' => [],
-                'key' => 'stats_6'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => '5 minutes gateway stats',
+                'type'   => 'collection', // or divider
+                'label'  => '5 minutes gateway stats',
                 'method' => 'stat_5minutes_gateway',
-                'params' => [],
-                'key' => 'stats_7'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'hourly gateway stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'hourly gateway stats',
                 'method' => 'stat_hourly_gateway',
-                'params' => [],
-                'key' => 'stats_8'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'daily gateway stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'daily gateway stats',
                 'method' => 'stat_daily_gateway',
-                'params' => [],
-                'key' => 'stats_9'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => '5 minutes site dashboard metrics',
+                'type'   => 'collection', // or divider
+                'label'  => '5 minutes site dashboard metrics',
                 'method' => 'list_dashboard',
                 'params' => [true],
                 'key' => 'stats_10'
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'hourly site dashboard metrics',
+                'type'   => 'collection', // or divider
+                'label'  => 'hourly site dashboard metrics',
                 'method' => 'list_dashboard',
-                'params' => [],
-                'key' => 'stats_11'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'site health metrics',
+                'type'   => 'collection', // or divider
+                'label'  => 'site health metrics',
                 'method' => 'list_health',
-                'params' => [],
-                'key' => 'stats_12'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'port forwarding stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'port forwarding stats',
                 'method' => 'list_portforward_stats',
-                'params' => [],
-                'key' => 'stats_13'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'DPI stats',
+                'type'   => 'collection', // or divider
+                'label'  => 'DPI stats',
                 'method' => 'list_dpi_stats',
-                'params' => [],
-                'key' => 'stats_14'
+                'params' => []
             ],
         ],
     ],
     [
-        'label' => 'Hotspot',
+        'label'   => 'Hotspot',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => 'stat vouchers',
+                'type'   => 'collection', // or divider
+                'label'  => 'stat vouchers',
                 'method' => 'stat_voucher',
-                'params' => [],
-                'key' => 'hotspot_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'stat payments',
+                'type'   => 'collection', // or divider
+                'label'  => 'stat payments',
                 'method' => 'stat_payment',
-                'params' => [],
-                'key' => 'hotspot_1'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list hotspot operators',
+                'type'   => 'collection', // or divider
+                'label'  => 'list hotspot operators',
                 'method' => 'list_hotspotop',
-                'params' => [],
-                'key' => 'hotspot_2'
+                'params' => []
             ],
         ],
     ],
     [
-        'label' => 'Messages',
+        'label'   => 'Messages',
         'options' => [
             [
-                'type' => 'collection', // or divider
-                'label' => 'list alarms',
+                'type'   => 'collection', // or divider
+                'label'  => 'list alarms',
                 'method' => 'list_alarms',
-                'params' => [],
-                'key' => 'messages_0'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'count all alarms',
+                'type'   => 'collection', // or divider
+                'label'  => 'count all alarms',
                 'method' => 'count_alarms',
-                'params' => [],
-                'key' => 'messages_1'
+                'params' => []
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'count active alarms',
+                'type'   => 'collection', // or divider
+                'label'  => 'count archived alarms',
                 'method' => 'count_alarms',
-                'params' => [false],
-                'key' => 'messages_2'
+                'params' => [true]
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list events',
+                'type'   => 'collection', // or divider
+                'label'  => 'list events',
                 'method' => 'list_events',
-                'params' => [],
-                'key' => 'messages_3'
+                'params' => []
             ],
             [
                 'type' => 'divider', // or collection
             ],
             [
-                'type' => 'collection', // or divider
-                'label' => 'list IPS/IDS events',
+                'type'   => 'collection', // or divider
+                'label'  => 'list IPS/IDS events',
                 'method' => 'stat_ips_events',
-                'params' => [],
-                'key' => 'messages_4'
+                'params' => []
             ],
         ],
     ],

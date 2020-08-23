@@ -35,17 +35,17 @@ use Twig\RuntimeLoader\RuntimeLoaderInterface;
 use Twig\TokenParser\TokenParserInterface;
 
 /**
- * Stores the Twig configuration.
+ * Stores the Twig configuration and renders templates.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class Environment
 {
-    const VERSION = '1.42.5';
-    const VERSION_ID = 14205;
+    const VERSION = '1.43.1';
+    const VERSION_ID = 14301;
     const MAJOR_VERSION = 1;
-    const MINOR_VERSION = 42;
-    const RELEASE_VERSION = 5;
+    const MINOR_VERSION = 43;
+    const RELEASE_VERSION = 1;
     const EXTRA_VERSION = '';
 
     protected $charset;

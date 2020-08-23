@@ -99,7 +99,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 
 ### Requirements
 
-- a web server with PHP and cURL modules installed (confirmed to work on Apache with PHP Version 5.6.32 and cURL 7.29.0 and with PHP 7.2.5 and cURL 7.60.0)
+- a web server with PHP and cURL modules installed (confirmed to work on Apache with PHP Version 5.6.32 and cURL 7.29.0 and with PHP 7.4.9 and cURL 7.58.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because several CSS and JS files are loaded from public CDNs.
 

@@ -17,7 +17,7 @@
                     <ul class="dropdown-menu scrollable-menu shadow">
     {% for option in menu.options %}
         {% if option.type == 'collection' %}
-                        <li><a id="collection_{{option.key}}" class="dropdown-item collection_idx" href="#" data-method="{{option.method}}" data-params='{{option.params|json_encode()}}' data-key="{{option.key}}"> {{option.label}}</a></li>
+                        <li><a class="dropdown-item collection_idx" href="#" data-method="{{option.method}}" data-params='{{option.params|json_encode()}}' data-key="{{option.key}}"> {{option.label}}</a></li>
         {% else %}
                         <div class="dropdown-divider"></div>
         {% endif %}

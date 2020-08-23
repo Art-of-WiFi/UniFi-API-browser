@@ -543,10 +543,10 @@ $('#about_modal').on('shown.bs.modal', function (e) {
         dataType: 'json',
         success:  function (json) {
             if (api_browser_version != '' && typeof(json.tag_name) !== 'undefined') {
-                if (api_browser_version < json.tag_name.substring(1)) {
+                if (cmpVersion(api_browser_version, json.tag_name.substring(1)) < 0) {
                     $('#span_api_browser_update').html('an update is available: ' + json.tag_name.substring(1));
                     $('#span_api_browser_update').removeClass('badge-success').addClass('badge-warning');
-                } else if (api_browser_version == json.tag_name.substring(1)) {
+                } else if (cmpVersion(api_browser_version, json.tag_name.substring(1)) === 0) {
                     $('#span_api_browser_update').html('up to date');
                     $('#span_api_browser_update').removeClass('badge-danger').addClass('badge-success');
                 } else {
@@ -562,3 +562,26 @@ $('#about_modal').on('shown.bs.modal', function (e) {
         }
     });
 })
+
+/**
+ * function to correctly compare sementic versioning numbers
+ */
+function cmpVersion(a, b) {
+    var i, cmp, len;
+    a = (a + '').split('.');
+    b = (b + '').split('.');
+    len = Math.max(a.length, b.length);
+    for( i = 0; i < len; i++ ) {
+        if( a[i] === undefined ) {
+            a[i] = '0';
+        }
+        if( b[i] === undefined ) {
+            b[i] = '0';
+        }
+        cmp = parseInt(a[i], 10) - parseInt(b[i], 10);
+        if( cmp !== 0 ) {
+            return (cmp < 0 ? -1 : 1);
+        }
+    }
+    return 0;
+}
