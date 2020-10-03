@@ -109,6 +109,12 @@ $collections = [
             ],
             [
                 'type'   => 'collection', // or divider
+                'label'  => 'list firewall rules',
+                'method' => 'list_firewallrules',
+                'params' => []
+            ],
+            [
+                'type'   => 'collection', // or divider
                 'label'  => 'list firewall groups',
                 'method' => 'list_firewallgroups',
                 'params' => []
