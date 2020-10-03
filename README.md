@@ -147,18 +147,16 @@ $collections = array_merge($collections, [
         'label' => 'Custom Menu', // length of this string is limited due to dropdown menu width
         'options' => [
             [
-                'type' => 'collection', // either collection or divider
+                'type' => 'collection', // either 'collection' or 'divider'
                 'label' => 'hourly site stats past 24 hours', // string that is displayed in the dropdown menu
-                'method' => 'stat_hourly_site', // the method/function in the API client class that is called
+                'method' => 'stat_hourly_site', // name of the method/function in the API client class that is called
                 'params' => [(time() - (24 * 60 *60)) * 1000, time() * 1000], // an array containing the parameters that are passed to the method/function
-                'key' => 'custom_0' // unique key for this menu option, may be required for future versions
             ],
             [
                 'type' => 'collection',
                 'label' => 'daily site stats past 31 days',
                 'method' => 'stat_daily_site',
                 'params' => [(time() - (31 * 24 * 60 *60)) * 1000, time() * 1000],
-                'key' => 'custom_1'
             ],
             [
                 'type' => 'divider', // dividers have no other properties
@@ -166,16 +164,14 @@ $collections = array_merge($collections, [
             [
                 'type' => 'collection',
                 'label' => 'enable the site LEDs',
-                'method' => 'site_leds', // don't go wild when adding such calls, this example is simply to show the flexibility
-                'params' => [true],
-                'key' => 'custom_2'
+                'method' => 'site_leds', // don't go too wild when adding such calls, this example is simply to show the flexibility
+                'params' => [true]
             ],
             [
                 'type' => 'collection',
                 'label' => 'disable the site LEDs',
-                'method' => 'site_leds', // don't go wild when adding such calls, this example is simply to show the flexibility
-                'params' => [false],
-                'key' => 'custom_3'
+                'method' => 'site_leds', // don't go too wild when adding such calls, this example is simply to show the flexibility
+                'params' => [false]
             ],
         ],
     ],

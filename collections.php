@@ -13,7 +13,6 @@
  *
  * NOTE:
  * - do not modify this file, instead add a custom sub menu to the config.php file
- * - take care to use correct values for the "key" properties (reserved for later use)
  * - a valid value for params looks like this:
  *     [true, true, 'no'] (note the quotes surrounding strings)
  */
@@ -92,8 +91,7 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => 'list network configuration',
                 'method' => 'list_networkconf',
-                'params' => [],
-                'key' => 'configuration_9'
+                'params' => []
             ],
             [
                 'type'   => 'collection', // or divider
@@ -105,6 +103,12 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => 'list port forwarding rules',
                 'method' => 'list_portforwarding',
+                'params' => []
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'list firewall rules',
+                'method' => 'list_firewallrules',
                 'params' => []
             ],
             [
@@ -340,8 +344,7 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => '5 minutes site dashboard metrics',
                 'method' => 'list_dashboard',
-                'params' => [true],
-                'key' => 'stats_10'
+                'params' => [true]
             ],
             [
                 'type'   => 'collection', // or divider
