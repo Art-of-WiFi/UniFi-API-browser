@@ -11,7 +11,7 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.12.66 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work)
+- currently, versions 4.x.x, 5.x.x, and 6.0.x of the UniFi Controller software are supported (version 6.0.33 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work)
 - when accessing UbiOS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UbiOS support
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
@@ -99,7 +99,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 
 ### Requirements
 
-- a web server with PHP and cURL modules installed (confirmed to work on Apache with PHP Version 5.6.32 and cURL 7.29.0 and with PHP 7.4.9 and cURL 7.58.0)
+- a web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because several CSS and JS files are loaded from public CDNs.
 
