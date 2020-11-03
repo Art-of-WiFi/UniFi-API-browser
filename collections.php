@@ -86,7 +86,6 @@ $collections = [
             [
                 'type' => 'divider', // or collection
             ],
-
             [
                 'type'   => 'collection', // or divider
                 'label'  => 'list network configuration',
@@ -228,6 +227,12 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => 'list wlan groups',
                 'method' => 'list_wlan_groups',
+                'params' => []
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'list AP groups', // supported from '6.0.23'
+                'method' => 'list_apgroups',
                 'params' => []
             ],
             [

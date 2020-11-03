@@ -10,9 +10,9 @@ namespace UniFi_API;
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
- * @package art-of-wifi/unifi-api-client
+ * @package UniFi Controller API client class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version 1.1.57
+ * @version 1.1.59
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example See this directory in the package repository for a variety of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.57';
+    protected $class_version       = '1.1.59';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -131,7 +131,10 @@ class Client
          * first we check whether we have a "regular" controller or one based on UniFi OS,
          * prepare cURL and options
          */
-        $ch = $this->get_curl_resource();
+        if (!($ch = $this->get_curl_resource())) {
+            return false;
+        }
+
         $curl_options = [
             CURLOPT_HEADER => true,
             CURLOPT_POST   => true,
@@ -157,16 +160,17 @@ class Client
         $curl_options = [
             CURLOPT_NOBODY     => false,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
-            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8']
+            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8'],
+            CURLOPT_REFERER    => $this->baseurl . '/login',
+            CURLOPT_URL        => $this->baseurl . '/api/login'
         ];
 
+        /**
+         * specific to UniFi OS-based controllers
+         */
         if ($http_code === 200) {
-            $this->is_unifi_os             = true;
-            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
-            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/auth/login';
-        } else {
-            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
-            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/login';
+            $this->is_unifi_os         = true;
+            $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
         }
 
         curl_setopt_array($ch, $curl_options);
@@ -212,7 +216,7 @@ class Client
          */
         if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
             preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
-            if (isset($results[1])) {
+            if (array_key_exists(1, $results)) {
                 $this->cookies = implode(';', $results[1]);
 
                 /**
@@ -244,7 +248,10 @@ class Client
         /**
          * prepare cURL and options
          */
-        $ch = $this->get_curl_resource();
+        if (!($ch = $this->get_curl_resource())) {
+            return false;
+        }
+
         $curl_options = [
             CURLOPT_HEADER => true,
             CURLOPT_POST   => true
@@ -309,19 +316,19 @@ class Client
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
-        if (!empty($up)) {
+        if (!is_null($up)) {
             $payload['up'] = intval($up);
         }
 
-        if (!empty($down)) {
+        if (!is_null($down)) {
             $payload['down'] = intval($down);
         }
 
-        if (!empty($MBytes)) {
+        if (!is_null($MBytes)) {
             $payload['bytes'] = intval($MBytes);
         }
 
-        if (isset($ap_mac)) {
+        if (!is_null($ap_mac)) {
             $payload['ap_mac'] = strtolower($ap_mac);
         }
 
@@ -466,7 +473,7 @@ class Client
     }
 
     /**
-     * 5 minutes site stats
+     * Fetch 5 minutes site stats
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -498,7 +505,7 @@ class Client
     }
 
     /**
-     * Hourly site stats
+     * Fetch hourly site stats
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -528,7 +535,7 @@ class Client
     }
 
     /**
-     * Daily site stats
+     * Fetch daily site stats
      *
      * NOTES:
      * - defaults to the past 52*7*24 hours
@@ -558,7 +565,7 @@ class Client
     }
 
     /**
-     * 5 minutes stats for a single access point or all access points
+     * Fetch 5 minutes stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -586,7 +593,7 @@ class Client
     }
 
     /**
-     * Hourly stats for a single access point or all access points
+     * Fetch hourly stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -613,7 +620,7 @@ class Client
     }
 
     /**
-     * Daily stats for a single access point or all access points
+     * Fetch daily stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -640,7 +647,7 @@ class Client
     }
 
     /**
-     * 5 minutes stats for a single user/client device
+     * Fetch 5 minutes stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -668,7 +675,7 @@ class Client
     }
 
     /**
-     * Hourly stats for a single user/client device
+     * Fetch hourly stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -696,7 +703,7 @@ class Client
     }
 
     /**
-     * Daily stats for a single user/client device
+     * Fetch daily stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -705,7 +712,7 @@ class Client
      *   the controller settings
      * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
      *
-     * @param  string $mac     MAC address of user/client device to return stats fo
+     * @param  string $mac     MAC address of user/client device to return stats for
      * @param  int    $start   optional, Unix timestamp in milliseconds
      * @param  int    $end     optional, Unix timestamp in milliseconds
      * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
@@ -724,15 +731,7 @@ class Client
     }
 
     /**
-     * 5 minutes gateway stats method
-     * ------------------------------
-     * returns an array of 5-minute stats objects for the gateway belonging to the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * Fetch 5 minutes gateway stats
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -740,6 +739,14 @@ class Client
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
      * - requires a USG
+     *
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                         lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                         default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @return array           returns an array of 5-minute stats objects for the gateway belonging to the current site
      */
     public function stat_5minutes_gateway($start = null, $end = null, $attribs = null)
     {
@@ -752,19 +759,19 @@ class Client
     }
 
     /**
-     * Hourly gateway stats method
-     * ---------------------------
-     * returns an array of hourly stats objects for the gateway belonging to the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * Fetch hourly gateway stats
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - requires a USG
+     *
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                         lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                         default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @return array           returns an array of hourly stats objects for the gateway belonging to the current site
      */
     public function stat_hourly_gateway($start = null, $end = null, $attribs = null)
     {
@@ -777,19 +784,19 @@ class Client
     }
 
     /**
-     * Daily gateway stats method
-     * --------------------------
-     * returns an array of daily stats objects for the gateway belonging to the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * Fetch daily gateway stats
      *
      * NOTES:
      * - defaults to the past 52*7*24 hours
      * - requires a USG
+     *
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                         lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                         default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @return array           returns an array of hourly stats objects for the gateway belonging to the current site
      */
     public function stat_daily_gateway($start = null, $end = null, $attribs = null)
     {
@@ -802,15 +809,15 @@ class Client
     }
 
     /**
-     * Method to fetch speed test results
-     * ----------------------------------
-     * returns an array of speed test result objects
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
+     * Fetch speed test results
      *
      * NOTES:
      * - defaults to the past 24 hours
      * - requires a USG
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @return array         returns an array of speed test result objects
      */
     public function stat_speedtest_results($start = null, $end = null)
     {
@@ -821,18 +828,19 @@ class Client
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
     }
 
+
     /**
-     * Method to fetch IPS/IDS event
-     * -----------------------------
-     * returns an array of IPS/IDS event objects
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <limit> = Maximum number of events to return, defaults to 10000
+     * Fetch IPS/IDS events
      *
      * NOTES:
      * - defaults to the past 24 hours
      * - requires a USG
      * - supported in UniFi controller versions 5.9.X and higher
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  int    $limit optional, maximum number of events to return, defaults to 10000
+     * @return array         returns an array of IPS/IDS event objects
      */
     public function stat_ips_events($start = null, $end = null, $limit = null)
     {
@@ -845,16 +853,16 @@ class Client
     }
 
     /**
-     * Show all login sessions
-     * -----------------------
-     * returns an array of login session objects for all devices or a single device
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
-     * optional parameter <mac>   = client MAC address to return sessions for (can only be used when start and end are also provided)
-     * optional parameter <type>  = client type to return sessions for, can be 'all', 'guest' or 'user'; default value is 'all'
+     * Fetch login sessions
      *
      * NOTES:
      * - defaults to the past 7*24 hours
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  string $mac   optional, client MAC address to return sessions for (can only be used when start and end are also provided)
+     * @param  string $type  optional, client type to return sessions for, can be 'all', 'guest' or 'user'; default value is 'all'
+     * @return array         returns an array of login session objects for all devices or a single device
      */
     public function stat_sessions($start = null, $end = null, $mac = null, $type = 'all')
     {
@@ -873,11 +881,14 @@ class Client
     }
 
     /**
-     * Show latest 'n' login sessions for a single client device
-     * ---------------------------------------------------------
-     * returns an array of latest login session objects for given client device
-     * required parameter <mac>   = client MAC address
-     * optional parameter <limit> = maximum number of sessions to get (default value is 5)
+     * Fetch latest 'n' login sessions for a single client device
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     *
+     * @param  string $mac   client MAC address
+     * @param  int    $limit optional, maximum number of sessions to get (default value is 5)
+     * @return array         returns an array of login session objects for all devices or a single device
      */
     public function stat_sta_sessions_latest($mac, $limit = null)
     {
@@ -888,14 +899,14 @@ class Client
     }
 
     /**
-     * Show all authorizations
-     * -----------------------
-     * returns an array of authorization objects
-     * optional parameter <start> = Unix timestamp in seconds
-     * optional parameter <end>   = Unix timestamp in seconds
+     * Fetch authorizations
      *
      * NOTES:
      * - defaults to the past 7*24 hours
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @return array         returns an array of authorization objects
      */
     public function stat_auths($start = null, $end = null)
     {
@@ -907,14 +918,14 @@ class Client
     }
 
     /**
-     * List all client devices ever connected to the site
-     * --------------------------------------------------
-     * returns an array of client device objects
-     * optional parameter <historyhours> = hours to go back (default is 8760 hours or 1 year)
+     * Fetch client devices that connected to the site within given timeframe
      *
      * NOTES:
      * - <historyhours> is only used to select clients that were online within that period,
      *   the returned stats per client are all-time totals, irrespective of the value of <historyhours>
+     *
+     * @param  int    $historyhours optional, hours to go back (default is 8760 hours or 1 year)
+     * @return array                returns an array of client device objects
      */
     public function stat_allusers($historyhours = 8760)
     {
@@ -924,10 +935,13 @@ class Client
     }
 
     /**
-     * List guest devices
-     * ------------------
-     * returns an array of guest device objects with valid access
-     * optional parameter <within> = time frame in hours to go back to list guests with valid access (default = 24*365 hours)
+     * Fetch guest devices
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     *
+     * @param  int    $within optional, time frame in hours to go back to list guests with valid access (default = 24*365 hours)
+     * @return array          returns an array of guest device objects with valid access
      */
     public function list_guests($within = 8760)
     {
@@ -937,10 +951,10 @@ class Client
     }
 
     /**
-     * List online client device(s)
-     * ----------------------------
-     * returns an array of online client device objects, or in case of a single device request, returns a single client device object
-     * optional parameter <client_mac> = the MAC address of a single online client device for which the call must be made
+     * Fetch online client device(s)
+     *
+     * @param  string $client_mac optional, the MAC address of a single online client device for which the call must be made
+     * @return array              returns an array of online client device objects, or in case of a single device request, returns a single client device object
      */
     public function list_clients($client_mac = null)
     {
@@ -948,10 +962,10 @@ class Client
     }
 
     /**
-     * Get details for a single client device
-     * --------------------------------------
-     * returns an object with the client device information
-     * required parameter <client_mac> = client device MAC address
+     * Fetch details for a single client device
+     *
+     * @param  string $client_mac optional, client device MAC address
+     * @return array              returns an object with the client device information
      */
     public function stat_client($client_mac)
     {
@@ -960,10 +974,10 @@ class Client
 
     /**
      * Assign client device to another group
-     * -------------------------------------
-     * return true on success
-     * required parameter <user_id>  = id of the user device to be modified
-     * required parameter <group_id> = id of the user group to assign user to
+     *
+     * @param  string $user_id  id of the user device to be modified
+     * @param  string $group_id id of the user group to assign user to
+     * @return bool             returns true upon success
      */
     public function set_usergroup($user_id, $group_id)
     {
@@ -974,13 +988,12 @@ class Client
 
     /**
      * Update client fixedip (using REST)
-     * ------------------------------
-     * returns an array containing a single object with attributes of the updated client on success
-     * required parameter <client_id>   = _id value for the client
-     * required parameter <use_fixedip> = boolean defining whether if use_fixedip is true or false
-     * optional parameter <network_id>  = _id value for the network where the ip belongs to
-     * optional parameter <fixed_ip>    = value of client's fixed_ip field
      *
+     * @param  string $client_id   _id value for the client
+     * @param  bool   $use_fixedip determines whether use_fixedip is true or false
+     * @param  string $network_id  optional, _id value for the network where the ip belongs to
+     * @param  string $fixed_ip    optional, IP address, value of client's fixed_ip field
+     * @return array               returns an array containing a single object with attributes of the updated client on success
      */
     public function edit_client_fixedip($client_id, $use_fixedip, $network_id = null, $fixed_ip = null)
     {
@@ -1004,9 +1017,9 @@ class Client
     }
 
     /**
-     * List user groups
-     * ----------------
-     * returns an array of user group objects
+     * Fetch user groups
+     *
+     * @return array returns an array of user group objects
      */
     public function list_usergroups()
     {
@@ -1030,13 +1043,13 @@ class Client
 
     /**
      * Modify user group (using REST)
-     * ------------------------------
-     * returns an array containing a single object with attributes of the updated usergroup on success
-     * required parameter <group_id>   = _id value of the user group
-     * required parameter <site_id>    = _id value of the site
-     * required parameter <group_name> = name of the user group
-     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
-     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     *
+     * @param  string  $group_id   _id value of the user group
+     * @param  string  $site_id    _id value of the site
+     * @param  string  $group_name name of the user group
+     * @param  integer $group_dn   limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * @param  integer $group_up   limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * @return array               returns an array containing a single object with attributes of the updated usergroup on success
      */
     public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
     {
@@ -1054,15 +1067,74 @@ class Client
 
     /**
      * Delete user group (using REST)
-     * ------------------------------
-     * returns true on success
-     * required parameter <group_id> = _id value of the user group
+     *
+     * @param  string $group_id _id value of the user group to delete
+     * @return bool             returns true on success
      */
     public function delete_usergroup($group_id)
     {
         $this->request_type = 'DELETE';
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id));
+    }
+
+    /**
+     * Fetch AP groups
+     *
+     * @return array returns an array containing the current AP groups on success
+     */
+    public function list_apgroups()
+    {
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id));
+    }
+
+    /**
+     * Create AP group
+     *
+     * @param  string $group_name  name to assign to the AP group
+     * @param  array  $device_macs optional, array containing the MAC addresses (strings) of the APs to add to the new group
+     * @return object              returns a single object with attributes of the new AP group on success
+     */
+    public function create_apgroup($group_name, $device_macs = [])
+    {
+        $payload = ['device_macs' => $device_macs, 'name' => $group_name];
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups', $payload);
+    }
+
+    /**
+     * Modify AP group
+     *
+     * @param  string $group_id    _id value of the AP group to modify
+     * @param  string $group_name  name to assign to the AP group
+     * @param  array  $device_macs array containing the members of the AP group which overwrites the existing
+     *                             group_members (passing an empty array will clear the AP member list)
+     * @return object              returns a single object with attributes of the updated AP group on success
+     */
+    public function edit_apgroup($group_id, $group_name, $device_macs)
+    {
+        $this->request_type = 'PUT';
+        $payload = [
+            '_id'            => $group_id,
+            'attr_no_delete' => false,
+            'name'           => $group_name,
+            'device_macs'    => $device_macs
+        ];
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id), $payload);
+    }
+
+    /**
+     * Delete AP group
+     *
+     * @param  string $group_id _id value of the AP group to delete
+     * @return bool             returns true on success
+     */
+    public function delete_apgroup($group_id)
+    {
+        $this->request_type = 'DELETE';
+
+        return $this->fetch_results_boolean('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id));
     }
 
     /**
@@ -1661,7 +1733,7 @@ class Client
     public function create_hotspotop($name, $x_password, $note = null)
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (isset($note)) {
+        if (!is_null($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1709,19 +1781,19 @@ class Client
             'quota'  => intval($quota)
         ];
 
-        if (isset($note)) {
+        if (!is_null($note)) {
             $payload['note'] = trim($note);
         }
 
-        if (!empty($up)) {
+        if (!is_null($up)) {
             $payload['up'] = intval($up);
         }
 
-        if (!empty($down)) {
+        if (!is_null($down)) {
             $payload['down'] = intval($down);
         }
 
-        if (!empty($MBytes)) {
+        if (!is_null($MBytes)) {
             $payload['bytes'] = intval($MBytes);
         }
 
@@ -1791,7 +1863,7 @@ class Client
 
         $payload = ['type' => $type];
 
-        if ($cat_filter !== null && $type == 'by_app' && is_array($cat_filter)) {
+        if (!is_null($cat_filter) && $type == 'by_app' && is_array($cat_filter)) {
             $payload['cats'] = $cat_filter;
         }
 
@@ -1879,18 +1951,18 @@ class Client
      * Reboot a device
      * ----------------------
      * return true on success
-     * required parameter <mac>  = device MAC address
-     * optional parameter <type> = string; two options: 'soft' or 'hard', defaults to soft
-     *                             soft can be used for all devices, requests a plain restart of that device
-     *                             hard is special for PoE switches and besides the restart also requests a
-     *                             power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
-     *                             does *NOT* trigger a factory-reset, as it somehow could suggest.
+     * required parameter <mac>         = device MAC address
+     * optional parameter <reboot_type> = string; two options: 'soft' or 'hard', defaults to soft
+     *                                    soft can be used for all devices, requests a plain restart of that device
+     *                                    hard is special for PoE switches and besides the restart also requests a
+     *                                    power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
+     *                                    does *NOT* trigger a factory-reset.
      */
-    public function restart_device($mac, $type = 'soft')
+    public function restart_device($mac, $reboot_type = 'soft')
     {
         $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
-        if (!empty($type) && in_array($type, ['soft', 'hard'])) {
-            $payload['type'] = strtolower($type);
+        if (!empty($reboot_type) && in_array($reboot_type, ['soft', 'hard'])) {
+            $payload['reboot_type'] = strtolower($reboot_type);
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
@@ -2501,10 +2573,13 @@ class Client
      * List alarms
      * -----------
      * returns an array of known alarms
+     * optional parameter <payload> = array of flags to filter by
+     *                                Example: ["archived" => false, "key" => "EVT_GW_WANTransition"]
+     *                                return only unarchived for a specific key
      */
-    public function list_alarms()
+    public function list_alarms($payload = [])
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm');
+        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm', $payload);
     }
 
     /**
@@ -2535,6 +2610,35 @@ class Client
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/evtmgr', $payload);
+    }
+
+    /**
+     * Check controller update
+     *
+     * NOTE:
+     * triggers an update of the controller cached known latest version.
+     *
+     * @return array returns an array with a single object containing details of the current known latest controller version info
+     *               on success, else returns false
+     */
+    public function check_controller_update()
+    {
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/fwupdate/latest-version');
+    }
+
+    /**
+     * Check firmware update
+     *
+     * NOTE:
+     * triggers a Device Firmware Update in Classic Settings > System settings > Maintenance
+     *
+     * @return bool returns true upon success
+     */
+    public function check_firmware_update()
+    {
+        $payload = ['cmd' => 'check-firmware-update'];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/productinfo', $payload);
     }
 
     /**
@@ -2755,7 +2859,7 @@ class Client
             'tunnel_medium_type' => (int) $tunnel_medium_type
         ];
 
-        if (isset($vlan)) {
+        if (!is_null($vlan)) {
             $payload['vlan'] = (int) $vlan;
         }
 
@@ -3037,7 +3141,7 @@ class Client
      */
     public function get_last_results_raw($return_json = false)
     {
-        if ($this->last_results_raw !== null) {
+        if (!is_null($this->last_results_raw)) {
             if ($return_json) {
                 return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             }
@@ -3055,7 +3159,7 @@ class Client
      */
     public function get_last_error_message()
     {
-        if ($this->last_error_message !== null) {
+        if (!is_null($this->last_error_message)) {
             return $this->last_error_message;
         }
 
@@ -3226,11 +3330,26 @@ class Client
                  */
                 if (isset($response->meta->msg)) {
                     $this->last_error_message = $response->meta->msg;
+                    if ($this->debug) {
+                        trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                    }
                 }
+            }
+        }
 
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
+        /**
+         * to deal with a response coming from the new v2 API
+         */
+        if(strpos($path, '/v2/api/') === 0) {
+            if (isset($response->errorCode)) {
+                if (isset($response->message)) {
+                    $this->last_error_message = $response->message;
+                    if ($this->debug) {
+                        trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                    }
                 }
+            } else {
+                return $response;
             }
         }
 
@@ -3414,7 +3533,7 @@ class Client
             CURLOPT_URL => $url
         ];
 
-        if ($payload !== null) {
+        if (!is_null($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POST]       = true;
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
