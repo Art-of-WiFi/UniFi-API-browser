@@ -1,17 +1,17 @@
 [
     {
         "name": "art-of-wifi/unifi-api-client",
-        "version": "v1.1.60",
-        "version_normalized": "1.1.60.0",
+        "version": "v1.1.62",
+        "version_normalized": "1.1.62.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-            "reference": "32252e56d7906feb7b80daaad47d29bce041a3bc"
+            "reference": "c82481a28a7cca2f96686e291826bf2f2854784d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/32252e56d7906feb7b80daaad47d29bce041a3bc",
-            "reference": "32252e56d7906feb7b80daaad47d29bce041a3bc",
+            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/c82481a28a7cca2f96686e291826bf2f2854784d",
+            "reference": "c82481a28a7cca2f96686e291826bf2f2854784d",
             "shasum": ""
         },
         "require": {
@@ -19,7 +19,7 @@
             "ext-json": "*",
             "php": ">=5.5.0"
         },
-        "time": "2020-11-12T10:09:37+00:00",
+        "time": "2020-12-10T13:52:39+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

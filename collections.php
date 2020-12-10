@@ -278,6 +278,15 @@ $collections = [
         'options' => [
             [
                 'type'   => 'collection', // or divider
+                'label'  => 'all sites stats',
+                'method' => 'stat_sites',
+                'params' => []
+            ],
+            [
+                'type' => 'divider', // or collection
+            ],
+            [
+                'type'   => 'collection', // or divider
                 'label'  => '5 minutes site stats',
                 'method' => 'stat_5minutes_site',
                 'params' => []
@@ -296,8 +305,8 @@ $collections = [
             ],
             [
                 'type'   => 'collection', // or divider
-                'label'  => 'all sites stats',
-                'method' => 'stat_sites',
+                'label'  => 'monthly site stats',
+                'method' => 'stat_monthly_site',
                 'params' => []
             ],
             [
@@ -322,6 +331,12 @@ $collections = [
                 'params' => []
             ],
             [
+                'type'   => 'collection', // or divider
+                'label'  => 'monthly access point stats',
+                'method' => 'stat_monthly_aps',
+                'params' => []
+            ],
+            [
                 'type' => 'divider', // or collection
             ],
             [
@@ -340,6 +355,12 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => 'daily gateway stats',
                 'method' => 'stat_daily_gateway',
+                'params' => []
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'monthly gateway stats',
+                'method' => 'stat_monthly_gateway',
                 'params' => []
             ],
             [

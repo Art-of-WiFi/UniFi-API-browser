@@ -11,7 +11,7 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x, 5.x.x, and 6.0.x of the UniFi Controller software are supported (version 6.0.33 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work)
+- currently, versions 4.x.x, 5.x.x, and 6.0.x of the UniFi Controller software are supported (version 6.0.42 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work)
 - when accessing UbiOS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UbiOS support
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
@@ -45,33 +45,6 @@ The UniFi API browser tool offers the following features:
 
 ### Data collections/API endpoints currently implemented in the API browser
 
-- Clients/users
-  - list online clients
-  - list guests
-  - list users
-  - list user groups
-  - stat all users
-  - stat authorisations
-  - stat sessions
-- Devices
-  - list devices (access points, USG routers and USW switches)
-  - list wlan groups
-  - list rogue access points
-  - list_known_rogueaps
-  - list devices tags (supported on controller version 5.5.19 and higher)
-- Stats
-  - hourly site stats
-  - daily site stats
-  - hourly access point stats
-  - daily access point stats
-  - all sites stats
-  - health metrics
-  - dashboard metrics
-  - port forward stats
-- Hotspot
-  - stat vouchers
-  - stat payments
-  - list hotspot operators
 - Configuration
   - list sites on this controller
   - list site settings
@@ -89,10 +62,49 @@ The UniFi API browser tool offers the following features:
   - dynamic DNS configuration
   - list country codes
   - list Radius accounts (supported on controller version 5.5.19 and higher)
+- Clients/users
+  - list online clients
+  - list guests
+  - list users
+  - list user groups
+  - stat all users
+  - stat authorisations
+  - stat sessions
+- Devices
+  - list devices (access points, USG routers and USW switches)
+  - list wlan groups
+  - list AP groups (supported on controller version 6.0.X and higher)
+  - list rogue access points
+  - list_known_rogueaps
+  - list devices tags (supported on controller version 5.5.19 and higher)
+- Stats
+  - all sites stats
+  - 5-minute site stats
+  - hourly site stats
+  - daily site stats
+  - monthly site stats
+  - 5-minute access point stats
+  - hourly access point stats
+  - daily access point stats
+  - monthly access point stats
+  - 5-minute gateway stats
+  - hourly gateway stats
+  - daily gateway stats
+  - monthly gateway stats
+  - 5-minute dashboard metrics
+  - hourly dashboard metrics
+  - site health metrics
+  - port forward stats
+  - DPI stats
+- Hotspot
+  - stat vouchers
+  - stat payments
+  - list hotspot operators
 - Messages
   - list events
   - list alarms
   - count alarms
+  - list IDS/IPS events
 
 Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
 
@@ -201,18 +213,19 @@ The PHP API client that comes bundled with this tool is based on the work by the
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/5.12.21-a25e774adb/unifi_sh_api
+- https://dl.ui.com/unifi/6.0.41/unifi_sh_api
 
 Other included libraries:
 
-- Bootstrap 4 (version 4.3.1) https://getbootstrap.com
-- Bootswatch themes (version 4.3.1) https://bootswatch.com
-- Font Awesome icons (version 5.11.2) https://fontawesome.com
-- jQuery (version 3.4.1) https://jquery.com
-- Twig template engine (version 2.12.1) https://twig.symfony.com
-- Highlight.js (version 9.15.10) https://highlightjs.org
+- Bootstrap 4 (version 4.5.3) https://getbootstrap.com
+- Bootswatch themes (version 4.5.3) https://bootswatch.com
+- Font Awesome icons (version 5.15.1) https://fontawesome.com
+- jQuery (version 3.5.1) https://jquery.com
+- Twig template engine (version 1.44.1) https://twig.symfony.com
+- Highlight.js (version 10.4.1) https://highlightjs.org
 - Kint (version 2.2) https://kint-php.github.io/kint
-- clipboard.js (2.0.4) https://clipboardjs.com
+- clipboard.js (version 2.0.6) https://clipboardjs.com
+- Moment.js (version 2.29.1) https://momentjs.com
 
 
 ### Security notice

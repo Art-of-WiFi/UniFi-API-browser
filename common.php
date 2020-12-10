@@ -7,12 +7,12 @@
  * with this package in the file LICENSE.md
  *
  */
-define('TOOL_VERSION', '2.0.13');
+define('TOOL_VERSION', '2.0.14');
 
 /**
  * gather some basic information for the About modal
  */
-$curl_info = curl_version();
+$curl_info      = curl_version();
 $unknown_string = 'unknown';
 
 /**
