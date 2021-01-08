@@ -11,8 +11,8 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those that are currently supported
-- currently, versions 4.x.x, 5.x.x, and 6.0.x of the UniFi Controller software are supported (version 6.0.42 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work)
-- when accessing UbiOS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UbiOS support
+- currently, versions 4.x.x, 5.x.x, and 6.0.x of the UniFi Controller software are supported (version 6.0.42 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work)
+- when accessing UniFi OS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UniFi OS support
 - there is still work to be done to add/improve functionality and usability of this tool so suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
@@ -142,9 +142,9 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 - after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
 
 
-### UbiOS support
+### UniFi OS support
 
-Support for UbiOS-based controllers (UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UbiOS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
+Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
 
 
 ### Extending the dropdown menu
