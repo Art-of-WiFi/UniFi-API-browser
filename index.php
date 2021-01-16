@@ -110,6 +110,14 @@ if (is_file('config/users.php') && is_readable('config/users.php')) {
     error_log('The file config/users.php does not exist, proceeding without user authentication.');
 }
 
+if (isset($users) && $users !== '') {
+    $user_authentication = true;
+} else {    
+    $user_authentication = false;
+    error_log('The file config/users.php does not define any users, proceeding without user authentication.');    
+}
+
+
 /**
  * if needed, we request the user to login
  */
