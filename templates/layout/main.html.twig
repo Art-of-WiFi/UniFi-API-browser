@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" integrity="sha512-oc9+XSs1H243/FRN9Rw62Fn8EtxjEYWHXRvjS43YtueEewbS6ObfXcJNyohjHqVKFPoXXUxwc+q1K7Dee6vv9g==" crossorigin="anonymous">
 
         <!-- placeholder to dynamically load the appropriate Bootswatch CSS file from CDN unless we already have a selected theme -->
-        <link rel="stylesheet" href="{% if session.theme not in ['', 'bootstrap'] %}https://stackpath.bootstrapcdn.com/bootswatch/4.5.3/{{session.theme}}/bootstrap.min.css{% endif %}" id="bootswatch_theme_stylesheet">
+        <link rel="stylesheet" href="{% if session.theme not in ['', 'bootstrap'] %}https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/{{session.theme}}/bootstrap.min.css{% endif %}" id="bootswatch_theme_stylesheet">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous">
 
@@ -29,7 +29,6 @@
             window.debug               = {{debug | default('false')}};
             window.api_browser_version = '{{tool_version}}';
         </script>
-
     </head>
     {% endblock %}
     <body>

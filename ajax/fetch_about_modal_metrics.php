@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled
@@ -11,16 +11,16 @@
 /**
  * load the files containing shared functions and the collections
  */
-require_once('../common.php');
-require_once('../collections.php');
+require_once '../common.php';
+require_once '../collections.php';
 
 /**
  * load the configuration file if readable
  */
 if (is_file('../config/config.php') && is_readable('../config/config.php')) {
-    include('../config/config.php');
+    include '../config/config.php';
 } else {
-    die();
+    exit;
 }
 
 /**

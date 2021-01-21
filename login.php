@@ -1,25 +1,23 @@
 <?php
 /**
- * Copyright (c) 2019, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
 
 /**
  * load required files
  */
-require_once('vendor/autoload.php');
-require_once('common.php');
-require_once('collections.php');
+require_once 'vendor/autoload.php';
+require_once 'common.php';
+require_once 'collections.php';
 
 /**
  * load the configuration file if readable
  */
 if (is_file('config/config.php') && is_readable('config/config.php')) {
-    require_once('config/config.php');
+    require_once 'config/config.php';
 } else {
     exit;
 }
@@ -28,7 +26,7 @@ if (is_file('config/config.php') && is_readable('config/config.php')) {
  * load the file containing user accounts, if readable
  */
 if (is_file('config/users.php') && is_readable('config/users.php')) {
-    require_once('config/users.php');
+    require_once 'config/users.php';
 } else {
     exit;
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled
@@ -12,17 +12,17 @@
  * load required packages using the composer autoloader together with the files containing shared functions
  * and the collections
  */
-require_once('../common.php');
-require_once('../collections.php');
-require_once('../vendor/autoload.php');
+require_once '../common.php';
+require_once '../collections.php';
+require_once '../vendor/autoload.php';
 
 /**
  * load the configuration file if readable
  */
 if (is_file('../config/config.php') && is_readable('../config/config.php')) {
-    include('../config/config.php');
+    include '../config/config.php';
 } else {
-    die();
+    exit;
 }
 
 /**
@@ -118,7 +118,10 @@ if (!empty($_SESSION['controller'])) {
                 break;
             case 'stat_daily_gateway':
                 $params = [null, null, $gateway_stats_attribs];
-        }
+
+                break;
+            case 'stat_monthly_gateway':
+                $params = [null, null, $gateway_stats_attribs];        }
     }
 
     if (!empty($method) && !empty($site_id)) {
@@ -212,4 +215,4 @@ if (!empty($_SESSION['controller'])) {
 header('Content-Type: application/json; charset=utf-8');
 echo (json_encode($results));
 
-$_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M';
+$_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB';

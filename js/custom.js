@@ -1,21 +1,19 @@
 /**
- * Copyright (c) 2019, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
 
 /**
  * initialize some vars for later use
  */
-var theme                  = 'bootstrap',
-    controller             = {
+var controller = {
         idx:             '',
         full_name:       $('#navbar_controller_dropdown_link').text(),
         config_complete: false
     },
+    theme                  = 'bootstrap',
     unifi_sites            = [],
     selected_site          = {},
     selected_collection    = {},

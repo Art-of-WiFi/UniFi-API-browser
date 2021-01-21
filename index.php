@@ -1,11 +1,9 @@
 <?php
 /**
- * Copyright (c) 2019, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
 
 /**
@@ -32,9 +30,9 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
  * load required packages using the composer autoloader together with the files containing shared functions
  * and the collections
  */
-require_once('vendor/autoload.php');
-require_once('common.php');
-require_once('collections.php');
+require_once 'vendor/autoload.php';
+require_once 'common.php';
+require_once 'collections.php';
 
 /**
  * initialize the Twig loader early on in case we need to render the error page
@@ -47,7 +45,7 @@ $twig   = new \Twig\Environment($loader);
  * - if not, stop and display an error message
  */
 if (is_file('config/config.php') && is_readable('config/config.php')) {
-    require_once('config/config.php');
+    require_once 'config/config.php';
 } else {
     /**
      * render the config error page
@@ -56,7 +54,7 @@ if (is_file('config/config.php') && is_readable('config/config.php')) {
         'error_message' => 'The file <b>config/config.php</b> does not exist! Please create one based on the <b>config/config-template.php</b> file!<br>',
     ]);
 
-    exit();
+    exit;
 }
 
 /**
@@ -81,7 +79,7 @@ if (!function_exists('curl_version')) {
         'error_message' => 'The <b>PHP curl</b> module is not installed! Please correct this before proceeding!<br>',
     ]);
 
-    exit();
+    exit;
 }
 
 /**
@@ -96,15 +94,20 @@ if (version_compare(PHP_VERSION, '5.6.0') < 0) {
         'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 5.6.0. Please upgrade before proceeding!<br>',
     ]);
 
-    exit();
+    exit;
 }
 
 /**
  * load the file containing user accounts, if readable
  */
 if (is_file('config/users.php') && is_readable('config/users.php')) {
-    require_once('config/users.php');
-    $user_authentication = true;
+    require_once 'config/users.php';
+    if (isset($users) && is_array($users) && count($users) > 0) {
+        $user_authentication = true;
+    } else {
+        $user_authentication = false;
+        error_log('The $users array in the config/users.php file does not exist or is empty, proceeding without user authentication.');
+    }
 } else {
     $user_authentication = false;
     error_log('The file config/users.php does not exist, proceeding without user authentication.');
