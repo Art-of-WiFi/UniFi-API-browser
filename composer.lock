@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.64",
+            "version": "v1.1.66",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "bf3446bba05fdca7dd66cb652ba4387d5f31b1b6"
+                "reference": "aa778c9b7b54083f1de8511a2e20bb0f017f849e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/bf3446bba05fdca7dd66cb652ba4387d5f31b1b6",
-                "reference": "bf3446bba05fdca7dd66cb652ba4387d5f31b1b6",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/aa778c9b7b54083f1de8511a2e20bb0f017f849e",
+                "reference": "aa778c9b7b54083f1de8511a2e20bb0f017f849e",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,11 @@
                 "ubiquiti",
                 "unifi"
             ],
-            "time": "2021-01-21T09:59:27+00:00"
+            "support": {
+                "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.66"
+            },
+            "time": "2021-01-24T13:21:26+00:00"
         },
         {
             "name": "kint-php/kint",
@@ -110,6 +114,10 @@
                 "kint",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/kint-php/kint/issues",
+                "source": "https://github.com/kint-php/kint/tree/master"
+            },
             "time": "2017-09-06T17:46:03+00:00"
         },
         {
@@ -172,6 +180,9 @@
                 "polyfill",
                 "portable"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.22.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -250,6 +261,10 @@
             "keywords": [
                 "templating"
             ],
+            "support": {
+                "issues": "https://github.com/twigphp/Twig/issues",
+                "source": "https://github.com/twigphp/Twig/tree/v1.44.2"
+            },
             "funding": [
                 {
                     "url": "https://github.com/fabpot",
@@ -271,5 +286,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

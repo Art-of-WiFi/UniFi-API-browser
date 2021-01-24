@@ -1,266 +1,278 @@
-[
-    {
-        "name": "art-of-wifi/unifi-api-client",
-        "version": "v1.1.64",
-        "version_normalized": "1.1.64.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-            "reference": "bf3446bba05fdca7dd66cb652ba4387d5f31b1b6"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/bf3446bba05fdca7dd66cb652ba4387d5f31b1b6",
-            "reference": "bf3446bba05fdca7dd66cb652ba4387d5f31b1b6",
-            "shasum": ""
-        },
-        "require": {
-            "ext-curl": "*",
-            "ext-json": "*",
-            "php": ">=5.5.0"
-        },
-        "time": "2021-01-21T09:59:27+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "UniFi_API\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Art of WiFi",
-                "email": "info@artofowifi.net",
-                "homepage": "http://artofwifi.net"
-            }
-        ],
-        "description": "API client class for use with Ubiquiti's UniFi controller",
-        "homepage": "https://github.com/Art-of-WiFi/UniFi-API-client",
-        "keywords": [
-            "UBNT",
-            "api",
-            "client",
-            "controller",
-            "ubiquiti",
-            "unifi"
-        ]
-    },
-    {
-        "name": "kint-php/kint",
-        "version": "2.2",
-        "version_normalized": "2.2.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/kint-php/kint.git",
-            "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/kint-php/kint/zipball/b091715eadaf6e1a7ef927f3e81d1004611d2aea",
-            "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.1.2"
-        },
-        "require-dev": {
-            "friendsofphp/php-cs-fixer": "^2.0",
-            "phpunit/phpunit": "^4.0",
-            "symfony/finder": "^2.6"
-        },
-        "time": "2017-09-06T17:46:03+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "files": [
-                "init.php"
+{
+    "packages": [
+        {
+            "name": "art-of-wifi/unifi-api-client",
+            "version": "v1.1.66",
+            "version_normalized": "1.1.66.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
+                "reference": "aa778c9b7b54083f1de8511a2e20bb0f017f849e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/aa778c9b7b54083f1de8511a2e20bb0f017f849e",
+                "reference": "aa778c9b7b54083f1de8511a2e20bb0f017f849e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.5.0"
+            },
+            "time": "2021-01-24T13:21:26+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "UniFi_API\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
             ],
-            "classmap": [
-                "src/"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Rokas Šleinius",
-                "homepage": "https://github.com/raveren"
+            "authors": [
+                {
+                    "name": "Art of WiFi",
+                    "email": "info@artofowifi.net",
+                    "homepage": "http://artofwifi.net"
+                }
+            ],
+            "description": "API client class for use with Ubiquiti's UniFi controller",
+            "homepage": "https://github.com/Art-of-WiFi/UniFi-API-client",
+            "keywords": [
+                "UBNT",
+                "api",
+                "client",
+                "controller",
+                "ubiquiti",
+                "unifi"
+            ],
+            "support": {
+                "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.66"
             },
-            {
-                "name": "Jonathan Vollebregt",
-                "homepage": "https://github.com/jnvsor"
+            "install-path": "../art-of-wifi/unifi-api-client"
+        },
+        {
+            "name": "kint-php/kint",
+            "version": "2.2",
+            "version_normalized": "2.2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kint-php/kint.git",
+                "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea"
             },
-            {
-                "name": "Contributors",
-                "homepage": "https://github.com/kint-php/kint/graphs/contributors"
-            }
-        ],
-        "description": "Kint - debugging tool for PHP developers",
-        "homepage": "https://kint-php.github.io/kint/",
-        "keywords": [
-            "debug",
-            "kint",
-            "php"
-        ]
-    },
-    {
-        "name": "symfony/polyfill-ctype",
-        "version": "v1.22.0",
-        "version_normalized": "1.22.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/symfony/polyfill-ctype.git",
-            "reference": "c6c942b1ac76c82448322025e084cadc56048b4e"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/c6c942b1ac76c82448322025e084cadc56048b4e",
-            "reference": "c6c942b1ac76c82448322025e084cadc56048b4e",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=7.1"
-        },
-        "suggest": {
-            "ext-ctype": "For best performance"
-        },
-        "time": "2021-01-07T16:49:33+00:00",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-main": "1.22-dev"
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kint-php/kint/zipball/b091715eadaf6e1a7ef927f3e81d1004611d2aea",
+                "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea",
+                "shasum": ""
             },
-            "thanks": {
-                "name": "symfony/polyfill",
-                "url": "https://github.com/symfony/polyfill"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "Symfony\\Polyfill\\Ctype\\": ""
+            "require": {
+                "php": ">=5.1.2"
             },
-            "files": [
-                "bootstrap.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Gert de Pagter",
-                "email": "BackEndTea@gmail.com"
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.0",
+                "phpunit/phpunit": "^4.0",
+                "symfony/finder": "^2.6"
             },
-            {
-                "name": "Symfony Community",
-                "homepage": "https://symfony.com/contributors"
-            }
-        ],
-        "description": "Symfony polyfill for ctype functions",
-        "homepage": "https://symfony.com",
-        "keywords": [
-            "compatibility",
-            "ctype",
-            "polyfill",
-            "portable"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
+            "time": "2017-09-06T17:46:03+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "init.php"
+                ],
+                "classmap": [
+                    "src/"
+                ]
             },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rokas Šleinius",
+                    "homepage": "https://github.com/raveren"
+                },
+                {
+                    "name": "Jonathan Vollebregt",
+                    "homepage": "https://github.com/jnvsor"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/kint-php/kint/graphs/contributors"
+                }
+            ],
+            "description": "Kint - debugging tool for PHP developers",
+            "homepage": "https://kint-php.github.io/kint/",
+            "keywords": [
+                "debug",
+                "kint",
+                "php"
+            ],
+            "install-path": "../kint-php/kint"
+        },
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.22.0",
+            "version_normalized": "1.22.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "c6c942b1ac76c82448322025e084cadc56048b4e"
             },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
-        ]
-    },
-    {
-        "name": "twig/twig",
-        "version": "v1.44.2",
-        "version_normalized": "1.44.2.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/twigphp/Twig.git",
-            "reference": "138c493c5b8ee7cff3821f80b8896d371366b5fe"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/twigphp/Twig/zipball/138c493c5b8ee7cff3821f80b8896d371366b5fe",
-            "reference": "138c493c5b8ee7cff3821f80b8896d371366b5fe",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=7.2.5",
-            "symfony/polyfill-ctype": "^1.8"
-        },
-        "require-dev": {
-            "psr/container": "^1.0",
-            "symfony/phpunit-bridge": "^4.4.9|^5.0.9"
-        },
-        "time": "2021-01-05T10:10:05+00:00",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "1.44-dev"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-0": {
-                "Twig_": "lib/"
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/c6c942b1ac76c82448322025e084cadc56048b4e",
+                "reference": "c6c942b1ac76c82448322025e084cadc56048b4e",
+                "shasum": ""
             },
-            "psr-4": {
-                "Twig\\": "src/"
-            }
+            "require": {
+                "php": ">=7.1"
+            },
+            "suggest": {
+                "ext-ctype": "For best performance"
+            },
+            "time": "2021-01-07T16:49:33+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.22-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Gert de Pagter",
+                    "email": "BackEndTea@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill for ctype functions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "ctype",
+                "polyfill",
+                "portable"
+            ],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../symfony/polyfill-ctype"
         },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "BSD-3-Clause"
-        ],
-        "authors": [
-            {
-                "name": "Fabien Potencier",
-                "email": "fabien@symfony.com",
-                "homepage": "http://fabien.potencier.org",
-                "role": "Lead Developer"
+        {
+            "name": "twig/twig",
+            "version": "v1.44.2",
+            "version_normalized": "1.44.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twigphp/Twig.git",
+                "reference": "138c493c5b8ee7cff3821f80b8896d371366b5fe"
             },
-            {
-                "name": "Twig Team",
-                "role": "Contributors"
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/138c493c5b8ee7cff3821f80b8896d371366b5fe",
+                "reference": "138c493c5b8ee7cff3821f80b8896d371366b5fe",
+                "shasum": ""
             },
-            {
-                "name": "Armin Ronacher",
-                "email": "armin.ronacher@active-4.com",
-                "role": "Project Founder"
-            }
-        ],
-        "description": "Twig, the flexible, fast, and secure template language for PHP",
-        "homepage": "https://twig.symfony.com",
-        "keywords": [
-            "templating"
-        ],
-        "funding": [
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/polyfill-ctype": "^1.8"
             },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/twig/twig",
-                "type": "tidelift"
-            }
-        ]
-    }
-]
+            "require-dev": {
+                "psr/container": "^1.0",
+                "symfony/phpunit-bridge": "^4.4.9|^5.0.9"
+            },
+            "time": "2021-01-05T10:10:05+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.44-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-0": {
+                    "Twig_": "lib/"
+                },
+                "psr-4": {
+                    "Twig\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Twig Team",
+                    "role": "Contributors"
+                },
+                {
+                    "name": "Armin Ronacher",
+                    "email": "armin.ronacher@active-4.com",
+                    "role": "Project Founder"
+                }
+            ],
+            "description": "Twig, the flexible, fast, and secure template language for PHP",
+            "homepage": "https://twig.symfony.com",
+            "keywords": [
+                "templating"
+            ],
+            "funding": [
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/twig/twig",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../twig/twig"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

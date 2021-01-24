@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Kint' => $vendorDir . '/kint-php/kint/src/Kint.php',
     'Kint_Object' => $vendorDir . '/kint-php/kint/src/Object.php',
     'Kint_Object_Blob' => $vendorDir . '/kint-php/kint/src/Object/Blob.php',

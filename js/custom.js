@@ -377,9 +377,7 @@ function fetchCollection() {
                     $('#output_pre').html('<code id="copy_container" class="json js-copy-target">' + output + '</code>');
 
                     if (selected_output_method === 'json_highlighted') {
-                        $('#output_pre > code').each(function() {
-                             hljs.highlightBlock(this);
-                        });
+                        hljs.highlightBlock(document.getElementById('output_pre'));
                     }
                 } else if (selected_output_method === 'kint' || selected_output_method === 'kint_plain') {
                     $('#output_pre').html('<div class="p-3">' + json.data + '</div>');

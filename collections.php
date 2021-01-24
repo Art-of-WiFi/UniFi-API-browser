@@ -37,6 +37,12 @@ $collections = [
                 'params' => []
             ],
             [
+                'type'   => 'collection', // or divider
+                'label'  => 'controller status',
+                'method' => 'stat_full_status',
+                'params' => []
+            ],
+            [
                 'type' => 'divider', // or collection
             ],
             [
@@ -267,6 +273,15 @@ $collections = [
                 'type'   => 'collection', // or divider
                 'label'  => 'list tags', // supported from '5.5.0'
                 'method' => 'list_tags',
+                'params' => []
+            ],
+            [
+                'type' => 'divider', // or collection
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'list device name mappings', // supported from '5.5.0'
+                'method' => 'list_device_name_mappings',
                 'params' => []
             ],
         ],
