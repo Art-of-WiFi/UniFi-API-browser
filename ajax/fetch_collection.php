@@ -173,13 +173,15 @@ if (!empty($_SESSION['controller'])) {
                      * Rich render mode
                      */
                     Kint::$display_called_from = false;
+                    Kint\Renderer\RichRenderer::$folder = false;
                     $results['data'] = @d($data_array);
                 } else if ($output_method === 'kint_plain') {
                     /**
                      * Plain render mode
                      */
-                    Kint_Renderer_Text::$decorations = false;
                     Kint::$display_called_from = false;
+                    Kint\Renderer\RichRenderer::$folder = false;
+                    Kint\Renderer\TextRenderer::$decorations = false;
                     $results['data'] = @s($data_array);
                 } else {
                     $results['data'] = $data_array;

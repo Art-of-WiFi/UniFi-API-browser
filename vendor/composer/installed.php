@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'c35123a1471585df3e985eab89ea6564cd11f1c6',
+    'reference' => '4d6534826048ace8aef1778e158d3edf683494ee',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,30 +18,30 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'c35123a1471585df3e985eab89ea6564cd11f1c6',
+      'reference' => '4d6534826048ace8aef1778e158d3edf683494ee',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
-      'pretty_version' => 'v1.1.66',
-      'version' => '1.1.66.0',
+      'pretty_version' => 'v1.1.69',
+      'version' => '1.1.69.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'aa778c9b7b54083f1de8511a2e20bb0f017f849e',
+      'reference' => '474578a9d5e571ae2742a173d750d88890afc5f8',
     ),
     'kint-php/kint' => 
     array (
-      'pretty_version' => '2.2',
-      'version' => '2.2.0.0',
+      'pretty_version' => '3.3',
+      'version' => '3.3.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'b091715eadaf6e1a7ef927f3e81d1004611d2aea',
+      'reference' => '335ac1bcaf04d87df70d8aa51e8887ba2c6d203b',
     ),
     'symfony/polyfill-ctype' => 
     array (
-      'pretty_version' => 'v1.22.0',
-      'version' => '1.22.0.0',
+      'pretty_version' => 'v1.22.1',
+      'version' => '1.22.1.0',
       'aliases' => 
       array (
       ),

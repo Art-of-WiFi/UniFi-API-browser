@@ -147,9 +147,11 @@ Alternatively you may choose to download the zip file and unzip it in your direc
 Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
 
 
-### Extending the dropdown menu
+### Extending the Collections dropdown menu
 
-Since version 2.0.0 you can extend the dropdown menu with your own options by adding them to the `config.php` file. Here's an example:
+Since version 2.0.0 you can extend the Collections dropdown menu with your own options by adding them to the `config.php` file.
+
+Here's an example:
 ```php
 /**
  * adding a custom sub menu example
@@ -162,7 +164,7 @@ $collections = array_merge($collections, [
                 'type' => 'collection', // either 'collection' or 'divider'
                 'label' => 'hourly site stats past 24 hours', // string that is displayed in the dropdown menu
                 'method' => 'stat_hourly_site', // name of the method/function in the API client class that is called
-                'params' => [(time() - (24 * 60 *60)) * 1000, time() * 1000], // an array containing the parameters that are passed to the method/function
+                'params' => [(time() - (24 * 60 *60)) * 1000, time() * 1000], // an array containing the parameters as they are passed to the method/function
             ],
             [
                 'type' => 'collection',
@@ -192,14 +194,14 @@ $collections = array_merge($collections, [
 
 Note: for a `collection` type menu option the `type`, `label`, `method`, `params` and `key` "properties" are required.
 
-This is what the result looks like:
+This is what the result looks like for the above example:
 
 ![Custom sub menu](https://user-images.githubusercontent.com/12016131/69611554-4fb4a400-102e-11ea-9175-99618c1e1f98.png "Custom sub menu")
 
 
 ### Updates
 
-If you have installed the tool using the `git clone` command, you can install updates by going into the directory where the tool has been installed, and running the `git pull` command from there.
+If you installed the tool using the `git clone` command, you can apply updates by going into the directory where the tool is installed, and running the `git pull` command from there.
 
 Otherwise you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been installed.
 
