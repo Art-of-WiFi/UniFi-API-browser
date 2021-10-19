@@ -22,9 +22,9 @@ Please keep the following in mind:
 A demo version that is connected to Ubiquiti's demo controller is available here: https://api-browser-demo.artofwifi.net/
 
 
-### Upgrading from 1.X to 2.X
+### Upgrading from 1.x to 2.x
 
-Because the structure of the configuration file has changed, we recommend creating a fresh install when upgrading from 1.X to 2.X.
+Because the structure of the configuration file has changed, we recommend creating a fresh install when upgrading from 1.x to 2.x.
 
 
 ### Features
