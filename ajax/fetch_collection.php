@@ -110,15 +110,12 @@ if (!empty($_SESSION['controller'])) {
         switch ($method) {
             case 'stat_5minutes_gateway':
                 $params = [null, null, $gateway_stats_attribs];
-
                 break;
             case 'stat_hourly_gateway':
                 $params = [null, null, $gateway_stats_attribs];
-
                 break;
             case 'stat_daily_gateway':
                 $params = [null, null, $gateway_stats_attribs];
-
                 break;
             case 'stat_monthly_gateway':
                 $params = [null, null, $gateway_stats_attribs];        }
