@@ -70,8 +70,8 @@ $results = [
         'login_perc' => 0,
         'load_perc'  => 0,
     ],
-    'count' => 0,
-    'data'  => []
+    'count'   => 0,
+    'data'    => [],
 ];
 
 $output_method = 'json';
@@ -106,20 +106,15 @@ if (!empty($_SESSION['controller'])) {
         $output_method = $_POST['selected_output_method'];
     }
 
-    if (empty($params)) {
-        switch ($method) {
-            case 'stat_5minutes_gateway':
-                $params = [null, null, $gateway_stats_attribs];
-                break;
-            case 'stat_hourly_gateway':
-                $params = [null, null, $gateway_stats_attribs];
-                break;
-            case 'stat_daily_gateway':
-                $params = [null, null, $gateway_stats_attribs];
-                break;
-            case 'stat_monthly_gateway':
-                $params = [null, null, $gateway_stats_attribs];
-        }
+    $gateway_stats_methods = [
+        'stat_5minutes_gateway',
+        'stat_hourly_gateway',
+        'stat_daily_gateway',
+        'stat_monthly_gateway'
+    ];
+
+    if (empty($params) && in_array($method, $gateway_stats_methods)) {
+        $params = [null, null, $gateway_stats_attribs];
     }
 
     if (!empty($method) && !empty($site_id)) {
@@ -129,7 +124,8 @@ if (!empty($_SESSION['controller'])) {
         /**
          * create an instance of the Unifi API client class, log in to the controller and pull the requested data
          */
-        $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']), trim(rtrim($controller['url'], "/")), $site_id);
+        $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
+            trim(rtrim($controller['url'], "/")), $site_id);
         $loginresults     = $unifi_connection->login();
 
         /**
@@ -170,19 +166,21 @@ if (!empty($_SESSION['controller'])) {
                      * for Kint we need to return the results in a slightly different manner
                      * Rich render mode
                      */
-                    Kint::$display_called_from = false;
+                    Kint::$display_called_from          = false;
                     Kint\Renderer\RichRenderer::$folder = false;
-                    $results['data'] = @d($data_array);
-                } else if ($output_method === 'kint_plain') {
-                    /**
-                     * Plain render mode
-                     */
-                    Kint::$display_called_from = false;
-                    Kint\Renderer\RichRenderer::$folder = false;
-                    Kint\Renderer\TextRenderer::$decorations = false;
-                    $results['data'] = @s($data_array);
+                    $results['data']                    = @d($data_array);
                 } else {
-                    $results['data'] = $data_array;
+                    if ($output_method === 'kint_plain') {
+                        /**
+                         * Plain render mode
+                         */
+                        Kint::$display_called_from               = false;
+                        Kint\Renderer\RichRenderer::$folder      = false;
+                        Kint\Renderer\TextRenderer::$decorations = false;
+                        $results['data']                         = @s($data_array);
+                    } else {
+                        $results['data'] = $data_array;
+                    }
                 }
             }
 
@@ -213,6 +211,6 @@ if (!empty($_SESSION['controller'])) {
  * output the results with correct JSON formatting
  */
 header('Content-Type: application/json; charset=utf-8');
-echo (json_encode($results));
+echo(json_encode($results));
 
 $_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB';

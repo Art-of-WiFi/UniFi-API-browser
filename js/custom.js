@@ -8,7 +8,7 @@
 /**
  * initialize some vars for later use
  */
-var controller = {
+let controller = {
         idx:             '',
         full_name:       $('#navbar_controller_dropdown_link').text(),
         config_complete: false
@@ -25,7 +25,7 @@ var controller = {
 if (localStorage.getItem('api_browser_tool_theme') === null || localStorage.getItem('api_browser_tool_theme') === 'bootstrap') {
     $('#bootstrap').addClass('active').find('a').append(' <i class="fas fa-check"></i>');
 } else {
-    var stored_theme = localStorage.getItem('api_browser_tool_theme');
+    let stored_theme = localStorage.getItem('api_browser_tool_theme');
     switchCSS(stored_theme);
 }
 
@@ -42,7 +42,7 @@ $('.theme_option').on('click', function(){
  * catch and process the selection of a UniFi controller
  */
 $('.controller_idx').on('click', function(){
-    var new_controller_idx = $(this).data('idx');
+    let new_controller_idx = $(this).data('idx');
     if (!$(this).hasClass('active')) {
         /**
          * update the current controller idx
@@ -182,7 +182,7 @@ $('#collection_dropdown').on('click', '.collection_idx', function(){
  * catch a output selection request
  */
 $('.output_radio_button').click(function() {
-    var button_value = $(this).find('input').attr('value');
+    let button_value = $(this).find('input').attr('value');
     if (button_value !== '') {
         selected_output_method = button_value;
         fetchCollection();
@@ -231,8 +231,8 @@ function fetchSites() {
     /**
      * inform the user
      */
-    $('#site_dropdown > li > div').html('');
-    $('#site_dropdown > li > div').append('<h5 class="dropdown-header">Fetching sites <i class="fas fa-sync fa-spin"></i></h5>');
+    $('#site_dropdown > li > div').html('')
+        .append('<h5 class="dropdown-header">Fetching sites <i class="fas fa-sync fa-spin"></i></h5>');
 
     $('.alert_wrapper').addClass('d-none');
     $('#fetching_sites_alert_wrapper').removeClass('d-none');
@@ -298,8 +298,8 @@ function fetchSites() {
 
             unifi_sites = [];
 
-            $('#site_dropdown > li > div').html('');
-            $('#site_dropdown > li > div').html('<h5 class="dropdown-header">Error loading sites</h5>');
+            $('#site_dropdown > li > div').html('')
+                .html('<h5 class="dropdown-header">Error loading sites</h5>');
 
             $('.alert_wrapper').addClass('d-none');
             $('#site_load_error_alert_wrapper').removeClass('d-none');
@@ -339,7 +339,7 @@ function fetchCollection() {
 
     $('#output_pre').html('<div class="d-flex align-items-center justify-content-center h-100 m-2"><div class="d-flex flex-column m-2"><i class="fas fa-sync fa-spin fa-2x"></i></div></div>');
 
-    var params_string = JSON.stringify(selected_collection.params).slice(1,-1);
+    let params_string = JSON.stringify(selected_collection.params).slice(1,-1);
 
     $('#results_summary_placeholder').html(
         controller.full_name + ' <i class="fas fa-sm fa-chevron-right"></i> ' + selected_site.name + ' <i class="fas fa-sm fa-chevron-right"></i> ' +
@@ -560,10 +560,10 @@ $('#about_modal').on('shown.bs.modal', function (e) {
 })
 
 /**
- * function to correctly compare sementic versioning numbers
+ * function to correctly compare semantic versioning numbers
  */
 function cmpVersion(a, b) {
-    var i, cmp, len;
+    let i, cmp, len;
     a = (a + '').split('.');
     b = (b + '').split('.');
     len = Math.max(a.length, b.length);

@@ -54,4 +54,4 @@ if (!empty($_SESSION['controller'])) {
  * output the results with correct JSON formatting
  */
 header('Content-Type: application/json; charset=utf-8');
-echo (json_encode($results));
+echo(json_encode($results));

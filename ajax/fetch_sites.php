@@ -37,7 +37,7 @@ $results = [
     'state'   => 'success',
     'message' => 'successfully fetched sites',
     'count'   => 0,
-    'data'    => []
+    'data'    => [],
 ];
 
 if (!empty($_SESSION['controller'])) {
@@ -51,10 +51,10 @@ if (!empty($_SESSION['controller'])) {
 
     if (!empty($host) && !empty($port)) {
         $fp = @fsockopen($host, $port, $errno, $errstr, 2);
-        if(!$fp) {
-            error_log("we have a connection error {$errstr} ({$errno})");
+        if (!$fp) {
+            error_log("we have a connection error $errstr ($errno)");
             $results['state']   = 'error';
-            $results['message'] = "we are unable to connect to the UniFi controller, {$errstr} ({$errno})!";
+            $results['message'] = "we are unable to connect to the UniFi controller, $errstr ($errno)!";
         } else {
             /**
              * and we can continue
@@ -64,7 +64,8 @@ if (!empty($_SESSION['controller'])) {
             /**
              * create an instance of the Unifi API client class, log in to the controller and pull the requested data
              */
-            $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']), trim(rtrim($controller['url'], "/")), 'default');
+            $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
+                trim(rtrim($controller['url'], "/")), 'default');
             $loginresults     = $unifi_connection->login();
 
             /**
@@ -84,10 +85,6 @@ if (!empty($_SESSION['controller'])) {
                         error_log('DEBUG: ' . count($sites_array) . ' sites collected');
                     }
 
-                    if (empty($sites_array)) {
-                        $sites_array = [];
-                    }
-
                     /**
                      * store the cookies from the controller for faster reconnects
                      */
@@ -98,15 +95,15 @@ if (!empty($_SESSION['controller'])) {
                      */
                     foreach ($sites_array as $site) {
                         $results['data'][] = [
-                            'site_id'        => isset($site->name) ? $site->name : $unknown_string,
-                            'site_full_name' => isset($site->desc) ? $site->desc : $unknown_string
+                            'site_id'        => $site->name ?? $unknown_string,
+                            'site_full_name' => $site->desc ?? $unknown_string,
                         ];
                     }
 
                     /**
                      * sort the sites array by full name
                      */
-                    usort($results['data'], function($a, $b) {
+                    usort($results['data'], function ($a, $b) {
                         if ($a['site_full_name'] == $b['site_full_name']) {
                             return 0;
                         }
@@ -139,6 +136,6 @@ if (!empty($_SESSION['controller'])) {
  * output the results with correct json formatting
  */
 header('Content-Type: application/json; charset=utf-8');
-echo (json_encode($results));
+echo(json_encode($results));
 
 $_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB';

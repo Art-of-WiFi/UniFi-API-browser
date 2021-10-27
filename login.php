@@ -37,7 +37,7 @@ if (is_file('config/users.php') && is_readable('config/users.php')) {
 session_start();
 
 $_SESSION['login_error_message'] = 'user name and password do not match, please try again';
-$_SESSION['logged_in'] = false;
+$_SESSION['logged_in']           = false;
 
 /**
  * load login form data if present, then login to test

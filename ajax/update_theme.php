@@ -31,7 +31,7 @@ session_start();
  */
 $results = [
     'status'  => 'success',
-    'message' => 'theme updated'
+    'message' => 'theme updated',
 ];
 
 /**
@@ -51,4 +51,4 @@ if (!empty($_POST['new_theme'])) {
  * output the results with correct JSON formatting
  */
 header('Content-Type: application/json; charset=utf-8');
-echo (json_encode($results));
+echo(json_encode($results));

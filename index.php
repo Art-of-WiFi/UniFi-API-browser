@@ -9,6 +9,10 @@
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
 session_start();
 
 /**
@@ -37,8 +41,8 @@ require_once 'collections.php';
 /**
  * initialize the Twig loader early on in case we need to render the error page
  */
-$loader = new \Twig\Loader\FilesystemLoader('templates');
-$twig   = new \Twig\Environment($loader);
+$loader = new FilesystemLoader('templates');
+$twig   = new Environment($loader);
 
 /**
  * load the configuration file, if readable
@@ -116,9 +120,9 @@ if (is_file('config/users.php') && is_readable('config/users.php')) {
 /**
  * if needed, we request the user to login
  */
-if ($user_authentication && (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] === false)) {
+if ($user_authentication && (empty($_SESSION['logged_in']))) {
     if (!empty($_SESSION['login_error_message'])) {
-        $login_error = $_SESSION['login_error_message'];
+        $login_error                     = $_SESSION['login_error_message'];
         $_SESSION['login_error_message'] = '';
     } else {
         $login_error = '';

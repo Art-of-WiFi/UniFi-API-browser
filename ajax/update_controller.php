@@ -31,7 +31,7 @@ session_start();
  */
 $results = [
     'status'  => 'success',
-    'message' => 'controller updated'
+    'message' => 'controller updated',
 ];
 
 /**
@@ -54,4 +54,4 @@ if (!empty($_POST['new_controller_idx'])) {
  * output the results with correct JSON formatting
  */
 header('Content-Type: application/json; charset=utf-8');
-echo (json_encode($results));
+echo(json_encode($results));

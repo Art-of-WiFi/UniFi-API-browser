@@ -42,8 +42,8 @@ if ($debug === true) {
 
         if (!empty($host) && !empty($port)) {
             $fp = @fsockopen($host, $port, $errno, $errstr, 2);
-            if(!$fp) {
-                echo "we are unable to connect to the UniFi controller {$errstr} ({$errno})" . PHP_EOL . PHP_EOL;
+            if (!$fp) {
+                echo "we are unable to connect to the UniFi controller $errstr ($errno)" . PHP_EOL . PHP_EOL;
             } else {
                 /**
                  * and we can continue
@@ -53,7 +53,8 @@ if ($debug === true) {
                 /**
                  * create an instance of the Unifi API client class, log in to the controller and pull the sites
                  */
-                $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']), trim(rtrim($controller['url'], "/")), 'default');
+                $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
+                    trim(rtrim($controller['url'], "/")), 'default');
                 $set_debug_mode   = $unifi_connection->set_debug($debug);
                 $loginresults     = $unifi_connection->login();
 

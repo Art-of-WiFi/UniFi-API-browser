@@ -107,11 +107,11 @@ if (typeof $.uf === 'undefined') {
 }
 
 $.uf.copy = function (button) {
-    var _this = this;
+    let _this = this;
 
-    var clipboard = new ClipboardJS(button, {
+    let clipboard = new ClipboardJS(button, {
         text: function (trigger) {
-            var el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
+            let el = $(trigger).closest('.js-copy-container').find('.js-copy-target');
             if (el.is(':input')) {
                 return el.val();
             } else {

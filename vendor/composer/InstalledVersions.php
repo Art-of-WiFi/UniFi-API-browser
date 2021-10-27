@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '5bf616d02d5f2466e42d2b795de0cd30547eab3c',
+    'reference' => '82861c0f2e2bccf9c9d938f1dd3813a82a32d064',
     'name' => '__root__',
   ),
   'versions' => 
@@ -44,7 +44,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '5bf616d02d5f2466e42d2b795de0cd30547eab3c',
+      'reference' => '82861c0f2e2bccf9c9d938f1dd3813a82a32d064',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (

@@ -5,7 +5,7 @@
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
-define('TOOL_VERSION', '2.0.20');
+const TOOL_VERSION = '2.0.20';
 
 /**
  * gather some basic information for the About modal
@@ -38,7 +38,7 @@ function getClientVersion()
 {
     if (is_readable('composer.lock')) {
         $composer_lock = file_get_contents('composer.lock');
-        $json_decoded = json_decode($composer_lock, true);
+        $json_decoded  = json_decode($composer_lock, true);
         if (isset($json_decoded['packages'])) {
             foreach ($json_decoded['packages'] as $package) {
                 if ($package['name'] === 'art-of-wifi/unifi-api-client') {
