@@ -74,7 +74,7 @@ $results = [
     'data'  => []
 ];
 
-$output_method  = 'json';
+$output_method = 'json';
 
 if (!empty($_SESSION['controller'])) {
     $method = '';
@@ -118,7 +118,8 @@ if (!empty($_SESSION['controller'])) {
                 $params = [null, null, $gateway_stats_attribs];
                 break;
             case 'stat_monthly_gateway':
-                $params = [null, null, $gateway_stats_attribs];        }
+                $params = [null, null, $gateway_stats_attribs];
+        }
     }
 
     if (!empty($method) && !empty($site_id)) {

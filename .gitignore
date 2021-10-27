@@ -1,4 +1,4 @@
-# Ignore personal config file
+# Ignore personal config files
 config/config.php
 config/users.php
 
@@ -12,3 +12,4 @@ desktop.ini
 .Trashes
 ehthumbs.db
 Thumbs.db
+/.idea

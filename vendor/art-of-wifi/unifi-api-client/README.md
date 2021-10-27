@@ -107,7 +107,7 @@ require_once 'vendor/autoload.php';
  * initialize the UniFi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
  */
-$unifi_connection = new UniFi_API\Client($controller_user, $controller_password $controller_url, $site_id, $controller_version, true);
+$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
 $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
@@ -133,7 +133,7 @@ own PHP code.
 
 The class currently supports the following functions/methods to GET/POST/PUT/DELETE data
 through the UniFi Controller API. Please refer to the comments in the source code for
-more details on the functions/methods and their respective parameters.
+more details on each of the functions/methods and their respective parameters.
 
 - login()
 - logout()
@@ -170,6 +170,7 @@ more details on the functions/methods and their respective parameters.
 - disable_ap()
 - edit_apgroup() (supported with controller versions 6.0.X and higher)
 - edit_client_fixedip()
+- edit_client_name()
 - edit_firewallgroup()
 - edit_usergroup()
 - extend_guest_validity()
