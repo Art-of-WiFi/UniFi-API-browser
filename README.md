@@ -11,7 +11,7 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those currently supported
-- currently, versions 4.x.x, 5.x.x, and 6.x.x of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.4.54 has been confirmed to work)
+- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.50 has been confirmed to work)
 - when accessing UniFi OS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UniFi OS support
 - there is still work to be done to add/improve functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
@@ -114,6 +114,9 @@ Please note that the bundled API client supports many more API endpoints, not al
 - a web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
 - network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - clients using this tool should have internet access because several CSS and JS files are loaded from public CDNs.
+- Using an administrator account with **read-only** permissions can limit visibility on certain collection/object properties. 
+  See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) 
+  for an example where the WPA2 password isn't accessible for **read-only** administrator accounts.
 
 
 ### Installation
@@ -270,4 +273,3 @@ Showing the site settings collection in interactive PHP format:
 The "About" modal:
 
 ![About modal](https://user-images.githubusercontent.com/12016131/67586311-9e320280-f751-11e9-9576-c0590c951edc.png "About modal")
-

@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '82861c0f2e2bccf9c9d938f1dd3813a82a32d064',
+    'reference' => 'fa83cf8d1315a6fced6e8553e17f0638f4dc5f7a',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,16 +18,16 @@
       'aliases' => 
       array (
       ),
-      'reference' => '82861c0f2e2bccf9c9d938f1dd3813a82a32d064',
+      'reference' => 'fa83cf8d1315a6fced6e8553e17f0638f4dc5f7a',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
-      'pretty_version' => 'v1.1.73',
-      'version' => '1.1.73.0',
+      'pretty_version' => 'v1.1.74',
+      'version' => '1.1.74.0',
       'aliases' => 
       array (
       ),
-      'reference' => '310abc43b52518853b671e3fa46423c007ccac79',
+      'reference' => 'fbfd6a824628d2d45f7b5dadb211cb1191335156',
     ),
     'kint-php/kint' => 
     array (
