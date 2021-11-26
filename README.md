@@ -11,9 +11,9 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those currently supported
-- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.50 has been confirmed to work)
-- when accessing UniFi OS-based controllers (e.g. UDM PRO) through this tool, please read the remarks below regarding UniFi OS support
-- there is still work to be done to add/improve functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
+- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.52 has been confirmed to work)
+- when accessing UniFi OS-based controllers (e.g. UDM, UDM PRO, UDR) through this tool, please read the remarks below regarding UniFi OS support
+- there is still work to be done to add/improve the functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
 
 
@@ -29,14 +29,14 @@ Because the structure of the configuration file has changed, we recommend creati
 
 ### Features
 
-The UniFi API browser tool offers the following features:
+The UniFi API browser tool offers the following features and benefits:
 
 - browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
 - switch between sites managed by the connected controller
 - switch between output formats (currently `JSON`, `JSON highlighted`, `PHP array, interactive` and `PHP array, highlighted` have been implemented)
 - copy the results to clipboard (this is only supported with the `JSON` output format, will fail gracefully with large collections)
-- switch between default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
-- an "About" modal which shows version information for PHP, cURL and the UniFi Controller
+- switch between the default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
+- an "About" modal which shows version information for PHP, cURL, and the UniFi Controller
 - very easy setup with minimal dependencies
 - timing details of API calls can be useful to "benchmark" your UniFi Controller
 - useful tool when developing applications that make use of the UniFi Controller API
@@ -48,8 +48,8 @@ The UniFi API browser tool offers the following features:
 - Configuration
   - list sites on this controller
   - list site settings
-  - list admins for current site
-  - sysinfo
+  - list admins for the current site
+  - system information (sysinfo)
   - self
   - list wlan config
   - list VoIP extension
@@ -75,7 +75,6 @@ The UniFi API browser tool offers the following features:
   - list wlan groups
   - list AP groups (supported on controller version 6.0.X and higher)
   - list rogue access points
-  - list_known_rogueaps
   - list devices tags (supported on controller version 5.5.19 and higher)
 - Stats
   - all sites stats
@@ -128,7 +127,7 @@ git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 ```
 - when git is done cloning, follow the configuration steps below to configure the settings for access to your UniFi Controller's API
 
-Alternatively you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
+Alternatively, you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
 
 
 ### Installation using Docker
@@ -157,7 +156,7 @@ Since version 2.0.0 you can extend the Collections dropdown menu with your own o
 Here's an example:
 ```php
 /**
- * adding a custom sub menu example
+ * adding a custom sub-menu example
  */
 $collections = array_merge($collections, [
     [
@@ -195,7 +194,7 @@ $collections = array_merge($collections, [
 ]);
 ```
 
-Note: for a `collection` type menu option the `type`, `label`, `method`, `params` and `key` "properties" are required.
+Note: for a `collection` type menu option the `type`, `label`, `method`, and `params` "properties" are required.
 
 This is what the result looks like for the above example:
 
@@ -206,7 +205,7 @@ This is what the result looks like for the above example:
 
 If you installed the tool using the `git clone` command, you can apply updates by going into the directory where the tool is installed, and running the `git pull` command from there.
 
-Otherwise you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been installed.
+Otherwise, you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been installed.
 
 
 ### Credits
