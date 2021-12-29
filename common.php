@@ -5,13 +5,14 @@
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
-const TOOL_VERSION = '2.0.22';
+const TOOL_VERSION = '2.0.23';
 
 /**
  * gather some basic information for the About modal
  */
 $curl_info      = curl_version();
 $unknown_string = 'unknown';
+
 /**
  * create the array to pass on to the twig templates
  */

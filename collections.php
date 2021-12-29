@@ -7,10 +7,10 @@
  */
 
 /**
- * this array defines the menu options for the various collections
+ * this array defines the menu options for the various menu_options
  *
- * NOTE:
- * - do not modify this file, instead add a custom sub menu to the config.php file
+ * NOTES:
+ * - do not modify this file, instead add a custom sub menu to the config.php file as explained in the README.md file
  * - a valid value for params looks like this:
  *     [true, true, 'no'] (note the quotes surrounding strings)
  */

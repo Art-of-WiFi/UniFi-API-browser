@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '54b39af910b0860239a6dde7ec23231716621ce0',
+    'reference' => 'ffeb659c44a1bdaf8043d1672b066114918c340a',
     'name' => '__root__',
   ),
   'versions' => 
@@ -44,16 +44,16 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '54b39af910b0860239a6dde7ec23231716621ce0',
+      'reference' => 'ffeb659c44a1bdaf8043d1672b066114918c340a',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
-      'pretty_version' => 'v1.1.74',
-      'version' => '1.1.74.0',
+      'pretty_version' => 'v1.1.76',
+      'version' => '1.1.76.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'fbfd6a824628d2d45f7b5dadb211cb1191335156',
+      'reference' => '746fb0933c1b0bbc3622ab4787edb9bffbafcd3a',
     ),
     'kint-php/kint' => 
     array (

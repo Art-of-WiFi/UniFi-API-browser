@@ -9,7 +9,7 @@
  */
 
 /**
- * load the files containing shared functions and the collections
+ * load the files containing shared functions and the menu_options
  */
 require_once '../common.php';
 require_once '../collections.php';

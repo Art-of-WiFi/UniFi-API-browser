@@ -32,7 +32,7 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
 
 /**
  * load required packages using the composer autoloader together with the files containing shared functions
- * and the collections
+ * and the menu_options
  */
 require_once 'vendor/autoload.php';
 require_once 'common.php';
@@ -147,7 +147,7 @@ if (empty($_SESSION['controller'])) {
     ]);
 } else {
     /**
-     * otherwise we proceed and we render the collections view page
+     * otherwise we proceed and we render the menu_options view page
      */
     echo $twig->render('collections_view.html.twig', [
         'controllers' => $controllers,

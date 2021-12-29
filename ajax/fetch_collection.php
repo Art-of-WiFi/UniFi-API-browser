@@ -10,7 +10,7 @@
 
 /**
  * load required packages using the composer autoloader together with the files containing shared functions
- * and the collections
+ * and the menu_options
  */
 require_once '../common.php';
 require_once '../collections.php';

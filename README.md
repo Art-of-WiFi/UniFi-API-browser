@@ -10,7 +10,7 @@ You will find examples and detailed instructions there.
 
 Please keep the following in mind:
 
-- the API browser tool doesn't support all available data collections/API endpoints, see the list below of those currently supported
+- the API browser tool doesn't support all available data menu_options/API endpoints, see the list below of those currently supported
 - currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.52 has been confirmed to work)
 - when accessing UniFi OS-based controllers (e.g. UDM, UDM PRO, UDR) through this tool, please read the remarks below regarding UniFi OS support
 - there is still work to be done to add/improve the functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
@@ -31,10 +31,10 @@ Because the structure of the configuration file has changed, we recommend creati
 
 The UniFi API browser tool offers the following features and benefits:
 
-- browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
+- browse data menu_options/API endpoints exposed by the UniFi Controller API in an easy manner
 - switch between sites managed by the connected controller
 - switch between output formats (currently `JSON`, `JSON highlighted`, `PHP array, interactive` and `PHP array, highlighted` have been implemented)
-- copy the results to clipboard (this is only supported with the `JSON` output format, will fail gracefully with large collections)
+- copy the results to clipboard (this is only supported with the `JSON` output format, will fail gracefully with large menu_options)
 - switch between the default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
 - an "About" modal which shows version information for PHP, cURL, and the UniFi Controller
 - very easy setup with minimal dependencies
@@ -43,7 +43,7 @@ The UniFi API browser tool offers the following features and benefits:
 - the API exposes more data than is visible through the UniFi controller's web interface which makes the tool useful for troubleshooting purposes
 - debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
-### Data collections/API endpoints currently implemented in the API browser
+### Data menu_options/API endpoints currently implemented in the API browser
 
 - Configuration
   - list sites on this controller
@@ -158,7 +158,7 @@ Here's an example:
 /**
  * adding a custom sub-menu example
  */
-$collections = array_merge($collections, [
+$menu_options = array_merge($menu_options, [
     [
         'label' => 'Custom Menu', // length of this string is limited due to dropdown menu width
         'options' => [
