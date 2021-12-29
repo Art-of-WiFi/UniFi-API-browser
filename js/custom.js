@@ -238,7 +238,7 @@ function fetchSites() {
     $('#fetching_sites_alert_wrapper').removeClass('d-none');
 
     /**
-     * reset the selected_site var and hide the menu_options dropdown
+     * reset the selected_site var and hide the collection_dropdown element
      */
     selected_site = {};
     $('#collection_dropdown').addClass('d-none');
@@ -509,7 +509,7 @@ $('#back-to-top').click(function () {
 
 $(function() {
     /**
-     * handle multi Level dropdowns for the menu_options menu
+     * handle multi Level dropdowns for the collections menu
      */
     $("ul.dropdown-menu [data-toggle='dropdown']").on('click', function(event) {
         event.preventDefault();

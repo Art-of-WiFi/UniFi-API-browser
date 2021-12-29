@@ -4,7 +4,7 @@
     - DataTables for table output and more
         - requires "flattening" of multidimensional arrays/objects
         - or else only expose a selection of attributes
-    - Chart output as option for certain data menu_options (and selected attributes)
+    - Chart output as option for certain data collections (and selected attributes)
         - same requirements as for tables
 
 2. Add the option to export data to CSV file format

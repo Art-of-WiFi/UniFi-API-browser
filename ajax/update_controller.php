@@ -7,7 +7,7 @@
  */
 
 /**
- * load required files containing shared functions and the menu_options
+ * load required files containing shared functions and the menu options
  */
 require_once '../common.php';
 require_once '../collections.php';

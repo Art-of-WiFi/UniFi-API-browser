@@ -7,7 +7,7 @@
  */
 
 /**
- * this array defines the menu options for the various menu_options
+ * this array defines the menu options for the various collections
  *
  * NOTES:
  * - do not modify this file, instead add a custom sub menu to the config.php file as explained in the README.md file

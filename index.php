@@ -32,7 +32,7 @@ if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
 
 /**
  * load required packages using the composer autoloader together with the files containing shared functions
- * and the menu_options
+ * and the menu options
  */
 require_once 'vendor/autoload.php';
 require_once 'common.php';
@@ -140,14 +140,14 @@ if ($user_authentication && (empty($_SESSION['logged_in']))) {
 
 if (empty($_SESSION['controller'])) {
     /**
-     * the user needs to select a controller first so we render the appropriate template
+     * the user needs to select a controller first, so we render the appropriate template
      */
     echo $twig->render('controller_select.html.twig', [
         'controllers' => $controllers,
     ]);
 } else {
     /**
-     * otherwise we proceed and we render the menu_options view page
+     * proceed and render the collections_view template
      */
     echo $twig->render('collections_view.html.twig', [
         'controllers' => $controllers,
