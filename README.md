@@ -11,15 +11,10 @@ You will find examples and detailed instructions there.
 Please keep the following in mind:
 
 - the API browser tool doesn't support all available data collections/API endpoints, see the list below of those currently supported
-- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.52 has been confirmed to work)
+- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.55 has been confirmed to work)
 - when accessing UniFi OS-based controllers (e.g. UDM, UDM PRO, UDR) through this tool, please read the remarks below regarding UniFi OS support
 - there is still work to be done to add/improve the functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
 - please read the Security Notice below before installing this tool!
-
-
-### Demo ###
-
-A demo version that is connected to Ubiquiti's demo controller is available here: https://api-browser-demo.artofwifi.net/
 
 
 ### Upgrading from 1.x to 2.x
