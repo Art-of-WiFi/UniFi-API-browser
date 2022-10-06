@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'ffeb659c44a1bdaf8043d1672b066114918c340a',
+    'reference' => '39aa18d3626f070f4de35a5aa1df5329ecdbb3b5',
     'name' => '__root__',
   ),
   'versions' => 
@@ -44,16 +44,16 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'ffeb659c44a1bdaf8043d1672b066114918c340a',
+      'reference' => '39aa18d3626f070f4de35a5aa1df5329ecdbb3b5',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
-      'pretty_version' => 'v1.1.76',
-      'version' => '1.1.76.0',
+      'pretty_version' => 'v1.1.79',
+      'version' => '1.1.79.0',
       'aliases' => 
       array (
       ),
-      'reference' => '746fb0933c1b0bbc3622ab4787edb9bffbafcd3a',
+      'reference' => 'cbe89d913cc4dd3742d5fd35e201ec86bc8ccdc9',
     ),
     'kint-php/kint' => 
     array (
@@ -66,21 +66,21 @@ private static $installed = array (
     ),
     'symfony/polyfill-ctype' => 
     array (
-      'pretty_version' => 'v1.23.0',
-      'version' => '1.23.0.0',
+      'pretty_version' => 'v1.26.0',
+      'version' => '1.26.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '46cd95797e9df938fdd2b03693b5fca5e64b01ce',
+      'reference' => '6fd1b9a79f6e3cf65f9e679b23af304cd9e010d4',
     ),
     'twig/twig' => 
     array (
-      'pretty_version' => 'v1.44.6',
-      'version' => '1.44.6.0',
+      'pretty_version' => 'v1.44.7',
+      'version' => '1.44.7.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'ae39480f010ef88adc7938503c9b02d3baf2f3b3',
+      'reference' => '0887422319889e442458e48e2f3d9add1a172ad5',
     ),
   ),
 );

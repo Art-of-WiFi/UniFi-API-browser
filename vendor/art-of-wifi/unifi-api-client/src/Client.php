@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.76
+ * @version Release: 1.1.79
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.76';
+    const CLASS_VERSION             = '1.1.79';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -38,7 +38,7 @@ class Client
     protected $exec_retries         = 0;
     protected $cookies              = '';
     protected $last_results_raw     = null;
-    protected $last_error_message   = null;
+    protected $last_error_message   = '';
     protected $curl_ssl_verify_peer = false;
     protected $curl_ssl_verify_host = false;
     protected $curl_http_version    = CURL_HTTP_VERSION_NONE;
@@ -140,7 +140,6 @@ class Client
         }
 
         $curl_options = [
-            CURLOPT_HEADER => true,
             CURLOPT_URL    => $this->baseurl . '/',
         ];
 
@@ -429,7 +428,7 @@ class Client
      *                        the existing note for the client-device is removed and "noted" attribute set to false
      * @return bool returns true upon success
      */
-    public function set_sta_note($user_id, $note = null)
+    public function set_sta_note($user_id, $note = '')
     {
         $payload = ['note' => $note];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
@@ -443,7 +442,7 @@ class Client
      *                        the existing name for the client device is removed
      * @return bool returns true upon success
      */
-    public function set_sta_name($user_id, $name = null)
+    public function set_sta_name($user_id, $name = '')
     {
         $payload = ['name' => $name];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
@@ -482,6 +481,9 @@ class Client
 
     /**
      * Fetch hourly site stats
+     *
+     * TODO: add support for optional attrib parameter
+     *       airtime_avg
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -598,6 +600,26 @@ class Client
     /**
      * Fetch hourly stats for a single access point or all access points
      *
+     * TODO: optionally add ["top_filter_by" => "tx_retries"] to payload
+     *       add optional parameter for attribs to support:
+     *       wifi_tx_attempts
+     *       tx_retries
+     *       wifi_tx_dropped
+     *       sta_assoc_failures
+     *       sta_wpa_auth_failures
+     *       mac_filter_rejections
+     *       sta_dhcp_failures
+     *       sta_assoc_min
+     *       sta_assoc_max
+     *       sta_connect_time_min
+     *       sta_connect_time_max
+     *       sta_connect_time_total
+     *       user-wlan-num_sta_connected
+     *       user-wlan-num_sta_disconnected
+     *       user-wlan-sta_assoc_samples
+     *       user-wlan-sta_track_samples
+     *       wlan-num_sta
+     *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - make sure that the retention policy for hourly stats is set to the correct value in
@@ -679,6 +701,7 @@ class Client
     /**
      * Fetch 5 minutes stats for a single user/client device
      *
+     *
      * NOTES:
      * - defaults to the past 12 hours
      * - only supported with UniFi controller versions 5.8.X and higher
@@ -692,7 +715,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of 5-minute stats objects
      */
     public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
@@ -720,7 +744,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of hourly stats objects
      */
     public function stat_hourly_user($mac, $start = null, $end = null, array $attribs = null)
@@ -748,7 +773,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of daily stats objects
      */
     public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
@@ -776,7 +802,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of monthly stats objects
      */
     public function stat_monthly_user($mac, $start = null, $end = null, $attribs = null)
@@ -1679,7 +1706,8 @@ class Client
         $device_adopt = false,
         $device_restart = false
     ) {
-        $email_valid = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+        $email       = trim($email);
+        $email_valid = filter_var($email, FILTER_VALIDATE_EMAIL);
         if (!$email_valid) {
             trigger_error('The email address provided is invalid!');
             return false;
@@ -1687,7 +1715,7 @@ class Client
 
         $payload = [
             'name'        => trim($name),
-            'email'       => trim($email),
+            'email'       => $email,
             'for_sso'     => $enable_sso,
             'cmd'         => 'invite-admin',
             'role'        => 'admin',
@@ -1868,10 +1896,10 @@ class Client
      * @param string $note       optional, note to attach to the hotspot operator
      * @return bool true upon success
      */
-    public function create_hotspotop($name, $x_password, $note = null)
+    public function create_hotspotop($name, $x_password, $note = '')
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (is_string($note)) {
+        if (!empty($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1907,7 +1935,7 @@ class Client
         $minutes,
         $count = 1,
         $quota = 0,
-        $note = null,
+        $note = '',
         $up = null,
         $down = null,
         $megabytes = null
@@ -1919,7 +1947,7 @@ class Client
             'quota'  => intval($quota),
         ];
 
-        if (is_string($note)) {
+        if (!empty($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -2548,7 +2576,7 @@ class Client
      * @return array containing wireless networks and their settings, or an array containing a single wireless network
      *               when using the <wlan_id> parameter
      */
-    public function list_wlanconf($wlan_id = null)
+    public function list_wlanconf($wlan_id = '')
     {
         return $this->fetch_results('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
@@ -2649,12 +2677,12 @@ class Client
      * @param string $name         optional, SSID
      * @return bool true on success
      */
-    public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
+    public function set_wlansettings($wlan_id, $x_passphrase, $name = '')
     {
         $payload                 = [];
         $payload['x_passphrase'] = trim($x_passphrase);
 
-        if (is_string($name)) {
+        if (!empty($name)) {
             $payload['name'] = trim($name);
         }
 
@@ -2777,7 +2805,7 @@ class Client
      *                         by default all alarms are archived
      * @return bool true on success
      */
-    public function archive_alarm($alarm_id = null)
+    public function archive_alarm($alarm_id = '')
     {
         $payload = ['cmd' => 'archive-all-alarms'];
         if (!empty($alarm_id)) {
@@ -3016,9 +3044,9 @@ class Client
      */
     public function create_radius_account($name, $x_password, $tunnel_type = null, $tunnel_medium_type = null, $vlan = null)
     {
-        $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types)) || ($tunnel_type ^ $tunnel_medium_type)) {
+        $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        $tunnel_medium_type_values = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        if (!in_array($tunnel_type, $tunnel_type_values) || !in_array($tunnel_medium_type, $tunnel_medium_type_values) || ($tunnel_type xor $tunnel_medium_type)) {
             return false;
         }
 
@@ -3036,7 +3064,7 @@ class Client
         }
 
         if (!is_null($vlan)) {
-            $payload['vlan'] = (int) $vlan;
+            $payload['vlan'] = (string) $vlan;
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/rest/account', $payload);
@@ -3337,7 +3365,7 @@ class Client
      *
      * @param boolean $return_json true returns the results in "pretty printed" json format,
      *                             false returns PHP stdClass Object format (default)
-     * @return object|string the raw results as returned by the controller API
+     * @return false|string|object|null the raw results as returned by the controller API
      */
     public function get_last_results_raw($return_json = false)
     {
@@ -3355,16 +3383,12 @@ class Client
     /**
      * Get last error message
      *
-     * @return object|bool the error message of the last method called in PHP stdClass Object format, returns false if
-     *                     unavailable
+     * @return string the error message of the last method called in PHP stdClass Object format, an empty string when
+     *                none available
      */
     public function get_last_error_message()
     {
-        if (!is_null($this->last_error_message)) {
-            return $this->last_error_message;
-        }
-
-        return false;
+        return $this->last_error_message;
     }
 
     /**
@@ -3628,7 +3652,7 @@ class Client
 
             if (isset($response->meta->rc)) {
                 if ($response->meta->rc === 'ok') {
-                    $this->last_error_message = null;
+                    $this->last_error_message = '';
                     if (is_array($response->data) && !$boolean) {
                         return $response->data;
                     }
