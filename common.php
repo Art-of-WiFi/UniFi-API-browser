@@ -5,7 +5,7 @@
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
-const TOOL_VERSION = '2.0.23';
+const TOOL_VERSION = '2.0.24';
 
 /**
  * gather some basic information for the About modal
