@@ -101,9 +101,9 @@ Please note that the bundled API client supports many more API endpoints, not al
 
 ### Requirements
 
-- a web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
-- network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
-- clients using this tool should have internet access because several CSS and JS files are loaded from public CDNs.
+- A web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
+- Metwork connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
+- Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from public CDNs.
 - Using an administrator account with **read-only** permissions can limit visibility on certain collection/object properties. 
   See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) 
   for an example where the WPA2 password isn't accessible for **read-only** administrator accounts.
