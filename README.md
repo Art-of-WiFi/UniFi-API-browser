@@ -139,7 +139,7 @@ Alternatively, you may choose to download the zip file and unzip it in your dire
 
 Support for UniFi OS-based controllers (for example the UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
 
-When connecting to a Network Application running on UniFi OS-based gateway through the WAN interface, you need to create a specific firewall rule to allow external access to port 443 on its local interface. Please read this blog post for more details:
+When using the UniFi API browser to connect to a Network Application on a UniFi OS-based gateway via the WAN interface, it is necessary to create a specific firewall rule to allow external access to port 443 on the gateway's local interface. For more information, please refer to the following blog post for further details.:
 https://artofwifi.net/2022/04/07/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro/
 
 
