@@ -219,9 +219,9 @@ Other included libraries:
 - Bootswatch themes (version 4.5.3) https://bootswatch.com
 - Font Awesome icons (version 5.15.1) https://fontawesome.com
 - jQuery (version 3.5.1) https://jquery.com
-- Twig template engine (version 1.44.1) https://twig.symfony.com
+- Twig template engine (version 1.44.7) https://twig.symfony.com
 - Highlight.js (version 10.4.1) https://highlightjs.org
-- Kint (version 2.2) https://kint-php.github.io/kint
+- Kint (version 3.3) https://kint-php.github.io/kint
 - clipboard.js (version 2.0.6) https://clipboardjs.com
 - Moment.js (version 2.29.1) https://momentjs.com
 
