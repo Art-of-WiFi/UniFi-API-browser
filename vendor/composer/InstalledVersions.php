@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'a19bc0eabacef3640d9759f1ce3d7e5624d15a99',
+    'reference' => '2e83eed173c4dc21189557e404d5731ebb0ede6c',
     'name' => '__root__',
   ),
   'versions' => 
@@ -44,7 +44,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'a19bc0eabacef3640d9759f1ce3d7e5624d15a99',
+      'reference' => '2e83eed173c4dc21189557e404d5731ebb0ede6c',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
@@ -66,12 +66,12 @@ private static $installed = array (
     ),
     'symfony/polyfill-ctype' => 
     array (
-      'pretty_version' => 'v1.26.0',
-      'version' => '1.26.0.0',
+      'pretty_version' => 'v1.27.0',
+      'version' => '1.27.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '6fd1b9a79f6e3cf65f9e679b23af304cd9e010d4',
+      'reference' => '5bbc823adecdae860bb64756d639ecfec17b050a',
     ),
     'twig/twig' => 
     array (
