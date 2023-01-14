@@ -1,20 +1,16 @@
 ## UniFi API browser
 
-This tool is for browsing data that is exposed through Ubiquiti's UniFi Controller API, written in PHP, JavaScript and the [Bootstrap](http://getbootstrap.com/) CSS framework.
+This tool allows you to browse data exposed through the UniFi Controller API, developed using PHP, JavaScript, and the [Bootstrap](http://getbootstrap.com/) CSS framework. It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#functionsmethods-supported) than the UniFi API browser tool.
 
-It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#functionsmethods-supported) than the UniFi API browser tool does.
+If you plan on creating your own PHP code to interact with the UniFi controller API, it is recommended to use the standalone version of the API client class, which can be found at https://github.com/Art-of-WiFi/UniFi-API-client. There, you will also find examples and detailed instructions on how to use it.
 
-If you plan on creating your own PHP code to leverage the UniFi controller API, it is recommended to use the standalone version of the API client class which can be found here: https://github.com/Art-of-WiFi/UniFi-API-client
+Please keep the following in mind when using the UniFi API browser:
 
-You will find examples and detailed instructions there.
-
-Please keep the following in mind:
-
-- the API browser tool doesn't support all available data collections/API endpoints, see the list below of those currently supported
-- currently, versions 4.X.X, 5.X.X, and 6.X.X of the UniFi Controller software are supported as well as UniFi OS-based controllers (version 6.5.55 has been confirmed to work)
-- when accessing UniFi OS-based controllers (e.g. UDM, UDM PRO, UDR) through this tool, please read the remarks below regarding UniFi OS support
-- there is still work to be done to add/improve the functionality and usability of this tool and your suggestions/comments are welcome. Please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas/questions.
-- please read the Security Notice below before installing this tool!
+- The tool does not support all available data collections and API endpoints. See the list below for those currently supported.
+- Currently, versions 5.X.X, 6.X.X, and 7.X.X of the UniFi Controller software are supported (version **7.2.95** has been confirmed to work)
+- The Network Application on UniFi OS-based controllers is also supported, same versions as above
+- When accessing UniFi OS-based controllers through this tool, please read the remarks regarding UniFi OS support
+- Please read the Security Notice before installing this tool.
 
 
 ### Upgrading from 1.x to 2.x
@@ -24,19 +20,19 @@ Because the structure of the configuration file has changed, we recommend creati
 
 ### Features
 
-The UniFi API browser tool offers the following features and benefits:
+The UniFi API browser tool offers the following features:
+- Browse data collections and API endpoints exposed by the UniFi Controller API in an easy manner
+- Switch between sites managed by the connected controller
+- Switch between output formats (currently **JSON**, **JSON highlighted**, **PHP array**, **interactive**, and **PHP array, highlighted**)
+- Copy the results to clipboard (this is only supported with the JSON output format and will fail gracefully with large collections)
+- Switch between the default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
+- An **About** modal that shows version information for PHP, cURL, and the UniFi Controller
+- Very easy setup with minimal dependencies
+- Timing details of API calls can be useful to "benchmark" your UniFi Controller
+- A useful tool when developing applications that make use of the UniFi Controller API
+- The API exposes more data than is visible through the UniFi controller's web interface, making it useful for troubleshooting purposes
+- Debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
-- browse data collections/API endpoints exposed by the UniFi Controller API in an easy manner
-- switch between sites managed by the connected controller
-- switch between output formats (currently `JSON`, `JSON highlighted`, `PHP array, interactive` and `PHP array, highlighted` have been implemented)
-- copy the results to clipboard (this is only supported with the `JSON` output format, will fail gracefully with large collections)
-- switch between the default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
-- an "About" modal which shows version information for PHP, cURL, and the UniFi Controller
-- very easy setup with minimal dependencies
-- timing details of API calls can be useful to "benchmark" your UniFi Controller
-- useful tool when developing applications that make use of the UniFi Controller API
-- the API exposes more data than is visible through the UniFi controller's web interface which makes the tool useful for troubleshooting purposes
-- debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 ### Data collections/API endpoints currently implemented in the API browser
 
@@ -141,7 +137,10 @@ Alternatively, you may choose to download the zip file and unzip it in your dire
 
 ### UniFi OS support
 
-Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
+Support for UniFi OS-based controllers (for example the UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
+
+When connecting to a Network Application running on UniFi OS-based gateway through the WAN interface, you need to create a specific firewall rule to allow external access to port 443 on its local interface. Please read this blog post for more details:
+https://artofwifi.net/2022/04/07/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro/
 
 
 ### Extending the Collections dropdown menu
@@ -212,7 +211,7 @@ The PHP API client that comes bundled with this tool is based on the work by the
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/6.0.41/unifi_sh_api
+- https://dl.ui.com/unifi/7.3.81-1529bd4a64/unifi_sh_api
 
 Other included libraries:
 
@@ -229,11 +228,13 @@ Other included libraries:
 
 ### Security notice
 
-We **highly recommend** enabling the user name/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, please make sure to use **strong random passwords**.
+It is important to note that the UniFi API browser tool is a powerful tool that allows access to sensitive data and configuration options on your UniFi controller. It is therefore important you take appropriate security measures, such as limiting access to the tool to trusted individuals. Additionally, you should be aware of the security risks associated with running PHP code on your server.
 
-Please refer to the instructions in the `config/users-template.php` file for further details
+We **highly recommend** enabling the username/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, make sure to use **strong random passwords**. Please refer to the instructions in the `config/users-template.php` file for further details
 
-It is your own responsibility to implement the necessary additional controls in securing this application and preventing unwanted access.
+
+### Support and Feedback
+This project is actively maintained, and feedback and suggestions are always welcome. If you encounter any issues or have any suggestions for improvements, please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas and questions.
 
 
 ### Screenshots
