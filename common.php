@@ -1,11 +1,16 @@
 <?php
 /**
- * Copyright (c) 2021, Art of WiFi
+ * Copyright (c) 2023, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
-const TOOL_VERSION = '2.0.24';
+
+use Composer\InstalledVersions;
+
+require_once 'vendor/autoload.php';
+
+const TOOL_VERSION = '2.0.25';
 
 /**
  * gather some basic information for the About modal
@@ -32,21 +37,11 @@ $about_modal_params = [
  */
 
 /**
- * function which returns the version of the included API client class by
- * extracting it from the composer.lock file
+ * returns the version of the included API client class
+ *
+ * @see https://getcomposer.org/doc/07-runtime.md
  */
 function getClientVersion()
 {
-    if (is_readable('composer.lock')) {
-        $composer_lock = file_get_contents('composer.lock');
-        $json_decoded  = json_decode($composer_lock, true);
-        if (isset($json_decoded['packages'])) {
-            foreach ($json_decoded['packages'] as $package) {
-                if ($package['name'] === 'art-of-wifi/unifi-api-client') {
-                    return substr($package['version'], 1);
-                }
-            }
-        }
-    }
-    return 'unknown';
+    return InstalledVersions::getVersion('art-of-wifi/unifi-api-client');
 }

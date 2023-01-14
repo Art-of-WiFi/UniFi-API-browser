@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '39aa18d3626f070f4de35a5aa1df5329ecdbb3b5',
+    'reference' => 'a19bc0eabacef3640d9759f1ce3d7e5624d15a99',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '39aa18d3626f070f4de35a5aa1df5329ecdbb3b5',
+      'reference' => 'a19bc0eabacef3640d9759f1ce3d7e5624d15a99',
     ),
     'art-of-wifi/unifi-api-client' => 
     array (
