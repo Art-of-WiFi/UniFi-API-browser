@@ -23,29 +23,29 @@
  */
 $controllers = [
     [
-        'user'     => 'demo', // the username for access to the Unifi Controller
-        'password' => 'demo', // the password for access to the Unifi Controller
+        'user'     => 'demo',                    // the username for access to the Unifi Controller
+        'password' => 'demo',                    // the password for access to the Unifi Controller
         'url'      => 'https://demo.ui.com:443', // full url to the Unifi Controller, eg. 'https://22.22.11.11:8443'
-        'name'     => 'demo.ubnt.com' // name for this controller which will be used in the dropdown menu
+        'name'     => 'demo.ubnt.com',            // name for this controller which will be used in the dropdown menu
     ],
     [
-        'user'     => 'demo2', // the username for access to the UniFi Controller
-        'password' => 'demo2', // the password for access to the UniFi Controller
+        'user'     => 'demo2',                   // the username for access to the UniFi Controller
+        'password' => 'demo2',                   // the password for access to the UniFi Controller
         'url'      => 'https://demo.ui.com:443', // full url to the UniFi Controller, eg. 'https://22.22.11.11:8443'
-        'name'     => 'demo2.ubnt.com'  // name for this controller which will be used in the dropdown menu
+        'name'     => 'demo2.ubnt.com',           // name for this controller which will be used in the dropdown menu
     ],
 ];
 
 /**
  * Optionally change the default values for options below
  */
-$theme           = 'bootstrap'; // your default theme of choice, pick one from the list below:
-                                // bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
-                                // readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
+$theme = 'bootstrap'; // your default theme of choice, pick one from the list below:
+// bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
+// readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
 
 $navbar_class    = 'dark';      // class for the main navigation bar, valid options are: light, dark
 $navbar_bg_class = 'dark';      // class for the main navigation bar background, valid options are:
-                                // primary, secondary, success, danger, warning, info, light, dark, white, transparent
+// primary, secondary, success, danger, warning, info, light, dark, white, transparent
 
-$debug           = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
-                                // when fetching the sites collection after selecting a controller
+$debug = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
+// when fetching the sites collection after selecting a controller

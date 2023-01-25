@@ -21,16 +21,16 @@
  *     https://passwordsgenerator.net/sha512-hash-generator/
  *
  * IMPORTANT NOTE:
- * If you do not create the users.php file or do no create any user accounts, the API browser tool
+ * If you do not create the users.php file or do not create any user accounts, the API browser tool
  * will be accessible without providing any means of authentication.
  */
 $users = [
     [
-       'user_name' => '', // string, the user name
-       'password'  => '', // string, the SHA512 hash of the password
+        'user_name' => '', // string, the username
+        'password'  => '', // string, the SHA512 hash of the password
     ],
     [
-       'user_name' => '', // string, the user name
-       'password'  => '', // string, the SHA512 hash of the password
+        'user_name' => '', // string, the username
+        'password'  => '', // string, the SHA512 hash of the password
     ],
 ];

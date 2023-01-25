@@ -14,7 +14,6 @@
  */
 require_once '../common.php';
 require_once '../collections.php';
-require_once '../vendor/autoload.php';
 
 use UniFi_API\Client as ApiClient;
 
@@ -112,7 +111,7 @@ if (!empty($_SESSION['controller'])) {
         'stat_5minutes_gateway',
         'stat_hourly_gateway',
         'stat_daily_gateway',
-        'stat_monthly_gateway'
+        'stat_monthly_gateway',
     ];
 
     if (empty($params) && in_array($method, $gateway_stats_methods)) {
@@ -204,7 +203,6 @@ if (!empty($_SESSION['controller'])) {
             $time_total  = $time_end - $time_start;
             $login_perc  = ($time_after_login / $time_total) * 100;
             $load_perc   = (($time_after_load - $time_after_login) / $time_total) * 100;
-            $remain_perc = 100 - $login_perc - $load_perc;
 
             $results['timings']['login']      = $time_after_login;
             $results['timings']['load']       = $time_after_load;

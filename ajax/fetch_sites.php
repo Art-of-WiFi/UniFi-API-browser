@@ -14,7 +14,6 @@
  */
 require_once '../common.php';
 require_once '../collections.php';
-require_once '../vendor/autoload.php';
 
 /**
  * load the configuration file if readable

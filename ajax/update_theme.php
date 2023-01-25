@@ -35,10 +35,7 @@ $results = [
 ];
 
 /**
- * get the POSTed new theme to store in the global $_SESSION variable
- */
-/**
- * get the POST parameters that were passed by the calling AJAX function
+ * get the POSTed new theme and store this in the global $_SESSION variable
  */
 if (!empty($_POST['new_theme'])) {
     $_SESSION['theme'] = $_POST['new_theme'];
