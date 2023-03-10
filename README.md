@@ -102,7 +102,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 ### Requirements
 
 - A web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
-- Metwork connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
+- Network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from public CDNs.
 - Using an administrator account with **read-only** permissions can limit visibility on certain collection/object properties. 
   See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) 
@@ -112,7 +112,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 ### Installation
 
 Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
-- open up a terminal window on your server and cd to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
+- open up a terminal window on your server and `cd` to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
 ```bash
 git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 ```
@@ -128,11 +128,11 @@ Alternatively, you may choose to download the zip file and unzip it in your dire
 
 ### Configuration
 
-- credentials for access to the UniFi Controller API are configured in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
-- starting with version 1.0.3, you can store **multiple controller configurations** in an array inside the `config/config.php` file
-- please refer to the instructions in the `config/config-template.php` file for further configuration instructions
-- starting with API browser tool version 2.0.0 you can restrict access to the tool by creating user accounts and passwords, please refer to the instructions in the `config/users-template.php` file for further details
-- after following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
+- Credentials for access to the UniFi Controller API are configured in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
+- Starting with version 1.0.3, you can store **multiple controller configurations** in an array inside the `config/config.php` file
+- Please refer to the `config/config-template.php` file for further configuration instructions
+- Starting with API browser tool version 2.0.0, you can restrict access to the tool by creating user accounts and passwords. Please refer to the instructions in the `config/users-template.php` file for further details
+- After following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
 
 
 ### UniFi OS support
