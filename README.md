@@ -7,7 +7,7 @@ If you plan on creating your own PHP code to interact with the UniFi controller 
 Please keep the following in mind when using the UniFi API browser:
 
 - The tool does not support all available data collections and API endpoints. See the list below for those currently supported.
-- Currently, versions 5.X.X, 6.X.X, and 7.X.X of the UniFi Controller software are supported (version **7.2.95** has been confirmed to work)
+- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.0.21** has been confirmed to work)
 - The Network Application on UniFi OS-based controllers is also supported, same versions as above
 - When accessing UniFi OS-based controllers through this tool, please read the remarks regarding UniFi OS support
 - Please read the Security Notice before installing this tool.

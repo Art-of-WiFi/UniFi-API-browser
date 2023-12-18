@@ -10,7 +10,7 @@ use Composer\InstalledVersions;
 
 require_once 'vendor/autoload.php';
 
-const TOOL_VERSION = '2.0.25';
+const TOOL_VERSION = '2.0.26';
 
 /**
  * gather some basic information for the About modal

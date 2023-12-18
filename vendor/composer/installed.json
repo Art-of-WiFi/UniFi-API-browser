@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.79",
-            "version_normalized": "1.1.79.0",
+            "version": "v1.1.82",
+            "version_normalized": "1.1.82.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "cbe89d913cc4dd3742d5fd35e201ec86bc8ccdc9"
+                "reference": "e89daaf1a31f0e9320eb2092398f588fa18a08eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/cbe89d913cc4dd3742d5fd35e201ec86bc8ccdc9",
-                "reference": "cbe89d913cc4dd3742d5fd35e201ec86bc8ccdc9",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/e89daaf1a31f0e9320eb2092398f588fa18a08eb",
+                "reference": "e89daaf1a31f0e9320eb2092398f588fa18a08eb",
                 "shasum": ""
             },
             "require": {
@@ -20,9 +20,9 @@
                 "ext-json": "*",
                 "php": ">=5.5.0"
             },
-            "time": "2022-03-28T09:57:57+00:00",
+            "time": "2023-12-18T10:42:56+00:00",
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "UniFi_API\\": "src/"
@@ -51,7 +51,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
-                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.79"
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.82"
             },
             "install-path": "../art-of-wifi/unifi-api-client"
         },
@@ -134,17 +134,17 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.27.0",
-            "version_normalized": "1.27.0.0",
+            "version": "v1.28.0",
+            "version_normalized": "1.28.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "5bbc823adecdae860bb64756d639ecfec17b050a"
+                "reference": "ea208ce43cbb04af6867b4fdddb1bdbf84cc28cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/5bbc823adecdae860bb64756d639ecfec17b050a",
-                "reference": "5bbc823adecdae860bb64756d639ecfec17b050a",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/ea208ce43cbb04af6867b4fdddb1bdbf84cc28cb",
+                "reference": "ea208ce43cbb04af6867b4fdddb1bdbf84cc28cb",
                 "shasum": ""
             },
             "require": {
@@ -156,11 +156,11 @@
             "suggest": {
                 "ext-ctype": "For best performance"
             },
-            "time": "2022-11-03T14:55:06+00:00",
+            "time": "2023-01-26T09:26:14+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.27-dev"
+                    "dev-main": "1.28-dev"
                 },
                 "thanks": {
                     "name": "symfony/polyfill",
@@ -199,7 +199,7 @@
                 "portable"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.27.0"
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.28.0"
             },
             "funding": [
                 {
