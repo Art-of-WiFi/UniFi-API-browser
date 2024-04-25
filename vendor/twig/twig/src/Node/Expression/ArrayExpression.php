@@ -15,9 +15,9 @@ use Twig\Compiler;
 
 class ArrayExpression extends AbstractExpression
 {
-    protected $index;
+    private $index;
 
-    public function __construct(array $elements, $lineno)
+    public function __construct(array $elements, int $lineno)
     {
         parent::__construct($elements, [], $lineno);
 

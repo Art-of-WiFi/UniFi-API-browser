@@ -1,16 +1,16 @@
 <?php
 /**
- * Copyright (c) 2023, Art of WiFi
+ * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
+ * This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 use Composer\InstalledVersions;
 
 require_once 'vendor/autoload.php';
 
-const TOOL_VERSION = '2.0.26';
+const TOOL_VERSION = '2.0.27';
 
 /**
  * gather some basic information for the About modal
@@ -25,7 +25,7 @@ $about_modal_params = [
     'os_version'          => php_uname('s') . ' ' . php_uname('r'),
     'php_version'         => phpversion(),
     'memory_limit'        => ini_get('memory_limit') . 'B',
-    'memory_used'         => round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB',
+    'memory_used'         => round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB',
     'curl_version'        => $curl_info['version'],
     'openssl_version'     => $curl_info['ssl_version'],
     'api_client_version'  => getClientVersion(),

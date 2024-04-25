@@ -18,11 +18,30 @@ namespace Twig\Sandbox;
  */
 interface SecurityPolicyInterface
 {
+    /**
+     * @param string[] $tags
+     * @param string[] $filters
+     * @param string[] $functions
+     *
+     * @throws SecurityError
+     */
     public function checkSecurity($tags, $filters, $functions);
 
+    /**
+     * @param object $obj
+     * @param string $method
+     *
+     * @throws SecurityNotAllowedMethodError
+     */
     public function checkMethodAllowed($obj, $method);
 
-    public function checkPropertyAllowed($obj, $method);
+    /**
+     * @param object $obj
+     * @param string $property
+     *
+     * @throws SecurityNotAllowedPropertyError
+     */
+    public function checkPropertyAllowed($obj, $property);
 }
 
 class_alias('Twig\Sandbox\SecurityPolicyInterface', 'Twig_Sandbox_SecurityPolicyInterface');

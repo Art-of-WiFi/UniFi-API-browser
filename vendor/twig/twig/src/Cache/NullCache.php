@@ -14,11 +14,9 @@ namespace Twig\Cache;
 /**
  * Implements a no-cache strategy.
  *
- * @final
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class NullCache implements CacheInterface
+final class NullCache implements CacheInterface
 {
     public function generateKey($name, $className)
     {

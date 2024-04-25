@@ -37,14 +37,12 @@ final class TemplateWrapper
      * Renders the template.
      *
      * @param array $context An array of parameters to pass to the template
-     *
-     * @return string The rendered template
      */
-    public function render($context = [])
+    public function render(array $context = []): string
     {
         // using func_get_args() allows to not expose the blocks argument
         // as it should only be used by internal code
-        return $this->template->render($context, \func_num_args() > 1 ? func_get_arg(1) : []);
+        return $this->template->render($context, \func_get_args()[1] ?? []);
     }
 
     /**
@@ -52,11 +50,11 @@ final class TemplateWrapper
      *
      * @param array $context An array of parameters to pass to the template
      */
-    public function display($context = [])
+    public function display(array $context = [])
     {
         // using func_get_args() allows to not expose the blocks argument
         // as it should only be used by internal code
-        $this->template->display($context, \func_num_args() > 1 ? func_get_arg(1) : []);
+        $this->template->display($context, \func_get_args()[1] ?? []);
     }
 
     /**
@@ -64,10 +62,8 @@ final class TemplateWrapper
      *
      * @param string $name    The block name
      * @param array  $context An array of parameters to pass to the template
-     *
-     * @return bool
      */
-    public function hasBlock($name, $context = [])
+    public function hasBlock(string $name, array $context = []): bool
     {
         return $this->template->hasBlock($name, $context);
     }
@@ -79,7 +75,7 @@ final class TemplateWrapper
      *
      * @return string[] An array of defined template block names
      */
-    public function getBlockNames($context = [])
+    public function getBlockNames(array $context = []): array
     {
         return $this->template->getBlockNames($context);
     }
@@ -92,7 +88,7 @@ final class TemplateWrapper
      *
      * @return string The rendered block
      */
-    public function renderBlock($name, $context = [])
+    public function renderBlock(string $name, array $context = []): string
     {
         $context = $this->env->mergeGlobals($context);
         $level = ob_get_level();
@@ -103,12 +99,6 @@ final class TemplateWrapper
         }
         try {
             $this->template->displayBlock($name, $context);
-        } catch (\Exception $e) {
-            while (ob_get_level() > $level) {
-                ob_end_clean();
-            }
-
-            throw $e;
         } catch (\Throwable $e) {
             while (ob_get_level() > $level) {
                 ob_end_clean();
@@ -126,23 +116,17 @@ final class TemplateWrapper
      * @param string $name    The block name to render
      * @param array  $context An array of parameters to pass to the template
      */
-    public function displayBlock($name, $context = [])
+    public function displayBlock(string $name, array $context = [])
     {
         $this->template->displayBlock($name, $this->env->mergeGlobals($context));
     }
 
-    /**
-     * @return Source
-     */
-    public function getSourceContext()
+    public function getSourceContext(): Source
     {
         return $this->template->getSourceContext();
     }
 
-    /**
-     * @return string
-     */
-    public function getTemplateName()
+    public function getTemplateName(): string
     {
         return $this->template->getTemplateName();
     }

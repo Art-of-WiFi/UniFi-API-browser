@@ -11,17 +11,8 @@
 
 namespace Twig\Extension;
 
-use Twig\Environment;
-
 abstract class AbstractExtension implements ExtensionInterface
 {
-    /**
-     * @deprecated since 1.23 (to be removed in 2.0), implement \Twig_Extension_InitRuntimeInterface instead
-     */
-    public function initRuntime(Environment $environment)
-    {
-    }
-
     public function getTokenParsers()
     {
         return [];
@@ -50,22 +41,6 @@ abstract class AbstractExtension implements ExtensionInterface
     public function getOperators()
     {
         return [];
-    }
-
-    /**
-     * @deprecated since 1.23 (to be removed in 2.0), implement \Twig_Extension_GlobalsInterface instead
-     */
-    public function getGlobals()
-    {
-        return [];
-    }
-
-    /**
-     * @deprecated since 1.26 (to be removed in 2.0), not used anymore internally
-     */
-    public function getName()
-    {
-        return static::class;
     }
 }
 

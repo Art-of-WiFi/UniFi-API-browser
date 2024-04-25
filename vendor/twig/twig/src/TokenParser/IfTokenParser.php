@@ -27,17 +27,15 @@ use Twig\Token;
  *      {% endfor %}
  *    </ul>
  *   {% endif %}
- *
- * @final
  */
-class IfTokenParser extends AbstractTokenParser
+final class IfTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
         $lineno = $token->getLine();
         $expr = $this->parser->getExpressionParser()->parseExpression();
         $stream = $this->parser->getStream();
-        $stream->expect(Token::BLOCK_END_TYPE);
+        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
         $body = $this->parser->subparse([$this, 'decideIfFork']);
         $tests = [$expr, $body];
         $else = null;
@@ -46,13 +44,13 @@ class IfTokenParser extends AbstractTokenParser
         while (!$end) {
             switch ($stream->next()->getValue()) {
                 case 'else':
-                    $stream->expect(Token::BLOCK_END_TYPE);
+                    $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
                     $else = $this->parser->subparse([$this, 'decideIfEnd']);
                     break;
 
                 case 'elseif':
                     $expr = $this->parser->getExpressionParser()->parseExpression();
-                    $stream->expect(Token::BLOCK_END_TYPE);
+                    $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
                     $body = $this->parser->subparse([$this, 'decideIfFork']);
                     $tests[] = $expr;
                     $tests[] = $body;
@@ -67,7 +65,7 @@ class IfTokenParser extends AbstractTokenParser
             }
         }
 
-        $stream->expect(Token::BLOCK_END_TYPE);
+        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
 
         return new IfNode(new Node($tests), $else, $lineno, $this->getTag());
     }

@@ -14,10 +14,11 @@ namespace Twig\Node\Expression\Unary;
 
 use Twig\Compiler;
 use Twig\Node\Expression\AbstractExpression;
+use Twig\Node\Node;
 
 abstract class AbstractUnary extends AbstractExpression
 {
-    public function __construct(\Twig_NodeInterface $node, $lineno)
+    public function __construct(Node $node, int $lineno)
     {
         parent::__construct(['node' => $node], [], $lineno);
     }

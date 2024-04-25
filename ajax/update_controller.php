@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023, Art of WiFi
+ * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
@@ -15,11 +15,11 @@ require_once '../collections.php';
 /**
  * load the configuration file if readable
  */
-if (is_file('../config/config.php') && is_readable('../config/config.php')) {
-    include '../config/config.php';
-} else {
+if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
     exit;
 }
+
+include '../config/config.php';
 
 /**
  * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required

@@ -15,10 +15,8 @@ use Twig\Profiler\Profile;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final
  */
-class TextDumper extends BaseDumper
+final class TextDumper extends BaseDumper
 {
     protected function formatTemplate(Profile $profile, $prefix)
     {

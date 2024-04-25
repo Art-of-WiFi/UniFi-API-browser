@@ -16,14 +16,12 @@ namespace Twig;
  * Represents a Token.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final
  */
-class Token
+final class Token
 {
-    protected $value;
-    protected $type;
-    protected $lineno;
+    private $value;
+    private $type;
+    private $lineno;
 
     public const EOF_TYPE = -1;
     public const TEXT_TYPE = 0;

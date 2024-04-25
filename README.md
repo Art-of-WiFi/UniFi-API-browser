@@ -7,7 +7,7 @@ If you plan on creating your own PHP code to interact with the UniFi controller 
 Please keep the following in mind when using the UniFi API browser:
 
 - The tool does not support all available data collections and API endpoints. See the list below for those currently supported.
-- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.0.21** has been confirmed to work)
+- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.1.113** has been confirmed to work)
 - The Network Application on UniFi OS-based controllers is also supported, same versions as above
 - When accessing UniFi OS-based controllers through this tool, please read the remarks regarding UniFi OS support
 - Please read the Security Notice before installing this tool.
@@ -101,7 +101,7 @@ Please note that the bundled API client supports many more API endpoints, not al
 
 ### Requirements
 
-- A web server with PHP (7.2.5 or higher) and the php-curl module installed (confirmed to work on Apache with PHP 7.4.9 and cURL 7.58.0)
+- A web server with PHP (7.4.0 or higher) and the php-curl module installed
 - Network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from public CDNs.
 - Using an administrator account with **read-only** permissions can limit visibility on certain collection/object properties. 
@@ -137,9 +137,9 @@ Alternatively, you may choose to download the zip file and unzip it in your dire
 
 ### UniFi OS support
 
-Support for UniFi OS-based controllers (for example the UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
+Support for UniFi OS-based controllers (for example, the UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
 
-When using the UniFi API browser to connect to a Network Application on a UniFi OS-based gateway via the WAN interface, it is necessary to create a specific firewall rule to allow external access to port 443 on the gateway's local interface. For more information, please refer to the following blog post for further details.:
+When using the UniFi API browser to connect to a Network Application on a UniFi OS-based gateway via the WAN interface, it is necessary to create a specific firewall rule to allow external access to port 443 on the gateway's local interface. For more information, please refer to the following blog post for further details:
 https://artofwifi.net/2022/04/07/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro/
 
 

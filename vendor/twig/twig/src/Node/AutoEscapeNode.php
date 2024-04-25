@@ -26,7 +26,7 @@ use Twig\Compiler;
  */
 class AutoEscapeNode extends Node
 {
-    public function __construct($value, \Twig_NodeInterface $body, $lineno, $tag = 'autoescape')
+    public function __construct($value, Node $body, int $lineno, string $tag = 'autoescape')
     {
         parent::__construct(['body' => $body], ['value' => $value], $lineno, $tag);
     }

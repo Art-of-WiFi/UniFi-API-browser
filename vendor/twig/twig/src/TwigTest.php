@@ -11,28 +11,42 @@
 
 namespace Twig;
 
+use Twig\Node\Expression\TestExpression;
+
 /**
  * Represents a template test.
  *
- * @final
+ * @final since Twig 2.4.0
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @see https://twig.symfony.com/doc/templates.html#test-operator
  */
 class TwigTest
 {
-    protected $name;
-    protected $callable;
-    protected $options;
-
+    private $name;
+    private $callable;
+    private $options;
     private $arguments = [];
 
-    public function __construct($name, $callable, array $options = [])
+    /**
+     * Creates a template test.
+     *
+     * @param string        $name     Name of this test
+     * @param callable|null $callable A callable implementing the test. If null, you need to overwrite the "node_class" option to customize compilation.
+     * @param array         $options  Options array
+     */
+    public function __construct(string $name, $callable = null, array $options = [])
     {
+        if (__CLASS__ !== static::class) {
+            @trigger_error('Overriding '.__CLASS__.' is deprecated since Twig 2.4.0 and the class will be final in 3.0.', \E_USER_DEPRECATED);
+        }
+
         $this->name = $name;
         $this->callable = $callable;
         $this->options = array_merge([
             'is_variadic' => false,
-            'node_class' => '\Twig\Node\Expression\TestExpression',
+            'node_class' => TestExpression::class,
             'deprecated' => false,
             'alternative' => null,
             'one_mandatory_argument' => false,
@@ -44,6 +58,11 @@ class TwigTest
         return $this->name;
     }
 
+    /**
+     * Returns the callable to execute for this test.
+     *
+     * @return callable|null
+     */
     public function getCallable()
     {
         return $this->callable;
@@ -52,6 +71,16 @@ class TwigTest
     public function getNodeClass()
     {
         return $this->options['node_class'];
+    }
+
+    public function setArguments($arguments)
+    {
+        $this->arguments = $arguments;
+    }
+
+    public function getArguments()
+    {
+        return $this->arguments;
     }
 
     public function isVariadic()
@@ -74,20 +103,13 @@ class TwigTest
         return $this->options['alternative'];
     }
 
-    public function setArguments($arguments)
-    {
-        $this->arguments = $arguments;
-    }
-
-    public function getArguments()
-    {
-        return $this->arguments;
-    }
-
     public function hasOneMandatoryArgument(): bool
     {
         return (bool) $this->options['one_mandatory_argument'];
     }
 }
 
-class_alias('Twig\TwigTest', 'Twig_SimpleTest');
+// For Twig 1.x compatibility
+class_alias('Twig\TwigTest', 'Twig_SimpleTest', false);
+
+class_alias('Twig\TwigTest', 'Twig_Test');

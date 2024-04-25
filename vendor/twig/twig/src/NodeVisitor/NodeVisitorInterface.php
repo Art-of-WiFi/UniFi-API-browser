@@ -12,6 +12,7 @@
 namespace Twig\NodeVisitor;
 
 use Twig\Environment;
+use Twig\Node\Node;
 
 /**
  * Interface for node visitor classes.
@@ -23,16 +24,16 @@ interface NodeVisitorInterface
     /**
      * Called before child nodes are visited.
      *
-     * @return \Twig_NodeInterface The modified node
+     * @return Node The modified node
      */
-    public function enterNode(\Twig_NodeInterface $node, Environment $env);
+    public function enterNode(Node $node, Environment $env);
 
     /**
      * Called after child nodes are visited.
      *
-     * @return \Twig_NodeInterface|false|null The modified node or null if the node must be removed
+     * @return Node|null The modified node or null if the node must be removed
      */
-    public function leaveNode(\Twig_NodeInterface $node, Environment $env);
+    public function leaveNode(Node $node, Environment $env);
 
     /**
      * Returns the priority for this visitor.

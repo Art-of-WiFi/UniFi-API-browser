@@ -16,16 +16,14 @@ use Twig\Token;
 
 /**
  * Evaluates an expression, discarding the returned value.
- *
- * @final
  */
-class DoTokenParser extends AbstractTokenParser
+final class DoTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
         $expr = $this->parser->getExpressionParser()->parseExpression();
 
-        $this->parser->getStream()->expect(Token::BLOCK_END_TYPE);
+        $this->parser->getStream()->expect(/* Token::BLOCK_END_TYPE */ 3);
 
         return new DoNode($expr, $token->getLine(), $this->getTag());
     }

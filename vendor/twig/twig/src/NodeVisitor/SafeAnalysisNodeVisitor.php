@@ -23,20 +23,17 @@ use Twig\Node\Expression\NameExpression;
 use Twig\Node\Expression\ParentExpression;
 use Twig\Node\Node;
 
-/**
- * @final
- */
-class SafeAnalysisNodeVisitor extends AbstractNodeVisitor
+final class SafeAnalysisNodeVisitor extends AbstractNodeVisitor
 {
-    protected $data = [];
-    protected $safeVars = [];
+    private $data = [];
+    private $safeVars = [];
 
     public function setSafeVars($safeVars)
     {
         $this->safeVars = $safeVars;
     }
 
-    public function getSafe(\Twig_NodeInterface $node)
+    public function getSafe(Node $node)
     {
         $hash = spl_object_hash($node);
         if (!isset($this->data[$hash])) {
@@ -56,7 +53,7 @@ class SafeAnalysisNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected function setSafe(\Twig_NodeInterface $node, array $safe)
+    private function setSafe(Node $node, array $safe)
     {
         $hash = spl_object_hash($node);
         if (isset($this->data[$hash])) {
@@ -125,8 +122,7 @@ class SafeAnalysisNodeVisitor extends AbstractNodeVisitor
             }
         } elseif ($node instanceof GetAttrExpression && $node->getNode('node') instanceof NameExpression) {
             $name = $node->getNode('node')->getAttribute('name');
-            // attributes on template instances are safe
-            if ('_self' == $name || \in_array($name, $this->safeVars)) {
+            if (\in_array($name, $this->safeVars)) {
                 $this->setSafe($node, ['all']);
             } else {
                 $this->setSafe($node, []);
@@ -138,7 +134,7 @@ class SafeAnalysisNodeVisitor extends AbstractNodeVisitor
         return $node;
     }
 
-    protected function intersectSafe(array $a = null, array $b = null)
+    private function intersectSafe(array $a = null, array $b = null): array
     {
         if (null === $a || null === $b) {
             return [];

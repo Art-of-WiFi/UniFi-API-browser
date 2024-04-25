@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023, Art of WiFi
+ * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled
@@ -18,14 +18,14 @@ require_once '../collections.php';
 /**
  * load the configuration file if readable
  */
-if (is_file('../config/config.php') && is_readable('../config/config.php')) {
-    include '../config/config.php';
-} else {
+if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
     exit;
 }
 
+include '../config/config.php';
+
 /**
- * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 session_start();
 
@@ -65,12 +65,12 @@ if (!empty($_SESSION['controller'])) {
              */
             $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
                 trim(rtrim($controller['url'], "/")), 'default');
-            $loginresults     = $unifi_connection->login();
+            $login_results    = $unifi_connection->login();
 
             /**
              * check for login errors
              */
-            if ($loginresults === 400) {
+            if ($login_results === 400) {
                 $results['state']   = 'error';
                 $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
             } else {

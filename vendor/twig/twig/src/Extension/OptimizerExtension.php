@@ -13,12 +13,9 @@ namespace Twig\Extension;
 
 use Twig\NodeVisitor\OptimizerNodeVisitor;
 
-/**
- * @final
- */
-class OptimizerExtension extends AbstractExtension
+final class OptimizerExtension extends AbstractExtension
 {
-    protected $optimizers;
+    private $optimizers;
 
     public function __construct($optimizers = -1)
     {
@@ -28,11 +25,6 @@ class OptimizerExtension extends AbstractExtension
     public function getNodeVisitors()
     {
         return [new OptimizerNodeVisitor($this->optimizers)];
-    }
-
-    public function getName()
-    {
-        return 'optimizer';
     }
 }
 

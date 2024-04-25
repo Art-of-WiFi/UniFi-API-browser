@@ -1,13 +1,13 @@
 <?php
 /**
- * Copyright (c) 2023, Art of WiFi
+ * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
 
 /**
- * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 
 use Twig\Environment;
@@ -16,11 +16,11 @@ use Twig\Loader\FilesystemLoader;
 session_start();
 
 /**
- * check whether user has requested to clear (force expiry) the PHP session, if so we
- * clear the session and reload the page without the query string
- * - this feature can be useful when login errors occur, mostly after upgrades or credential changes
+ * We check whether the user has requested to clear (force expiry) the PHP session, if so, we
+ * clear the session and reload the page without the query string.
+ * This feature can be useful when login errors occur, mostly after upgrades or credential changes.
  */
-if (isset($_GET['reset_session']) && $_GET['reset_session'] == true) {
+if (isset($_GET['reset_session']) && $_GET['reset_session']) {
     $_SESSION = [];
     session_unset();
     session_destroy();
@@ -106,9 +106,10 @@ if (version_compare(PHP_VERSION, '5.6.0') < 0) {
  */
 if (is_file('config/users.php') && is_readable('config/users.php')) {
     require_once 'config/users.php';
-    if (isset($users) && is_array($users) && count($users) > 0) {
-        $user_authentication = true;
-    } else {
+
+    $user_authentication = true;
+
+    if (!isset($users) || !is_array($users) || count($users) === 0) {
         $user_authentication = false;
         error_log('The $users array in the config/users.php file does not exist or is empty, proceeding without user authentication.');
     }
@@ -118,14 +119,14 @@ if (is_file('config/users.php') && is_readable('config/users.php')) {
 }
 
 /**
- * if needed, we request the user to login
+ * if needed, we request the user to log in
  */
 if ($user_authentication && (empty($_SESSION['logged_in']))) {
+    $login_error = '';
+
     if (!empty($_SESSION['login_error_message'])) {
         $login_error                     = $_SESSION['login_error_message'];
         $_SESSION['login_error_message'] = '';
-    } else {
-        $login_error = '';
     }
 
     /**

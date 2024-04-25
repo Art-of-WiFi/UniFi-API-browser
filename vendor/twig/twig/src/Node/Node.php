@@ -20,7 +20,7 @@ use Twig\Source;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Node implements \Twig_NodeInterface
+class Node implements \Countable, \IteratorAggregate
 {
     protected $nodes;
     protected $attributes;
@@ -36,11 +36,11 @@ class Node implements \Twig_NodeInterface
      * @param int    $lineno     The line number
      * @param string $tag        The tag name associated with the Node
      */
-    public function __construct(array $nodes = [], array $attributes = [], $lineno = 0, $tag = null)
+    public function __construct(array $nodes = [], array $attributes = [], int $lineno = 0, string $tag = null)
     {
         foreach ($nodes as $name => $node) {
-            if (!$node instanceof \Twig_NodeInterface) {
-                @trigger_error(sprintf('Using "%s" for the value of node "%s" of "%s" is deprecated since version 1.25 and will be removed in 2.0.', \is_object($node) ? \get_class($node) : (null === $node ? 'null' : \gettype($node)), $name, static::class), \E_USER_DEPRECATED);
+            if (!$node instanceof self) {
+                throw new \InvalidArgumentException(sprintf('Using "%s" for the value of node "%s" of "%s" is not supported. You must pass a \Twig\Node\Node instance.', \is_object($node) ? \get_class($node) : (null === $node ? 'null' : \gettype($node)), $name, static::class));
             }
         }
         $this->nodes = $nodes;
@@ -77,41 +77,6 @@ class Node implements \Twig_NodeInterface
         return implode("\n", $repr);
     }
 
-    /**
-     * @deprecated since 1.16.1 (to be removed in 2.0)
-     */
-    public function toXml($asDom = false)
-    {
-        @trigger_error(sprintf('%s is deprecated since version 1.16.1 and will be removed in 2.0.', __METHOD__), \E_USER_DEPRECATED);
-
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $dom->formatOutput = true;
-        $dom->appendChild($xml = $dom->createElement('twig'));
-
-        $xml->appendChild($node = $dom->createElement('node'));
-        $node->setAttribute('class', static::class);
-
-        foreach ($this->attributes as $name => $value) {
-            $node->appendChild($attribute = $dom->createElement('attribute'));
-            $attribute->setAttribute('name', $name);
-            $attribute->appendChild($dom->createTextNode($value));
-        }
-
-        foreach ($this->nodes as $name => $n) {
-            if (null === $n) {
-                continue;
-            }
-
-            $child = $n->toXml(true)->getElementsByTagName('node')->item(0);
-            $child = $dom->importNode($child, true);
-            $child->setAttribute('name', $name);
-
-            $node->appendChild($child);
-        }
-
-        return $asDom ? $dom : $dom->saveXML();
-    }
-
     public function compile(Compiler $compiler)
     {
         foreach ($this->nodes as $node) {
@@ -121,16 +86,6 @@ class Node implements \Twig_NodeInterface
 
     public function getTemplateLine()
     {
-        return $this->lineno;
-    }
-
-    /**
-     * @deprecated since 1.27 (to be removed in 2.0)
-     */
-    public function getLine()
-    {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 1.27 and will be removed in 2.0. Use getTemplateLine() instead.', \E_USER_DEPRECATED);
-
         return $this->lineno;
     }
 
@@ -178,7 +133,7 @@ class Node implements \Twig_NodeInterface
      */
     public function hasNode($name)
     {
-        return \array_key_exists($name, $this->nodes);
+        return isset($this->nodes[$name]);
     }
 
     /**
@@ -186,19 +141,15 @@ class Node implements \Twig_NodeInterface
      */
     public function getNode($name)
     {
-        if (!\array_key_exists($name, $this->nodes)) {
+        if (!isset($this->nodes[$name])) {
             throw new \LogicException(sprintf('Node "%s" does not exist for Node "%s".', $name, static::class));
         }
 
         return $this->nodes[$name];
     }
 
-    public function setNode($name, $node = null)
+    public function setNode($name, self $node)
     {
-        if (!$node instanceof \Twig_NodeInterface) {
-            @trigger_error(sprintf('Using "%s" for the value of node "%s" of "%s" is deprecated since version 1.25 and will be removed in 2.0.', \is_object($node) ? \get_class($node) : (null === $node ? 'null' : \gettype($node)), $name, static::class), \E_USER_DEPRECATED);
-        }
-
         $this->nodes[$name] = $node;
     }
 
@@ -210,6 +161,7 @@ class Node implements \Twig_NodeInterface
     /**
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return \count($this->nodes);
@@ -218,59 +170,46 @@ class Node implements \Twig_NodeInterface
     /**
      * @return \Traversable
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator($this->nodes);
     }
 
-    public function setTemplateName($name)
+    /**
+     * @deprecated since 2.8 (to be removed in 3.0)
+     */
+    public function setTemplateName($name/*, $triggerDeprecation = true */)
     {
+        $triggerDeprecation = 2 > \func_num_args() || \func_get_arg(1);
+        if ($triggerDeprecation) {
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.8 and will be removed in 3.0. Use setSourceContext() instead.', \E_USER_DEPRECATED);
+        }
+
         $this->name = $name;
         foreach ($this->nodes as $node) {
-            if (null !== $node) {
-                $node->setTemplateName($name);
-            }
+            $node->setTemplateName($name, $triggerDeprecation);
         }
     }
 
     public function getTemplateName()
     {
-        return $this->name;
+        return $this->sourceContext ? $this->sourceContext->getName() : null;
     }
 
     public function setSourceContext(Source $source)
     {
         $this->sourceContext = $source;
         foreach ($this->nodes as $node) {
-            if ($node instanceof self) {
-                $node->setSourceContext($source);
-            }
+            $node->setSourceContext($source);
         }
+
+        $this->setTemplateName($source->getName(), false);
     }
 
     public function getSourceContext()
     {
         return $this->sourceContext;
-    }
-
-    /**
-     * @deprecated since 1.27 (to be removed in 2.0)
-     */
-    public function setFilename($name)
-    {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 1.27 and will be removed in 2.0. Use setTemplateName() instead.', \E_USER_DEPRECATED);
-
-        $this->setTemplateName($name);
-    }
-
-    /**
-     * @deprecated since 1.27 (to be removed in 2.0)
-     */
-    public function getFilename()
-    {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 1.27 and will be removed in 2.0. Use getTemplateName() instead.', \E_USER_DEPRECATED);
-
-        return $this->name;
     }
 }
 

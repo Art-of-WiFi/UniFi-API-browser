@@ -21,7 +21,7 @@ use Twig\Node\Node;
  */
 class EnterProfileNode extends Node
 {
-    public function __construct($extensionName, $type, $name, $varName)
+    public function __construct(string $extensionName, string $type, string $name, string $varName)
     {
         parent::__construct([], ['extension_name' => $extensionName, 'name' => $name, 'type' => $type, 'var_name' => $varName]);
     }
@@ -29,9 +29,9 @@ class EnterProfileNode extends Node
     public function compile(Compiler $compiler)
     {
         $compiler
-            ->write(sprintf('$%s = $this->env->getExtension(', $this->getAttribute('var_name')))
+            ->write(sprintf('$%s = $this->extensions[', $this->getAttribute('var_name')))
             ->repr($this->getAttribute('extension_name'))
-            ->raw(");\n")
+            ->raw("];\n")
             ->write(sprintf('$%s->enter($%s = new \Twig\Profiler\Profile($this->getTemplateName(), ', $this->getAttribute('var_name'), $this->getAttribute('var_name').'_prof'))
             ->repr($this->getAttribute('type'))
             ->raw(', ')

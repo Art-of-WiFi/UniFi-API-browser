@@ -12,21 +12,20 @@
 namespace Twig\Sandbox;
 
 use Twig\Markup;
+use Twig\Template;
 
 /**
  * Represents a security policy which need to be enforced when sandbox mode is enabled.
  *
- * @final
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class SecurityPolicy implements SecurityPolicyInterface
+final class SecurityPolicy implements SecurityPolicyInterface
 {
-    protected $allowedTags;
-    protected $allowedFilters;
-    protected $allowedMethods;
-    protected $allowedProperties;
-    protected $allowedFunctions;
+    private $allowedTags;
+    private $allowedFilters;
+    private $allowedMethods;
+    private $allowedProperties;
+    private $allowedFunctions;
 
     public function __construct(array $allowedTags = [], array $allowedFilters = [], array $allowedMethods = [], array $allowedProperties = [], array $allowedFunctions = [])
     {
@@ -88,16 +87,15 @@ class SecurityPolicy implements SecurityPolicyInterface
 
     public function checkMethodAllowed($obj, $method)
     {
-        if ($obj instanceof \Twig_TemplateInterface || $obj instanceof Markup) {
+        if ($obj instanceof Template || $obj instanceof Markup) {
             return;
         }
 
         $allowed = false;
         $method = strtr($method, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
         foreach ($this->allowedMethods as $class => $methods) {
-            if ($obj instanceof $class) {
-                $allowed = \in_array($method, $methods);
-
+            if ($obj instanceof $class && \in_array($method, $methods)) {
+                $allowed = true;
                 break;
             }
         }
@@ -112,9 +110,8 @@ class SecurityPolicy implements SecurityPolicyInterface
     {
         $allowed = false;
         foreach ($this->allowedProperties as $class => $properties) {
-            if ($obj instanceof $class) {
-                $allowed = \in_array($property, \is_array($properties) ? $properties : [$properties]);
-
+            if ($obj instanceof $class && \in_array($property, \is_array($properties) ? $properties : [$properties])) {
+                $allowed = true;
                 break;
             }
         }

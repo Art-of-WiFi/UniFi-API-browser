@@ -17,13 +17,10 @@ use Twig\Source;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final
  */
-class DeprecationCollector
+final class DeprecationCollector
 {
     private $twig;
-    private $deprecations;
 
     public function __construct(Environment $twig)
     {
@@ -58,9 +55,12 @@ class DeprecationCollector
      */
     public function collect(\Traversable $iterator)
     {
-        $this->deprecations = [];
-
-        set_error_handler([$this, 'errorHandler']);
+        $deprecations = [];
+        set_error_handler(function ($type, $msg) use (&$deprecations) {
+            if (\E_USER_DEPRECATED === $type) {
+                $deprecations[] = $msg;
+            }
+        });
 
         foreach ($iterator as $name => $contents) {
             try {
@@ -72,20 +72,7 @@ class DeprecationCollector
 
         restore_error_handler();
 
-        $deprecations = $this->deprecations;
-        $this->deprecations = [];
-
         return $deprecations;
-    }
-
-    /**
-     * @internal
-     */
-    public function errorHandler($type, $msg)
-    {
-        if (\E_USER_DEPRECATED === $type) {
-            $this->deprecations[] = $msg;
-        }
     }
 }
 

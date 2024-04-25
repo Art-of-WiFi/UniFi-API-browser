@@ -11,28 +11,11 @@
 
 namespace Twig\Loader;
 
-use Twig\Error\LoaderError;
-use Twig\Source;
-
 /**
- * Adds a getSourceContext() method for loaders.
- *
- * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since 1.27 (to be removed in 3.0)
+ * Empty interface for Twig 1.x compatibility.
  */
-interface SourceContextLoaderInterface
+interface SourceContextLoaderInterface extends LoaderInterface
 {
-    /**
-     * Returns the source context for a given template logical name.
-     *
-     * @param string $name The template logical name
-     *
-     * @return Source
-     *
-     * @throws LoaderError When $name is not found
-     */
-    public function getSourceContext($name);
 }
 
 class_alias('Twig\Loader\SourceContextLoaderInterface', 'Twig_SourceContextLoaderInterface');

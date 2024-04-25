@@ -18,10 +18,8 @@ use Twig\Token;
  * Creates a nested scope.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final
  */
-class WithTokenParser extends AbstractTokenParser
+final class WithTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
@@ -29,16 +27,16 @@ class WithTokenParser extends AbstractTokenParser
 
         $variables = null;
         $only = false;
-        if (!$stream->test(Token::BLOCK_END_TYPE)) {
+        if (!$stream->test(/* Token::BLOCK_END_TYPE */ 3)) {
             $variables = $this->parser->getExpressionParser()->parseExpression();
-            $only = $stream->nextIf(Token::NAME_TYPE, 'only');
+            $only = (bool) $stream->nextIf(/* Token::NAME_TYPE */ 5, 'only');
         }
 
-        $stream->expect(Token::BLOCK_END_TYPE);
+        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
 
         $body = $this->parser->subparse([$this, 'decideWithEnd'], true);
 
-        $stream->expect(Token::BLOCK_END_TYPE);
+        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
 
         return new WithNode($body, $variables, $only, $token->getLine(), $this->getTag());
     }

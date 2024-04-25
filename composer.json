@@ -1,9 +1,9 @@
 {
     "require": {
-        "twig/twig": "1.*",
+        "twig/twig": "^2.0",
         "kint-php/kint": "3.*",
         "art-of-wifi/unifi-api-client": "^1.1",
-        "php": ">=7.2.5",
+        "php": ">=7.4.0",
         "ext-curl": "*",
         "ext-json": "*"
     }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2023, Art of WiFi
+ * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
@@ -15,7 +15,7 @@
  * Multi controller configuration options
  * =======================================
  * The number of UniFi controllers that can be added is unlimited, just take care to correctly maintain
- * the array structure by following PHP syntax shown below.
+ * the array structure by following the PHP syntax shown below.
  *
  * **All fields are required for each controller**
  *
@@ -37,7 +37,7 @@ $controllers = [
 ];
 
 /**
- * Optionally change the default values for options below
+ * Optionally change the default values for the options below
  */
 $theme = 'bootstrap'; // your default theme of choice, pick one from the list below:
 // bootstrap, cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper
@@ -48,4 +48,4 @@ $navbar_bg_class = 'dark';      // class for the main navigation bar background,
 // primary, secondary, success, danger, warning, info, light, dark, white, transparent
 
 $debug = false;       // set to true (without quotes) to enable debug output to the browser and the PHP error log
-// when fetching the sites collection after selecting a controller
+// when fetching the site collection after selecting a controller

@@ -27,10 +27,8 @@ use Twig\Token;
  *    {% block content %}{% endblock %}
  *
  * @see https://twig.symfony.com/doc/templates.html#horizontal-reuse for details.
- *
- * @final
  */
-class UseTokenParser extends AbstractTokenParser
+final class UseTokenParser extends AbstractTokenParser
 {
     public function parse(Token $token)
     {
@@ -44,22 +42,22 @@ class UseTokenParser extends AbstractTokenParser
         $targets = [];
         if ($stream->nextIf('with')) {
             do {
-                $name = $stream->expect(Token::NAME_TYPE)->getValue();
+                $name = $stream->expect(/* Token::NAME_TYPE */ 5)->getValue();
 
                 $alias = $name;
                 if ($stream->nextIf('as')) {
-                    $alias = $stream->expect(Token::NAME_TYPE)->getValue();
+                    $alias = $stream->expect(/* Token::NAME_TYPE */ 5)->getValue();
                 }
 
                 $targets[$name] = new ConstantExpression($alias, -1);
 
-                if (!$stream->nextIf(Token::PUNCTUATION_TYPE, ',')) {
+                if (!$stream->nextIf(/* Token::PUNCTUATION_TYPE */ 9, ',')) {
                     break;
                 }
             } while (true);
         }
 
-        $stream->expect(Token::BLOCK_END_TYPE);
+        $stream->expect(/* Token::BLOCK_END_TYPE */ 3);
 
         $this->parser->addTrait(new Node(['template' => $template, 'targets' => new Node($targets)]));
 

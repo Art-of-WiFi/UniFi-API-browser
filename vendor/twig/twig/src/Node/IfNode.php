@@ -21,7 +21,7 @@ use Twig\Compiler;
  */
 class IfNode extends Node
 {
-    public function __construct(\Twig_NodeInterface $tests, ?\Twig_NodeInterface $else, $lineno, $tag = null)
+    public function __construct(Node $tests, ?Node $else, int $lineno, string $tag = null)
     {
         $nodes = ['tests' => $tests];
         if (null !== $else) {
@@ -50,8 +50,11 @@ class IfNode extends Node
                 ->subcompile($this->getNode('tests')->getNode($i))
                 ->raw(") {\n")
                 ->indent()
-                ->subcompile($this->getNode('tests')->getNode($i + 1))
             ;
+            // The node might not exists if the content is empty
+            if ($this->getNode('tests')->hasNode($i + 1)) {
+                $compiler->subcompile($this->getNode('tests')->getNode($i + 1));
+            }
         }
 
         if ($this->hasNode('else')) {
