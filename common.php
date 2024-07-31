@@ -3,12 +3,12 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license bundled with this package in the file LICENSE.md
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
-use Composer\InstalledVersions;
-
 require_once 'vendor/autoload.php';
+
+use UniFi_API\Client as ApiClient;
 
 const TOOL_VERSION = '2.0.27';
 
@@ -33,15 +33,24 @@ $about_modal_params = [
 ];
 
 /**
- * common functions from here
- */
-
-/**
  * returns the version of the included API client class
  *
- * @see https://getcomposer.org/doc/07-runtime.md
+ * @return string
  */
-function getClientVersion()
+function getClientVersion(): string
 {
-    return InstalledVersions::getVersion('art-of-wifi/unifi-api-client');
+    $unifi_connection = new ApiClient('user', 'password');
+    return $unifi_connection->get_class_version();
 }
+
+/**
+ * output the results with correct JSON formatting
+ * @param $results
+ * @return void
+ */
+function returnJson($results): void
+{
+    header('Content-Type: application/json; charset=utf-8');
+    echo(json_encode($results));
+}
+

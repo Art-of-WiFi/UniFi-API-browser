@@ -3,14 +3,14 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
  * load required packages using the composer autoloader together with the files containing shared functions
  * and the menu options
+ *
+ * @var string $unknown_string
  */
 require_once '../common.php';
 require_once '../collections.php';
@@ -22,6 +22,12 @@ if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
     exit;
 }
 
+/**
+ * include the configuration file
+ *
+ * @var array $controllers
+ * @var bool $debug
+ */
 include '../config/config.php';
 
 /**
@@ -30,7 +36,7 @@ include '../config/config.php';
 session_start();
 
 /**
- * initialize the results array
+ * initialize the $results array
  */
 $results = [
     'state'   => 'success',
@@ -63,9 +69,14 @@ if (!empty($_SESSION['controller'])) {
             /**
              * create an instance of the Unifi API client class, log in to the controller and pull the requested data
              */
-            $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
-                trim(rtrim($controller['url'], "/")), 'default');
-            $login_results    = $unifi_connection->login();
+            $unifi_connection = new UniFi_API\Client(
+                trim($controller['user']),
+                trim($controller['password']),
+                trim(rtrim($controller['url'], "/")),
+                'default'
+            );
+
+            $login_results = $unifi_connection->login();
 
             /**
              * check for login errors
@@ -85,7 +96,7 @@ if (!empty($_SESSION['controller'])) {
                     }
 
                     /**
-                     * store the cookies from the controller for faster reconnects
+                     * store the cookies from the controller for faster reconnecting
                      */
                     $_SESSION['unificookie'] = $unifi_connection->get_cookie();
 
@@ -100,7 +111,7 @@ if (!empty($_SESSION['controller'])) {
                     }
 
                     /**
-                     * sort the sites array by full name
+                     * sort the site array by full name
                      */
                     usort($results['data'], function ($a, $b) {
                         if ($a['site_full_name'] == $b['site_full_name']) {
@@ -111,7 +122,7 @@ if (!empty($_SESSION['controller'])) {
                     });
 
                     /**
-                     * get the first site from the results array, just to be sure we use a valid site
+                     * get the first site from the $results array, just to be sure we use a valid site
                      */
                     $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
                     $site_info   = $unifi_connection->stat_sysinfo();
@@ -131,10 +142,6 @@ if (!empty($_SESSION['controller'])) {
     }
 }
 
-/**
- * output the results with correct json formatting
- */
-header('Content-Type: application/json; charset=utf-8');
-echo(json_encode($results));
+returnJson($results);
 
 $_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB';

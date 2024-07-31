@@ -3,9 +3,7 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
@@ -22,10 +20,16 @@ if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
     exit;
 }
 
+/**
+ * include the configuration file
+ *
+ * @var array $controllers
+ * @var bool $debug
+ */
 include '../config/config.php';
 
 /**
- * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 session_start();
 
@@ -52,10 +56,15 @@ if ($debug === true) {
                 /**
                  * create an instance of the Unifi API client class, log in to the controller and pull the sites
                  */
-                $unifi_connection = new UniFi_API\Client(trim($controller['user']), trim($controller['password']),
-                    trim(rtrim($controller['url'], "/")), 'default');
-                $set_debug_mode   = $unifi_connection->set_debug($debug);
-                $login_results    = $unifi_connection->login();
+                $unifi_connection = new UniFi_API\Client(
+                    trim($controller['user']),
+                    trim($controller['password']),
+                    trim(rtrim($controller['url'], "/")),
+                    'default'
+                );
+
+                $set_debug_mode = $unifi_connection->set_debug($debug);
+                $login_results  = $unifi_connection->login();
 
                 /**
                  * check for login errors

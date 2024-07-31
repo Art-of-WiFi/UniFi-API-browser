@@ -3,7 +3,7 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
@@ -27,7 +27,7 @@ include '../config/config.php';
 session_start();
 
 /**
- * initialize the results array
+ * initialize the $results array
  */
 $results = [
     'status'  => 'success',
@@ -44,8 +44,4 @@ if (!empty($_POST['new_theme'])) {
     $results['message'] = 'empty POST';
 }
 
-/**
- * output the results with correct JSON formatting
- */
-header('Content-Type: application/json; charset=utf-8');
-echo(json_encode($results));
+returnJson($results);

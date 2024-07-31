@@ -3,11 +3,13 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
  * load required files containing shared functions and the menu options
+ *
+ * @var array $controllers
  */
 require_once '../common.php';
 require_once '../collections.php';
@@ -22,7 +24,7 @@ if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
 include '../config/config.php';
 
 /**
- * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
  */
 session_start();
 
@@ -50,8 +52,4 @@ if (!empty($_POST['new_controller_idx'])) {
     $results['message'] = 'empty POST';
 }
 
-/**
- * output the results with correct JSON formatting
- */
-header('Content-Type: application/json; charset=utf-8');
-echo(json_encode($results));
+returnJson($results);

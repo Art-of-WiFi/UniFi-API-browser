@@ -3,11 +3,7 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
- */
-
-/**
- * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 use Twig\Environment;
@@ -31,11 +27,24 @@ if (isset($_GET['reset_session']) && $_GET['reset_session']) {
 }
 
 /**
- * load required packages using the composer autoloader together with the files containing shared functions
- * and the menu options
+ * load required packages using the composer autoloader
  */
 require_once 'vendor/autoload.php';
+
+/**
+ * include the common functions file
+ *
+ * @var string $curl_info
+ * @var string $unknown_string
+ * @var array $about_modal_params
+ */
 require_once 'common.php';
+
+/**
+ * load the file containing the collections for the menu options
+ *
+ * @var array $collections
+ */
 require_once 'collections.php';
 
 /**
@@ -45,8 +54,14 @@ $loader = new FilesystemLoader('templates');
 $twig   = new Environment($loader);
 
 /**
- * load the configuration file, if readable
- * - if not, stop and display an error message
+ * load the configuration file, if readable, if not, stop and display an error message
+ *
+ * @var array $controllers
+ * @var bool $debug
+ * @var string $theme
+ * @var string $navbar_class
+ * @var string $navbar_bg_class
+ * @var bool $about_modal_params
  */
 if (is_file('config/config.php') && is_readable('config/config.php')) {
     require_once 'config/config.php';
@@ -72,8 +87,7 @@ $twig->addGlobal('navbar_bg_class', $navbar_bg_class);
 $twig->addGlobal('about_modal_params', $about_modal_params);
 
 /**
- * check whether the required PHP curl module is available
- * - if not, stop and display an error message
+ * check whether the required PHP curl module is available, if not, stop and display an error message
  */
 if (!function_exists('curl_version')) {
     /**

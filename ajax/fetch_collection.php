@@ -3,9 +3,7 @@
  * Copyright (c) 2024, Art of WiFi
  * www.artofwifi.net
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
@@ -61,7 +59,7 @@ $gateway_stats_attribs = [
 ];
 
 /**
- * initialize the results array
+ * initialize the $results array
  */
 $results = [
     'state'   => 'success',
@@ -200,23 +198,19 @@ if (!empty($_SESSION['controller'])) {
             /**
              * calculate all the timings/percentages
              */
-            $time_end    = microtime(true);
-            $time_total  = $time_end - $time_start;
-            $login_perc  = ($time_after_login / $time_total) * 100;
-            $load_perc   = (($time_after_load - $time_after_login) / $time_total) * 100;
+            $time_end         = microtime(true);
+            $time_total       = $time_end - $time_start;
+            $login_percentage = ($time_after_login / $time_total) * 100;
+            $load_percentage  = (($time_after_load - $time_after_login) / $time_total) * 100;
 
             $results['timings']['login']      = $time_after_login;
             $results['timings']['load']       = $time_after_load;
-            $results['timings']['login_perc'] = $login_perc;
-            $results['timings']['load_perc']  = $load_perc;
+            $results['timings']['login_perc'] = $login_percentage;
+            $results['timings']['load_perc']  = $load_percentage;
         }
     }
 }
 
-/**
- * output the results with correct JSON formatting
- */
-header('Content-Type: application/json; charset=utf-8');
-echo(json_encode($results));
+returnJson($results);
 
 $_SESSION['memory_used'] = round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'MB';
