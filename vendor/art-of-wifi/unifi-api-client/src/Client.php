@@ -13,20 +13,24 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.91
+ * @version Release: 1.1.92
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
  */
 class Client
 {
+    /** constants */
+    const CLASS_VERSION        = '1.1.92';
+    const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const DEFAULT_CURL_METHOD  = 'GET';
+
     /**
      * protected properties
      *
-     * NOTE: do **not** edit the property values below, instead use the constructor or the getter and setter
-     *       functions/methods
+     * @note do **not** directly edit the property values below, instead use the constructor or the respective
+     *       getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.91';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -42,19 +46,18 @@ class Client
     protected bool   $curl_ssl_verify_peer = false;
     protected int    $curl_ssl_verify_host = 0;
     protected int    $curl_http_version    = CURL_HTTP_VERSION_NONE;
-    protected string $curl_method          = 'GET';
-    protected array  $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected string $curl_method          = self::DEFAULT_CURL_METHOD;
     protected int    $curl_request_timeout = 30;
     protected int    $curl_connect_timeout = 10;
     protected string $unificookie_name     = 'unificookie';
     protected array  $curl_headers         = [
-        'accept: application/json',
-        'content-type: application/json',
+        'Accept: application/json',
+        'Content-Type: application/json',
         'Expect:',
     ];
 
     /**
-     * Construct an instance of the UniFi API client class
+     * Construct an instance of the UniFi API client class.
      *
      * @param string $user username to use when connecting to the UniFi controller
      * @param string $password password to use when connecting to the UniFi controller
@@ -67,7 +70,7 @@ class Client
      *                         is recommended for production environments to prevent potential MitM attacks, default
      *                         value (false) disables validation of the controller's SSL certificate
      * @param string $unificookie_name optional, name of the cookie to use, default value is 'unificookie'.
-     *                                 This is only needed when you have multiple apps using the API on the same web
+     *                                 This is only necessary when you have multiple apps using the API on the same web
      *                                 server.
      */
     public function __construct(
@@ -109,23 +112,19 @@ class Client
     }
 
     /**
-     * This method is called as soon as there are no other references to the class instance
-     * https://www.php.net/manual/en/language.oop5.decon.php
+     * This method is called as soon as there are no other references to the class instance.
      *
-     * NOTE: to force the class instance to log out when you're done, call logout()
+     * @see https://www.php.net/manual/en/language.oop5.decon.php
+     * @note to force the class instance to log out when you're done, call logout()
      */
     public function __destruct()
     {
-        /**
-         * if $_SESSION[$this->unificookie_name] is set, do not log out here
-         */
+        /** if $_SESSION[$this->unificookie_name] is set, do not log out here */
         if (isset($_SESSION[$this->unificookie_name])) {
             return;
         }
 
-        /**
-         * log out, if needed
-         */
+        /** log out, if needed */
         if ($this->is_logged_in) {
             $this->logout();
         }
@@ -140,9 +139,7 @@ class Client
      */
     public function login()
     {
-        /**
-         * skip the login process if already logged in
-         */
+        /** skip the login process if already logged in */
         if ($this->update_unificookie()) {
             $this->is_logged_in = true;
         }
@@ -151,9 +148,7 @@ class Client
             return true;
         }
 
-        /**
-         * prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS
-         */
+        /** prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS */
         $ch = $this->get_curl_handle();
 
         $curl_options = [
@@ -162,9 +157,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request and get the HTTP response code
-         */
+        /** execute the cURL request and get the HTTP response code */
         curl_exec($ch);
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -173,9 +166,7 @@ class Client
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
-        /**
-         * prepare the actual login
-         */
+        /** prepare the actual login */
         $curl_options = [
             CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
@@ -184,9 +175,7 @@ class Client
             CURLOPT_URL        => $this->baseurl . '/api/login',
         ];
 
-        /**
-         * specific to UniFi OS-based controllers
-         */
+        /** specific to UniFi OS-based controllers */
         if ($http_code === 200) {
             $this->is_unifi_os         = true;
             $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
@@ -194,9 +183,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request and get the HTTP response code
-         */
+        /** execute the cURL request and get the HTTP response code */
         $response  = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -214,9 +201,7 @@ class Client
             print '</pre>' . PHP_EOL;
         }
 
-        /**
-         * based on the HTTP response code trigger an error
-         */
+        /** based on the HTTP response code trigger an error */
         if ($http_code >= 400) {
             trigger_error("HTTP response status received: $http_code. Probably a controller login failure");
 
@@ -225,9 +210,7 @@ class Client
 
         curl_close($ch);
 
-        /**
-         * check the HTTP response code
-         */
+        /** check the HTTP response code */
         if ($http_code >= 200) {
             $this->is_logged_in = true;
 
@@ -244,9 +227,7 @@ class Client
      */
     public function logout(): bool
     {
-        /**
-         * prepare cURL and options
-         */
+        /** prepare cURL and options */
         $ch = $this->get_curl_handle();
 
         $curl_options = [
@@ -268,9 +249,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request to logout
-         */
+        /** execute the cURL request to logout */
         curl_exec($ch);
 
         if (curl_errno($ch)) {
@@ -305,9 +284,7 @@ class Client
     {
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
-        /**
-         * append received values for up/down/megabytes/ap_mac to the payload array to be submitted
-         */
+        /** append received values for up/down/megabytes/ap_mac to the payload array to be submitted */
         if (!empty($up)) {
             $payload['up'] = $up;
         }
@@ -382,10 +359,8 @@ class Client
     /**
      * Forget one or more client devices
      *
-     * NOTE:
-     * only supported with controller versions 5.9.X and higher, can be
-     * slow (up to 5 minutes) on larger controllers
-     *
+     * @note only supported with controller versions 5.9.X and higher, can be
+     *       slow (up to 5 minutes) on larger controllers
      * @param array $macs array of client MAC addresses (strings)
      * @return bool returns true upon success
      */
@@ -1460,8 +1435,7 @@ class Client
     /**
      * Fetch (device) tags (using REST)
      *
-     * NOTES: this endpoint was introduced with controller versions 5.5.X
-     *
+     * @note this endpoint was introduced with controller versions 5.5.X
      * @return array|bool containing known device tag objects
      */
     public function list_tags()
@@ -1472,8 +1446,7 @@ class Client
     /**
      * Create (device) tag (using REST)
      *
-     * NOTES: this endpoint was introduced with controller versions 5.5.X
-     *
+     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $name required, the tag name to add
      * @param array|null $devices_macs optional, array of the MAC address(es) of the device(s) to tag with the new tag
      * @return bool return true on success
@@ -1492,8 +1465,7 @@ class Client
     /**
      * Set tagged devices (using REST)
      *
-     * NOTES: this endpoint was introduced with controller versions 5.5.X
-     *
+     * @note this endpoint was introduced with controller versions 5.5.X
      * @param array $devices_macs required, array of the MAC address(es) of the device(s) to tag
      * @param string $tag_id required, the _id value of the tag to set
      * @return bool return true on success
@@ -1510,8 +1482,7 @@ class Client
     /**
      * Get (device) tag (using REST)
      *
-     * NOTES: this endpoint was introduced with controller versions 5.5.X
-     *
+     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $tag_id required, the _id value of the tag to retrieve
      * @return array|bool containing matching tag objects
      */
@@ -1525,8 +1496,7 @@ class Client
     /**
      * Delete (device) tag (using REST)
      *
-     * NOTES: this endpoint was introduced with controller versions 5.5.X
-     *
+     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $tag_id required, the _id value of the tag to set
      * @return bool return true on success
      */
@@ -1563,13 +1533,13 @@ class Client
     /**
      * Generate a backup
      *
-     * NOTES: this is an experimental function, please do not use unless you know exactly what you're doing
-     *
+     * @note this is an experimental function, please do not use unless you know exactly what you're doing
+     * @param int $days number of days for which the backup must be generated
      * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
      */
-    public function generate_backup()
+    public function generate_backup(int $days = -1)
     {
-        $payload = ['cmd' => 'backup'];
+        $payload = ['cmd' => 'backup', 'days' => $days];
 
         return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
     }
@@ -1589,8 +1559,7 @@ class Client
     /**
      * Generate a backup/export of the current site
      *
-     * NOTES: this is an experimental function, please do not use unless you know exactly what you're doing
-     *
+     * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @return array|bool URL from where the backup/export file can be downloaded once generated, false upon failure
      */
     public function generate_backup_site()
@@ -1613,8 +1582,7 @@ class Client
     /**
      * Fetch sites stats
      *
-     * NOTES: this endpoint was introduced with controller version 5.2.9
-     *
+     * @note this endpoint was introduced with controller version 5.2.9
      * @return array|bool containing statistics for all sites hosted on this controller
      */
     public function stat_sites()
@@ -1651,8 +1619,7 @@ class Client
     /**
      * Change the current site's name
      *
-     * NOTES: immediately after being changed, the site is available in the output of the list_sites() function
-     *
+     * @note immediately after the change, the site is available in the output of the list_sites() function
      * @param string $site_name the new long name for the current site
      * @return bool true on success
      */
@@ -2076,8 +2043,7 @@ class Client
     /**
      * Create voucher(s)
      *
-     * NOTES: please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
-     *
+     * @note please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
      * @param int $minutes minutes the voucher is valid after activation (expiration time)
      * @param int $count number of vouchers to create, default value is 1
      * @param int $quota single-use or multi-use vouchers, value '0' is for multi-use, '1' is for single-use,
@@ -2342,9 +2308,7 @@ class Client
     /**
      * Reboot a UniFi CloudKey
      *
-     * NOTE:
-     * This API call has no effect on UniFi controllers *not* running on a UniFi CloudKey device
-     *
+     * @note this API call has no effect on UniFi controllers *not* running on a UniFi OS device
      * @return bool true on success
      */
     public function reboot_cloudkey(): bool
@@ -2762,7 +2726,7 @@ class Client
      * @param string $wpa_mode optional, wpa mode (wpa, wpa2, ..)
      * @param string $wpa_enc optional, encryption (auto, ccmp)
      * @param boolean $vlan_enabled optional, enable/disable VLAN for this wlan (is ignored as of 1.1.73)
-     * @param string|null $vlan_id optional, "_id" value  of the VLAN to assign to this WLAN, can be found using
+     * @param string|null $vlan_id optional, "_id" value of the VLAN to assign to this WLAN, can be found using
      *                                  list_networkconf()
      * @param boolean $uapsd_enabled optional, enable/disable Unscheduled Automatic Power Save Delivery
      * @param boolean $schedule_enabled optional, enable/disable wlan schedule
@@ -2985,9 +2949,7 @@ class Client
     /**
      * Check controller update
      *
-     * NOTE:
-     * triggers an update of the controller cached known latest version.
-     *
+     * @note triggers an update of the controller's cached, latest known version.
      * @return array|bool returns an array with a single object containing details of the current known latest
      *                    controller version info on success, else returns false
      */
@@ -2999,9 +2961,7 @@ class Client
     /**
      * Check firmware update
      *
-     * NOTE:
-     * triggers a Device Firmware Update in Classic Settings > System settings > Maintenance
-     *
+     * @note triggers a Device Firmware Update in Classic Settings > System settings > Maintenance
      * @return bool returns true upon success
      */
     public function check_firmware_update(): bool
@@ -3306,10 +3266,8 @@ class Client
     /**
      * List device states
      *
-     * NOTE:
-     * this function returns a partial implementation of the codes listed here
-     * https://help.ui.com/hc/en-us/articles/205231710-UniFi-UAP-Status-Meaning-Definitions
-     *
+     * @note this function returns a partial implementation of the codes listed at this URL:
+     * @see https://help.ui.com/hc/en-us/articles/205231710-UniFi-UAP-Status-Meaning-Definitions
      * @return array containing translations of UniFi device "state" values to humanized form
      */
     public function list_device_states(): array
@@ -3331,22 +3289,19 @@ class Client
     /**
      * Custom API request
      *
-     * NOTE:
-     * Only use this method when you fully understand the behavior of the UniFi controller API. No input validation is
-     * performed, to be used with care!
-     *
+     * @note Only use this method when you fully understand the behavior of the UniFi controller API.
+     *       No input validation performed, to be used with care!
      * @param string $path suffix of the URL (following the port number) to pass request to, *must* start with
-     *                              a "/" character
+     *                     a "/" character
      * @param string $method optional, HTTP request type, can be GET (default), POST, PUT, PATCH, or DELETE
      * @param object|array|null $payload optional, stdClass object or associative array containing the payload to pass
      * @param string $return optional, string; determines how to return results, when "boolean" the method must
-     *                              return a boolean result (true/false) or "array" when the method must return an
-     *                              array
+     *                       return a boolean result (true/false) or "array" when the method must return an array
      * @return bool|array returns results as requested, returns false on incorrect parameters
      */
     public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array')
     {
-        if (!in_array($method, $this->curl_methods_allowed)) {
+        if (!in_array($method, self::CURL_METHODS_ALLOWED)) {
             return false;
         }
 
@@ -3373,9 +3328,7 @@ class Client
     /**
      * Fetch access points and other devices under management of the controller (USW, USG, and/or UnIfi OS consoles)
      *
-     * NOTE:
-     * changed function/method name to fit its purpose
-     *
+     * @note changed function/method name to fit its purpose
      * @param string|null $device_mac optional, the MAC address of a single device for which the call must be made
      * @return array containing known device objects (or a single device when using the <device_mac> parameter)
      */
@@ -3474,9 +3427,7 @@ class Client
     /**
      * Modify the private property $site
      *
-     * NOTE:
-     * this method is useful to switch between sites
-     *
+     * @note this method is useful to switch between sites
      * @param string $site must be the short site name of a site to which the
      *                     provided credentials have access
      * @return string the new (short) site name
@@ -3526,7 +3477,7 @@ class Client
     /**
      * Get last raw results
      *
-     * @param boolean $return_json true returns the results in "pretty printed" json format,
+     * @param boolean $return_json true returns the results in "pretty printed" JSON format,
      *                             false returns PHP stdClass Object format (default)
      * @return false|string|object|null the raw results as returned by the controller API
      */
@@ -3625,8 +3576,7 @@ class Client
      */
     public function set_curl_method(string $curl_method): bool
     {
-
-        if (!in_array($curl_method, $this->curl_methods_allowed)) {
+        if (!in_array($curl_method, self::CURL_METHODS_ALLOWED)) {
             return false;
         }
 
@@ -3815,9 +3765,7 @@ class Client
         bool   $login_required = true
     )
     {
-        /**
-         * guard clause to check if logged in when needed
-         */
+        /** guard clause to check if logged in when needed */
         if ($login_required && !$this->is_logged_in) {
             return false;
         }
@@ -3852,9 +3800,7 @@ class Client
                 }
             }
 
-            /**
-             * to deal with a response coming from the new v2 API
-             */
+            /** to deal with a response coming from the new v2 API */
             if (strpos($path, '/v2/api/') === 0) {
                 if (isset($response->errorCode)) {
                     if (isset($response->message)) {
@@ -3901,7 +3847,7 @@ class Client
             $error = 'Unknown JSON error occurred';
             switch (json_last_error()) {
                 case JSON_ERROR_NONE:
-                    // JSON is valid, no error has occurred and return true early
+                    /** JSON is valid, no error has occurred and return true early */
                     return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
@@ -3920,17 +3866,17 @@ class Client
 
                     break;
                 case JSON_ERROR_UTF8:
-                    // PHP >= 5.3.3
+                    /** PHP >= 5.3.3 */
                     $error = 'Malformed UTF-8 characters, possibly incorrectly encoded';
 
                     break;
                 case JSON_ERROR_RECURSION:
-                    // PHP >= 5.5.0
+                    /** PHP >= 5.5.0 */
                     $error = 'One or more recursive references in the value to be encoded';
 
                     break;
                 case JSON_ERROR_INF_OR_NAN:
-                    // PHP >= 5.5.0
+                    /** PHP >= 5.5.0 */
                     $error = 'One or more NAN or INF values in the value to be encoded';
 
                     break;
@@ -3940,9 +3886,7 @@ class Client
                     break;
             }
 
-            /**
-             * check whether we have PHP >= 7.0.0
-             */
+            /** check whether we have PHP >= 7.0.0 */
             if (defined('JSON_ERROR_INVALID_PROPERTY_NAME') && defined('JSON_ERROR_UTF16')) {
                 switch (json_last_error()) {
                     case JSON_ERROR_INVALID_PROPERTY_NAME:
@@ -4008,9 +3952,7 @@ class Client
         if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$this->unificookie_name]) && !empty($_SESSION[$this->unificookie_name])) {
             $this->cookies = $_SESSION[$this->unificookie_name];
 
-            /**
-             * if the cookie contains a JWT this is a UniFi OS controller
-             */
+            /** if the cookie contains a JWT, this is a UniFi OS controller */
             if (strpos($this->cookies, 'TOKEN') !== false) {
                 $this->is_unifi_os = true;
             }
@@ -4041,9 +3983,7 @@ class Client
                 return;
             }
 
-            /**
-             * remove any existing x-csrf-token headers first
-             */
+            /** remove any existing x-csrf-token headers first */
             foreach ($this->curl_headers as $index => $header) {
                 if (strpos(strtolower($header), strtolower('x-csrf-token:')) !== false) {
                     unset($this->curl_headers[$index]);
@@ -4100,7 +4040,7 @@ class Client
      */
     protected function exec_curl(string $path, $payload = null)
     {
-        if (!in_array($this->curl_method, $this->curl_methods_allowed)) {
+        if (!in_array($this->curl_method, self::CURL_METHODS_ALLOWED)) {
             trigger_error('an invalid HTTP request type was used: ' . $this->curl_method);
             return false;
         }
@@ -4117,9 +4057,7 @@ class Client
             CURLOPT_URL => $url,
         ];
 
-        /**
-         * when a payload is passed
-         */
+        /** when a payload is passed */
         $json_payload = '';
         if (!empty($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
@@ -4158,18 +4096,14 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request
-         */
+        /** execute the cURL request */
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
-        /**
-         * get the HTTP response code
-         */
+        /** get the HTTP response code */
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         /**
@@ -4182,9 +4116,7 @@ class Client
             }
 
             if ($this->exec_retries === 0) {
-                /**
-                 * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
-                 */
+                /** explicitly clear the expired Cookie/Token, update other properties and log out before logging in again */
                 if (isset($_SESSION[$this->unificookie_name])) {
                     $_SESSION[$this->unificookie_name] = '';
                 }
@@ -4195,14 +4127,10 @@ class Client
 
                 curl_close($ch);
 
-                /**
-                 * then login again
-                 */
+                /** then login again */
                 $this->login();
 
-                /**
-                 * when re-login was successful, execute the same cURL request again
-                 */
+                /** when re-login was successful, execute the same cURL request again */
                 if ($this->is_logged_in) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
@@ -4239,10 +4167,8 @@ class Client
 
         curl_close($ch);
 
-        /**
-         * set method back to default value, just in case
-         */
-        $this->curl_method = 'GET';
+        /** set the method back to the default value, just in case */
+        $this->curl_method = self::DEFAULT_CURL_METHOD;
 
         return $response;
     }
@@ -4250,12 +4176,11 @@ class Client
     /**
      * Create and return a new cURL handle
      *
-     * @return object|resource CurlHandle object with PHP 8, or a resource for lower PHP versions
+     * @return object|resource CurlHandle object with PHP 8.* and higher, or a resource for lower PHP versions
      */
     protected function get_curl_handle()
     {
-        $ch = curl_init();
-
+        $ch           = curl_init();
         $curl_options = [
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
             CURLOPT_HTTP_VERSION   => $this->curl_http_version,
