@@ -9,7 +9,6 @@ class ComposerStaticInit5cc2e24247b4e15bb92a850823953a3c
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         '3917c79c5052b270641b5a200963dbc2' => __DIR__ . '/..' . '/kint-php/kint/init.php',
     );
 
@@ -24,7 +23,6 @@ class ComposerStaticInit5cc2e24247b4e15bb92a850823953a3c
         ),
         'S' => 
         array (
-            'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Ctype\\' => 23,
         ),
@@ -42,10 +40,6 @@ class ComposerStaticInit5cc2e24247b4e15bb92a850823953a3c
         'Twig\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
-        ),
-        'Symfony\\Polyfill\\Php72\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
