@@ -1,12 +1,15 @@
 <?php
 /**
- * Copyright (c) 2024, Art of WiFi
+ * Copyright © 2024, Art of WiFi
  * www.artofwifi.net
  *
  * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader;
 
 session_start();
@@ -69,9 +72,17 @@ if (is_file('config/config.php') && is_readable('config/config.php')) {
     /**
      * render the config error page
      */
-    echo $twig->render('config_error.html.twig', [
-        'error_message' => 'The file <b>config/config.php</b> does not exist! Please create one based on the <b>config/config-template.php</b> file!<br>',
-    ]);
+    try {
+        echo $twig->render('config_error.html.twig', [
+            'error_message' => 'The file <b>config/config.php</b> does not exist! Please create one based on the <b>config/config-template.php</b> file!<br>',
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 
     exit;
 }
@@ -93,9 +104,17 @@ if (!function_exists('curl_version')) {
     /**
      * render the config error page
      */
-    echo $twig->render('config_error.html.twig', [
-        'error_message' => 'The <b>PHP curl</b> module is not installed! Please correct this before proceeding!<br>',
-    ]);
+    try {
+        echo $twig->render('config_error.html.twig', [
+            'error_message' => 'The <b>PHP curl</b> module is not installed! Please correct this before proceeding!<br>',
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 
     exit;
 }
@@ -108,9 +127,17 @@ if (version_compare(PHP_VERSION, '5.6.0') < 0) {
     /**
      * render the config error page
      */
-    echo $twig->render('config_error.html.twig', [
-        'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 5.6.0. Please upgrade before proceeding!<br>',
-    ]);
+    try {
+        echo $twig->render('config_error.html.twig', [
+            'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 5.6.0. Please upgrade before proceeding!<br>',
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 
     exit;
 }
@@ -146,9 +173,17 @@ if ($user_authentication && (empty($_SESSION['logged_in']))) {
     /**
      * render the login page
      */
-    echo $twig->render('login.html.twig', [
-        'login_error' => $login_error,
-    ]);
+    try {
+        echo $twig->render('login.html.twig', [
+            'login_error' => $login_error,
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 
     exit;
 }
@@ -157,18 +192,34 @@ if (empty($_SESSION['controller'])) {
     /**
      * the user needs to select a controller first, so we render the appropriate template
      */
-    echo $twig->render('controller_select.html.twig', [
-        'controllers' => $controllers,
-    ]);
+    try {
+        echo $twig->render('controller_select.html.twig', [
+            'controllers' => $controllers,
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 } else {
     /**
      * proceed and render the collections_view template
      */
-    echo $twig->render('collections_view.html.twig', [
-        'controllers' => $controllers,
-        'controller'  => $_SESSION['controller'],
-        'collections' => $collections,
-    ]);
+    try {
+        echo $twig->render('collections_view.html.twig', [
+            'controllers' => $controllers,
+            'controller'  => $_SESSION['controller'],
+            'collections' => $collections,
+        ]);
+    } catch (LoaderError $e) {
+        error_log('Twig LoaderError: ' . $e->getMessage());
+    } catch (RuntimeError $e) {
+        error_log('Twig RuntimeError: ' . $e->getMessage());
+    } catch (SyntaxError $e) {
+        error_log('Twig SyntaxError: ' . $e->getMessage());
+    }
 }
 
 exit;

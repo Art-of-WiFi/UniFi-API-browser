@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2024, Art of WiFi
+ * Copyright © 2024, Art of WiFi
  * www.artofwifi.net
  *
  * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
@@ -13,13 +13,13 @@ use UniFi_API\Client as ApiClient;
 const TOOL_VERSION = '2.0.27';
 
 /**
- * gather some basic information for the About modal
+ * Gather some basic information for the About modal.
  */
 $curl_info      = curl_version();
 $unknown_string = 'unknown';
 
 /**
- * create the array to pass on to the twig templates
+ * Create the array to pass on to the twig templates.
  */
 $about_modal_params = [
     'os_version'          => php_uname('s') . ' ' . php_uname('r'),
@@ -33,7 +33,7 @@ $about_modal_params = [
 ];
 
 /**
- * returns the version of the included API client class
+ * The version of the included API client class.
  *
  * @return string
  */
@@ -44,7 +44,8 @@ function getClientVersion(): string
 }
 
 /**
- * output the results with correct JSON formatting
+ * Output the results with correct JSON formatting.
+ *
  * @param $results
  * @return void
  */

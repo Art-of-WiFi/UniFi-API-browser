@@ -1,14 +1,14 @@
 <?php
 /**
- * Copyright (c) 2024, Art of WiFi
+ * Copyright © 2024, Art of WiFi
  * www.artofwifi.net
  *
  * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
- * load required packages using the composer autoloader together with the files containing shared functions
- * and the menu options
+ * Load required packages using the composer autoloader together with the files containing shared functions
+ * and the menu options.
  *
  * @var string $unknown_string
  */
@@ -16,14 +16,14 @@ require_once '../common.php';
 require_once '../collections.php';
 
 /**
- * load the configuration file if readable
+ * Load the configuration file if readable.
  */
 if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
     exit;
 }
 
 /**
- * include the configuration file
+ * Include the configuration file.
  *
  * @var array $controllers
  * @var bool $debug
@@ -31,12 +31,12 @@ if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
 include '../config/config.php';
 
 /**
- * to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * To use the PHP $_SESSION array for temporary storage of variables, session_start() is required.
  */
 session_start();
 
 /**
- * initialize the $results array
+ * Initialize the $results array.
  */
 $results = [
     'state'   => 'success',
@@ -49,7 +49,7 @@ if (!empty($_SESSION['controller'])) {
     $controller = $_SESSION['controller'];
 
     /**
-     * we first check for connectivity to the host and port provided in the URL
+     * We first check for connectivity to the host and port provided in the URL.
      */
     $host = parse_url($controller['url'], PHP_URL_HOST);
     $port = parse_url($controller['url'], PHP_URL_PORT) ?: 443;
@@ -62,12 +62,12 @@ if (!empty($_SESSION['controller'])) {
             $results['message'] = "we are unable to connect to the UniFi controller, $errstr ($errno)!";
         } else {
             /**
-             * and we can continue
+             * And we can continue.
              */
             fclose($fp);
 
             /**
-             * create an instance of the Unifi API client class, log in to the controller and pull the requested data
+             * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
              */
             $unifi_connection = new UniFi_API\Client(
                 trim($controller['user']),
@@ -79,14 +79,14 @@ if (!empty($_SESSION['controller'])) {
             $login_results = $unifi_connection->login();
 
             /**
-             * check for login errors
+             * Check for login errors.
              */
             if ($login_results === 400) {
                 $results['state']   = 'error';
                 $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
             } else {
                 /**
-                 * we can safely continue
+                 * We can safely continue.
                  */
                 $sites_array = $unifi_connection->list_sites();
 
@@ -96,12 +96,12 @@ if (!empty($_SESSION['controller'])) {
                     }
 
                     /**
-                     * store the cookies from the controller for faster reconnecting
+                     * Store the cookies from the controller for faster reconnecting.
                      */
                     $_SESSION['unificookie'] = $unifi_connection->get_cookie();
 
                     /**
-                     * loop through the fetched sites
+                     * Loop through the fetched sites.
                      */
                     foreach ($sites_array as $site) {
                         $results['data'][] = [
@@ -111,7 +111,7 @@ if (!empty($_SESSION['controller'])) {
                     }
 
                     /**
-                     * sort the site array by full name
+                     * Sort the site array by full name.
                      */
                     usort($results['data'], function ($a, $b) {
                         if ($a['site_full_name'] == $b['site_full_name']) {
@@ -122,7 +122,7 @@ if (!empty($_SESSION['controller'])) {
                     });
 
                     /**
-                     * get the first site from the $results array, just to be sure we use a valid site
+                     * Get the first site from the $results array, just to be sure we use a valid site.
                      */
                     $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
                     $site_info   = $unifi_connection->stat_sysinfo();

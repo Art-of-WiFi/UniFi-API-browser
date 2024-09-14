@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2024, Art of WiFi
+ * Copyright © 2024, Art of WiFi
  * www.artofwifi.net
  *
  * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md

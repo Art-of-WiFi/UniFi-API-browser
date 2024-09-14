@@ -1,14 +1,14 @@
 <?php
 /**
- * Copyright (c) 2024, Art of WiFi
+ * Copyright © 2024, Art of WiFi
  * www.artofwifi.net
  *
  * @license This file is subject to the MIT license bundled with this package in the file LICENSE.md
  */
 
 /**
- * load required packages using the composer autoloader together with the files containing shared functions
- * and the menu options
+ * Load required packages using the composer autoloader together with the files containing shared functions
+ * and the menu options.
  */
 require_once '../common.php';
 require_once '../collections.php';
@@ -16,7 +16,8 @@ require_once '../collections.php';
 use UniFi_API\Client as ApiClient;
 
 /**
- * load the configuration file if readable
+ * Load the configuration file if readable.
+ *
  * @var bool $debug
  */
 if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
@@ -26,13 +27,13 @@ if (!is_file('../config/config.php') || !is_readable('../config/config.php')) {
 include '../config/config.php';
 
 /**
- * in order to use the PHP $_SESSION array for temporary storage of variables, session_start() is required
+ * To use the PHP $_SESSION array for temporary storage of variables, session_start() is required.
  */
 session_start();
 
 /**
- * array containing attributes to fetch for the gateway stats, overriding
- * the default attributes
+ * An array containing attributes to fetch for the gateway stats, overriding
+ * the default attributes.
  */
 $gateway_stats_attribs = [
     'time',
@@ -59,7 +60,7 @@ $gateway_stats_attribs = [
 ];
 
 /**
- * initialize the $results array
+ * Initialize the $results array.
  */
 $results = [
     'state'   => 'success',
@@ -122,7 +123,7 @@ if (!empty($_SESSION['controller'])) {
         $controller = $_SESSION['controller'];
 
         /**
-         * create an instance of the Unifi API client class, log in to the controller and pull the requested data
+         * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
          */
         $unifi_connection = new ApiClient(
             trim($controller['user']),
@@ -134,20 +135,20 @@ if (!empty($_SESSION['controller'])) {
         $login_results = $unifi_connection->login();
 
         /**
-         * check for login errors
+         * Check for login errors.
          */
         if ($login_results === 400) {
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
         } else {
             /**
-             * we can safely continue
+             * We can safely continue.
              */
             $time_1           = microtime(true);
             $time_after_login = $time_1 - $time_start;
 
             /**
-             * we then determine which method is required and which parameters to pass
+             * We then determine which method is required and which parameters to pass.
              * https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
              */
             if (count($params) === 0) {
@@ -158,7 +159,7 @@ if (!empty($_SESSION['controller'])) {
 
             if (!empty($data_array)) {
                 /**
-                 * we count the objects and inject $data_array into $results
+                 * Count the objects and inject $data_array into $results.
                  */
                 $results['count'] = count($data_array);
 
@@ -168,8 +169,9 @@ if (!empty($_SESSION['controller'])) {
 
                 if ($output_method === 'kint') {
                     /**
-                     * for Kint we need to return the results in a slightly different manner
-                     * Rich render mode
+                     * For Kint, we need to return the results in a slightly different manner.
+                     *
+                     * @note using Rich render mode
                      */
                     Kint::$display_called_from          = false;
                     Kint\Renderer\RichRenderer::$folder = false;
@@ -177,7 +179,7 @@ if (!empty($_SESSION['controller'])) {
                 } else {
                     if ($output_method === 'kint_plain') {
                         /**
-                         * Plain render mode
+                         * @note using Plain render mode
                          */
                         Kint::$display_called_from               = false;
                         Kint\Renderer\RichRenderer::$folder      = false;
@@ -190,13 +192,13 @@ if (!empty($_SESSION['controller'])) {
             }
 
             /**
-             * execute timing of data collection from UniFi controller
+             * Execute timing of data collection from UniFi controller.
              */
             $time_2          = microtime(true);
             $time_after_load = $time_2 - $time_start;
 
             /**
-             * calculate all the timings/percentages
+             * Calculate all the timings/percentages.
              */
             $time_end         = microtime(true);
             $time_total       = $time_end - $time_start;
