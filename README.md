@@ -1,13 +1,17 @@
 ## UniFi API browser
 
-This tool allows you to browse data exposed through the UniFi Controller API, developed using PHP, JavaScript, and the [Bootstrap](http://getbootstrap.com/) CSS framework. It comes bundled with a **PHP class for access to the UniFi Controller API**, which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#functionsmethods-supported) than the UniFi API browser tool.
+This tool allows you to browse data exposed through the UniFi Controller API, developed using PHP, JavaScript,
+and the [Bootstrap](http://getbootstrap.com/) CSS framework. It comes bundled with a **PHP class for access to the UniFi Controller API**, 
+which supports [more API endpoints](https://github.com/Art-of-WiFi/UniFi-API-client#functionsmethods-supported) than the UniFi API browser tool.
 
-If you plan on creating your own PHP code to interact with the UniFi controller API, it is recommended to use the standalone version of the API client class, which can be found at https://github.com/Art-of-WiFi/UniFi-API-client. There, you will also find examples and detailed instructions on how to use it.
+If you plan on creating your own PHP code to interact with the UniFi controller API, it is recommended to use the
+standalone version of the API client class, which can be found at https://github.com/Art-of-WiFi/UniFi-API-client.
+There, you will also find examples and detailed instructions on how to use it.
 
 Please keep the following in mind when using the UniFi API browser:
 
 - The tool does not support all available data collections and API endpoints. See the list below for those currently supported.
-- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.1.113** has been confirmed to work)
+- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.4.60** has been confirmed to work)
 - The Network Application on UniFi OS-based controllers is also supported, same versions as above
 - When accessing UniFi OS-based controllers through this tool, please read the remarks regarding UniFi OS support
 - Please read the Security Notice before installing this tool.
@@ -228,9 +232,9 @@ Other included libraries:
 
 ### Security notice
 
-It is important to note that the UniFi API browser tool is a powerful tool that allows access to sensitive data and configuration options on your UniFi controller. It is therefore important you take appropriate security measures, such as limiting access to the tool to trusted individuals. Additionally, you should be aware of the security risks associated with running PHP code on your server.
-
-We **highly recommend** enabling the username/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, make sure to use **strong random passwords**. Please refer to the instructions in the `config/users-template.php` file for further details
+> [!CAUTION]
+> It is important to note that the UniFi API browser tool is a powerful tool that allows access to sensitive data and configuration options on your UniFi controller. It is therefore important you take appropriate security measures, such as limiting access to the tool to trusted individuals. Additionally, you should be aware of the security risks associated with running PHP code on your server.
+> We **highly recommend** enabling the username/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, make sure to use **strong random passwords**. Please refer to the instructions in the `config/users-template.php` file for further details
 
 
 ### Support and Feedback
