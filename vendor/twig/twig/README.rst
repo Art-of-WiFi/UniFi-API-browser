@@ -6,9 +6,6 @@ Twig is a template language for PHP.
 Twig uses a syntax similar to the Django and Jinja template languages which
 inspired the Twig runtime environment.
 
-**Twig version 2 is not maintained anymore.**
-Please, upgrade at your earliest convenience.
-
 Sponsors
 --------
 

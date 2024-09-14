@@ -17,13 +17,11 @@ use Twig\Node\Node;
 /**
  * Represents a template function.
  *
- * @final
- *
  * @author Fabien Potencier <fabien@symfony.com>
  *
  * @see https://twig.symfony.com/doc/templates.html#functions
  */
-class TwigFunction
+final class TwigFunction
 {
     private $name;
     private $callable;
@@ -31,33 +29,27 @@ class TwigFunction
     private $arguments = [];
 
     /**
-     * Creates a template function.
-     *
-     * @param string        $name     Name of this function
-     * @param callable|null $callable A callable implementing the function. If null, you need to overwrite the "node_class" option to customize compilation.
-     * @param array         $options  Options array
+     * @param callable|array{class-string, string}|null $callable A callable implementing the function. If null, you need to overwrite the "node_class" option to customize compilation.
      */
     public function __construct(string $name, $callable = null, array $options = [])
     {
-        if (__CLASS__ !== static::class) {
-            @trigger_error('Overriding '.__CLASS__.' is deprecated since Twig 2.4.0 and the class will be final in 3.0.', \E_USER_DEPRECATED);
-        }
-
         $this->name = $name;
         $this->callable = $callable;
         $this->options = array_merge([
             'needs_environment' => false,
             'needs_context' => false,
+            'needs_charset' => false,
             'is_variadic' => false,
             'is_safe' => null,
             'is_safe_callback' => null,
             'node_class' => FunctionExpression::class,
             'deprecated' => false,
+            'deprecating_package' => '',
             'alternative' => null,
         ], $options);
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -65,39 +57,44 @@ class TwigFunction
     /**
      * Returns the callable to execute for this function.
      *
-     * @return callable|null
+     * @return callable|array{class-string, string}|null
      */
     public function getCallable()
     {
         return $this->callable;
     }
 
-    public function getNodeClass()
+    public function getNodeClass(): string
     {
         return $this->options['node_class'];
     }
 
-    public function setArguments($arguments)
+    public function setArguments(array $arguments): void
     {
         $this->arguments = $arguments;
     }
 
-    public function getArguments()
+    public function getArguments(): array
     {
         return $this->arguments;
     }
 
-    public function needsEnvironment()
+    public function needsCharset(): bool
+    {
+        return $this->options['needs_charset'];
+    }
+
+    public function needsEnvironment(): bool
     {
         return $this->options['needs_environment'];
     }
 
-    public function needsContext()
+    public function needsContext(): bool
     {
         return $this->options['needs_context'];
     }
 
-    public function getSafe(Node $functionArgs)
+    public function getSafe(Node $functionArgs): ?array
     {
         if (null !== $this->options['is_safe']) {
             return $this->options['is_safe'];
@@ -110,31 +107,28 @@ class TwigFunction
         return [];
     }
 
-    public function isVariadic()
+    public function isVariadic(): bool
     {
-        return $this->options['is_variadic'];
+        return (bool) $this->options['is_variadic'];
     }
 
-    public function isDeprecated()
+    public function isDeprecated(): bool
     {
         return (bool) $this->options['deprecated'];
     }
 
-    public function getDeprecatedVersion()
+    public function getDeprecatingPackage(): string
     {
-        return $this->options['deprecated'];
+        return $this->options['deprecating_package'];
     }
 
-    public function getAlternative()
+    public function getDeprecatedVersion(): string
+    {
+        return \is_bool($this->options['deprecated']) ? '' : $this->options['deprecated'];
+    }
+
+    public function getAlternative(): ?string
     {
         return $this->options['alternative'];
     }
 }
-
-// For Twig 1.x compatibility
-class_alias('Twig\TwigFunction', 'Twig_SimpleFunction', false);
-
-class_alias('Twig\TwigFunction', 'Twig_Function');
-
-// Ensure that the aliased name is loaded to keep BC for classes implementing the typehint with the old aliased name.
-class_exists('Twig\Node\Node');

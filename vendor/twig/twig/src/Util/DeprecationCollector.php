@@ -35,7 +35,7 @@ final class DeprecationCollector
      *
      * @return array An array of deprecations
      */
-    public function collectDir($dir, $ext = '.twig')
+    public function collectDir(string $dir, string $ext = '.twig'): array
     {
         $iterator = new \RegexIterator(
             new \RecursiveIteratorIterator(
@@ -53,13 +53,15 @@ final class DeprecationCollector
      *
      * @return array An array of deprecations
      */
-    public function collect(\Traversable $iterator)
+    public function collect(\Traversable $iterator): array
     {
         $deprecations = [];
         set_error_handler(function ($type, $msg) use (&$deprecations) {
             if (\E_USER_DEPRECATED === $type) {
                 $deprecations[] = $msg;
             }
+
+            return false;
         });
 
         foreach ($iterator as $name => $contents) {
@@ -75,5 +77,3 @@ final class DeprecationCollector
         return $deprecations;
     }
 }
-
-class_alias('Twig\Util\DeprecationCollector', 'Twig_Util_DeprecationCollector');

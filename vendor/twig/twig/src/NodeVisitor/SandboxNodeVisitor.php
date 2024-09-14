@@ -28,17 +28,21 @@ use Twig\Node\SetNode;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @internal
  */
-final class SandboxNodeVisitor extends AbstractNodeVisitor
+final class SandboxNodeVisitor implements NodeVisitorInterface
 {
     private $inAModule = false;
+    /** @var array<string, int> */
     private $tags;
+    /** @var array<string, int> */
     private $filters;
+    /** @var array<string, int> */
     private $functions;
-
     private $needsToStringWrap = false;
 
-    protected function doEnterNode(Node $node, Environment $env)
+    public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof ModuleNode) {
             $this->inAModule = true;
@@ -50,22 +54,22 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         } elseif ($this->inAModule) {
             // look for tags
             if ($node->getNodeTag() && !isset($this->tags[$node->getNodeTag()])) {
-                $this->tags[$node->getNodeTag()] = $node;
+                $this->tags[$node->getNodeTag()] = $node->getTemplateLine();
             }
 
             // look for filters
             if ($node instanceof FilterExpression && !isset($this->filters[$node->getNode('filter')->getAttribute('value')])) {
-                $this->filters[$node->getNode('filter')->getAttribute('value')] = $node;
+                $this->filters[$node->getNode('filter')->getAttribute('value')] = $node->getTemplateLine();
             }
 
             // look for functions
             if ($node instanceof FunctionExpression && !isset($this->functions[$node->getAttribute('name')])) {
-                $this->functions[$node->getAttribute('name')] = $node;
+                $this->functions[$node->getAttribute('name')] = $node->getTemplateLine();
             }
 
             // the .. operator is equivalent to the range() function
             if ($node instanceof RangeBinary && !isset($this->functions['range'])) {
-                $this->functions['range'] = $node;
+                $this->functions['range'] = $node->getTemplateLine();
             }
 
             if ($node instanceof PrintNode) {
@@ -96,7 +100,7 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         return $node;
     }
 
-    protected function doLeaveNode(Node $node, Environment $env)
+    public function leaveNode(Node $node, Environment $env): ?Node
     {
         if ($node instanceof ModuleNode) {
             $this->inAModule = false;
@@ -112,15 +116,15 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         return $node;
     }
 
-    private function wrapNode(Node $node, string $name)
+    private function wrapNode(Node $node, string $name): void
     {
         $expr = $node->getNode($name);
-        if ($expr instanceof NameExpression || $expr instanceof GetAttrExpression) {
+        if (($expr instanceof NameExpression || $expr instanceof GetAttrExpression) && !$expr->isGenerator()) {
             $node->setNode($name, new CheckToStringNode($expr));
         }
     }
 
-    private function wrapArrayNode(Node $node, string $name)
+    private function wrapArrayNode(Node $node, string $name): void
     {
         $args = $node->getNode($name);
         foreach ($args as $name => $_) {
@@ -128,10 +132,8 @@ final class SandboxNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return 0;
     }
 }
-
-class_alias('Twig\NodeVisitor\SandboxNodeVisitor', 'Twig_NodeVisitor_Sandbox');

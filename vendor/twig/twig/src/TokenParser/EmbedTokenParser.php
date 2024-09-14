@@ -14,20 +14,23 @@ namespace Twig\TokenParser;
 use Twig\Node\EmbedNode;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\Node;
 use Twig\Token;
 
 /**
  * Embeds a template.
+ *
+ * @internal
  */
 final class EmbedTokenParser extends IncludeTokenParser
 {
-    public function parse(Token $token)
+    public function parse(Token $token): Node
     {
         $stream = $this->parser->getStream();
 
         $parent = $this->parser->getExpressionParser()->parseExpression();
 
-        list($variables, $only, $ignoreMissing) = $this->parseArguments();
+        [$variables, $only, $ignoreMissing] = $this->parseArguments();
 
         $parentToken = $fakeParentToken = new Token(/* Token::STRING_TYPE */ 7, '__parent__', $token->getLine());
         if ($parent instanceof ConstantExpression) {
@@ -58,15 +61,13 @@ final class EmbedTokenParser extends IncludeTokenParser
         return new EmbedNode($module->getTemplateName(), $module->getAttribute('index'), $variables, $only, $ignoreMissing, $token->getLine(), $this->getTag());
     }
 
-    public function decideBlockEnd(Token $token)
+    public function decideBlockEnd(Token $token): bool
     {
         return $token->test('endembed');
     }
 
-    public function getTag()
+    public function getTag(): string
     {
         return 'embed';
     }
 }
-
-class_alias('Twig\TokenParser\EmbedTokenParser', 'Twig_TokenParser_Embed');
