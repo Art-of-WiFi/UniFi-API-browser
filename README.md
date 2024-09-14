@@ -234,6 +234,7 @@ Other included libraries:
 
 > [!CAUTION]
 > It is important to note that the UniFi API browser tool is a powerful tool that allows access to sensitive data and configuration options on your UniFi controller. It is therefore important you take appropriate security measures, such as limiting access to the tool to trusted individuals. Additionally, you should be aware of the security risks associated with running PHP code on your server.
+> 
 > We **highly recommend** enabling the username/password authentication feature by creating a `config/users.php` based on the included `config/users-template.php` file. When creating passwords and their SHA512 hashes for entry in the `config/users.php` file, make sure to use **strong random passwords**. Please refer to the instructions in the `config/users-template.php` file for further details
 
 
