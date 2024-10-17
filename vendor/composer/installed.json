@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.95",
-            "version_normalized": "1.1.95.0",
+            "version": "v1.1.97",
+            "version_normalized": "1.1.97.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "b633fa54c738b7cfac5ca27b8126161eac5f8e5b"
+                "reference": "6498b0255b0963ad914076ddda7f74df4fd2eb73"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/b633fa54c738b7cfac5ca27b8126161eac5f8e5b",
-                "reference": "b633fa54c738b7cfac5ca27b8126161eac5f8e5b",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/6498b0255b0963ad914076ddda7f74df4fd2eb73",
+                "reference": "6498b0255b0963ad914076ddda7f74df4fd2eb73",
                 "shasum": ""
             },
             "require": {
@@ -20,7 +20,7 @@
                 "ext-json": "*",
                 "php": ">=7.4.0"
             },
-            "time": "2024-10-07T10:54:19+00:00",
+            "time": "2024-10-17T12:56:47+00:00",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -51,7 +51,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
-                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.95"
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.97"
             },
             "install-path": "../art-of-wifi/unifi-api-client"
         },

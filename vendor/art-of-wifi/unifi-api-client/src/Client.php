@@ -13,7 +13,6 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.92
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -21,7 +20,7 @@ namespace UniFi_API;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '1.1.95';
+    const CLASS_VERSION        = '1.1.96';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -1490,7 +1489,7 @@ class Client
     }
 
     /**
-     * Fetch known rogue access points
+     * Fetch known rogue access points.
      *
      * @return array|bool containing known rogue access point objects
      */
@@ -1500,7 +1499,7 @@ class Client
     }
 
     /**
-     * Generate a backup
+     * Generate a backup.
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @param int $days number of days for which the backup must be generated
@@ -1514,7 +1513,19 @@ class Client
     }
 
     /**
-     * Fetch auto backups
+     * Download a generated backup file.
+     *
+     * @note this is an experimental function, please do not use unless you know exactly what you're doing
+     * @param string $filepath the path to the generated backup file
+     * @return string|bool the raw content of the backup file, false upon failure
+     */
+    public function download_backup(string $filepath)
+    {
+        return $this->exec_curl($filepath);
+    }
+
+    /**
+     * Fetch auto backups.
      *
      * @return array|bool containing objects with backup details on success
      */
@@ -1526,7 +1537,7 @@ class Client
     }
 
     /**
-     * Generate a backup/export of the current site
+     * Generate a backup/export of the current site.
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @return array|bool URL from where the backup/export file can be downloaded once generated, false upon failure
@@ -3102,7 +3113,7 @@ class Client
      */
     public function start_rolling_upgrade(): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade');
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade', ['uap', 'usw', 'ugw']);
     }
 
     /**
