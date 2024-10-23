@@ -13,6 +13,8 @@
 require_once '../common.php';
 require_once '../collections.php';
 
+use Kint\Renderer\TextRenderer;
+use Kint\Renderer\RichRenderer;
 use UniFi_API\Client as ApiClient;
 
 /**
@@ -163,6 +165,13 @@ if (!empty($_SESSION['controller'])) {
                  */
                 $results['count'] = count($data_array);
 
+                /**
+                 * For results returned from API v2, we need to check for the 'data' property and count that.
+                 */
+                if(property_exists($data_array, 'data')) {
+                    $results['count'] = count($data_array->data);
+                }
+
                 if ($debug) {
                     error_log('DEBUG: ' . $results['count'] . ' objects collected');
                 }
@@ -173,18 +182,18 @@ if (!empty($_SESSION['controller'])) {
                      *
                      * @note using Rich render mode
                      */
-                    Kint::$display_called_from          = false;
-                    Kint\Renderer\RichRenderer::$folder = false;
-                    $results['data']                    = @d($data_array);
+                    Kint::$display_called_from = false;
+                    RichRenderer::$folder      = false;
+                    $results['data']           = @d($data_array);
                 } else {
                     if ($output_method === 'kint_plain') {
                         /**
                          * @note using Plain render mode
                          */
-                        Kint::$display_called_from               = false;
-                        Kint\Renderer\RichRenderer::$folder      = false;
-                        Kint\Renderer\TextRenderer::$decorations = false;
-                        $results['data']                         = @s($data_array);
+                        Kint::$display_called_from = false;
+                        RichRenderer::$folder      = false;
+                        TextRenderer::$decorations = false;
+                        $results['data']           = @s($data_array);
                     } else {
                         $results['data'] = $data_array;
                     }

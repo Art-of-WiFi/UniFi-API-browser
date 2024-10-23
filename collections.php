@@ -10,7 +10,7 @@
  * this array defines the menu options for the various collections
  *
  * NOTES:
- * - do not modify this file, instead add a custom sub menu to the config.php file as explained in the README.md file
+ * - do not modify this file, instead add a custom submenu to the config.php file as explained in the README.md file
  * - a valid value for params looks like this:
  *     [true, true, 'no'] (note the quotes surrounding strings)
  */
@@ -484,6 +484,57 @@ $collections = [
                 'label'  => 'list IPS/IDS events',
                 'method' => 'stat_ips_events',
                 'params' => [],
+            ],
+            [
+                'type' => 'divider', // or collection
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: device alerts',
+                'method' => 'get_system_log',
+                'params' => ['device-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: critical alerts',
+                'method' => 'get_system_log',
+                'params' => ['next-ai-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: VPN alerts',
+                'method' => 'get_system_log',
+                'params' => ['vpn-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: admin activity',
+                'method' => 'get_system_log',
+                'params' => ['admin-activity'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: update alerts',
+                'method' => 'get_system_log',
+                'params' => ['update-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: client alerts',
+                'method' => 'get_system_log',
+                'params' => ['client-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: threat alerts',
+                'method' => 'get_system_log',
+                'params' => ['threat-alert'],
+            ],
+            [
+                'type'   => 'collection', // or divider
+                'label'  => 'system log: triggers',
+                'method' => 'get_system_log',
+                'params' => ['triggers'],
             ],
         ],
     ],
