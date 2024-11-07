@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.99",
-            "version_normalized": "1.1.99.0",
+            "version": "v1.1.100",
+            "version_normalized": "1.1.100.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "70f6a374e2c73eb91a9aa20f6c9375b235d55ce1"
+                "reference": "1522992e495f94b9fa52ff1015fe1e99f9a24fe4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/70f6a374e2c73eb91a9aa20f6c9375b235d55ce1",
-                "reference": "70f6a374e2c73eb91a9aa20f6c9375b235d55ce1",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/1522992e495f94b9fa52ff1015fe1e99f9a24fe4",
+                "reference": "1522992e495f94b9fa52ff1015fe1e99f9a24fe4",
                 "shasum": ""
             },
             "require": {
@@ -20,7 +20,7 @@
                 "ext-json": "*",
                 "php": ">=7.4.0"
             },
-            "time": "2024-10-23T11:30:34+00:00",
+            "time": "2024-10-29T11:14:00+00:00",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -51,7 +51,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
-                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.99"
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.100"
             },
             "install-path": "../art-of-wifi/unifi-api-client"
         },
@@ -531,17 +531,17 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.11.1",
-            "version_normalized": "3.11.1.0",
+            "version": "v3.11.3",
+            "version_normalized": "3.11.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "ff063afc691e1cfda6714f1915ed766cb108d188"
+                "reference": "3b06600ff3abefaf8ff55d5c336cd1c4253f8c7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/ff063afc691e1cfda6714f1915ed766cb108d188",
-                "reference": "ff063afc691e1cfda6714f1915ed766cb108d188",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3b06600ff3abefaf8ff55d5c336cd1c4253f8c7e",
+                "reference": "3b06600ff3abefaf8ff55d5c336cd1c4253f8c7e",
                 "shasum": ""
             },
             "require": {
@@ -556,7 +556,7 @@
                 "psr/container": "^1.0|^2.0",
                 "symfony/phpunit-bridge": "^5.4.9|^6.4|^7.0"
             },
-            "time": "2024-09-10T10:40:14+00:00",
+            "time": "2024-11-07T12:34:41+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -598,7 +598,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.11.1"
+                "source": "https://github.com/twigphp/Twig/tree/v3.11.3"
             },
             "funding": [
                 {

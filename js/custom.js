@@ -194,7 +194,7 @@ $('.output_radio_button').click(function() {
  */
 function switchCSS(new_theme) {
     console.log('switching to new Bootswatch theme: ' + new_theme);
-    if (new_theme == 'bootstrap') {
+    if (new_theme === 'bootstrap') {
         $('#bootswatch_theme_stylesheet').attr('href', '');
     } else {
         $('#bootswatch_theme_stylesheet').attr('href', 'https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/' + new_theme + '/bootstrap.min.css');
@@ -317,7 +317,7 @@ function fetchDebugDetails() {
             url:      'ajax/show_api_debug.php',
             dataType: 'html',
             success:  function (data) {
-                if (data != 'ignore') {
+                if (data !== 'ignore') {
                     console.log('debug messages as returned by the cURL request to the UniFi controller API:');
                     console.log(data);
                 }
@@ -532,28 +532,37 @@ $(function() {
  * upon opening the "About" modal we check latest version of API browser tool using AJAX and inform user when it's
  * more recent than the current
  */
+let version_update_span = $('#span_api_browser_update');
 $('#about_modal').on('shown.bs.modal', function (e) {
     $.ajax({
         type:     'GET',
         url:      'https://api.github.com/repos/Art-of-WiFi/UniFi-API-browser/releases/latest',
         dataType: 'json',
         success:  function (json) {
-            if (api_browser_version != '' && typeof(json.tag_name) !== 'undefined') {
-                if (cmpVersion(api_browser_version, json.tag_name.substring(1)) < 0) {
-                    $('#span_api_browser_update').html('an update is available: ' + json.tag_name.substring(1));
+            if (api_browser_version !== '' && typeof(json.tag_name) !== 'undefined') {
+                const normalizedTagName = json.tag_name.startsWith('v') ? json.tag_name.substring(1) : json.tag_name;
+
+                if (debug) {
+                    console.log('API Browser Version:', api_browser_version);
+                    console.log('Normalized Tag Name:', normalizedTagName);
+                    console.log('Comparison Result:', cmpVersion(api_browser_version, normalizedTagName));
+                }
+
+                if (cmpVersion(api_browser_version, normalizedTagName) < 0) {
+                    version_update_span.html('an update is available: ' + normalizedTagName);
                     $('#span_api_browser_update').removeClass('badge-success').addClass('badge-warning');
-                } else if (cmpVersion(api_browser_version, json.tag_name.substring(1)) === 0) {
-                    $('#span_api_browser_update').html('up to date');
-                    $('#span_api_browser_update').removeClass('badge-danger').addClass('badge-success');
+                } else if (cmpVersion(api_browser_version, normalizedTagName) === 0) {
+                    version_update_span.html('up to date');
+                    version_update_span.removeClass('badge-danger').addClass('badge-success');
                 } else {
-                    $('#span_api_browser_update').html('bleeding edge!');
-                    $('#span_api_browser_update').removeClass('badge-success').addClass('badge-danger');
+                    version_update_span.html('bleeding edge!');
+                    version_update_span.removeClass('badge-success').addClass('badge-danger');
                 }
             }
         },
         error:    function(jqXHR, textStatus, errorThrown) {
-            $('#span_api_browser_update').html('error checking updates');
-            $('#span_api_browser_update').removeClass('badge-success').addClass('badge-danger');
+            version_update_span.html('error checking updates');
+            version_update_span.removeClass('badge-success').addClass('badge-danger');
             console.log(jqXHR);
         }
     });
