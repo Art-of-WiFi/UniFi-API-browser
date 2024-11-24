@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v1.1.100",
+            "version": "v1.1.101",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "1522992e495f94b9fa52ff1015fe1e99f9a24fe4"
+                "reference": "9726378e3c47bb27e2164458cda6e616681d3d1e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/1522992e495f94b9fa52ff1015fe1e99f9a24fe4",
-                "reference": "1522992e495f94b9fa52ff1015fe1e99f9a24fe4",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/9726378e3c47bb27e2164458cda6e616681d3d1e",
+                "reference": "9726378e3c47bb27e2164458cda6e616681d3d1e",
                 "shasum": ""
             },
             "require": {
@@ -54,9 +54,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
-                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.100"
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v1.1.101"
             },
-            "time": "2024-10-29T11:14:00+00:00"
+            "time": "2024-11-15T09:33:11+00:00"
         },
         {
             "name": "kint-php/kint",

@@ -2,16 +2,19 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
-UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.5.2** has been confirmed to
-work) are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **4.0.20** has been
-confirmed to work).
-
 This class is used by our API Browser tool, which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
-easy inclusion in your projects.
+easy inclusion in your projects. See the [installation instructions](#Installation) below for more details.
+
+## Supported Versions
+
+| Software                             | Versions                                            |
+|--------------------------------------|-----------------------------------------------------|
+| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X (**8.5.6 is confirmed**) |
+| UniFi OS                             | 3.X, 4.X (**4.1.15 is confirmed**)                  |
 
 
 ## Requirements
@@ -29,17 +32,19 @@ easy inclusion in your projects.
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers has been added as of version 1.1.47. These devices have been verified to work:
+Support for UniFi OS-based controllers has been added as of version 1.1.47. These devices/services have been verified
+to work:
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
 - UniFi Cloud Key Gen2 (UCK G2), firmware version 2.0.24 or higher
 - UniFi Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
-- UniFi Cloud Console, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 - UniFi Express (UX)
 - UniFi Dream Wall (UDW)
 - UniFi Cloud Gateway Ultra (UCG-Ultra)
+- UniFi CloudKey Enterprise (CK-Enterprise)
 - UniFi Enterprise Fortress Gateway (EFG)
+- Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 
 The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
 
