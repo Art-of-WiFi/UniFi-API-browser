@@ -161,15 +161,15 @@ if (!empty($_SESSION['controller'])) {
 
             if (!empty($data_array)) {
                 /**
-                 * Count the objects and inject $data_array into $results.
+                 * Count the array items and inject $data_array into $results.
                  */
                 $results['count'] = count($data_array);
 
                 /**
-                 * For results returned from API v2, we need to check for the 'data' property and count that.
+                 * For results returned from API v2, we need to check for the 'data' key and count items in that array.
                  */
-                if(property_exists($data_array, 'data')) {
-                    $results['count'] = count($data_array->data);
+                if(key_exists('data', $data_array)) {
+                    $results['count'] = count($data_array['data']);
                 }
 
                 if ($debug) {
