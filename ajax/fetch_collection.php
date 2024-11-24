@@ -154,22 +154,25 @@ if (!empty($_SESSION['controller'])) {
              * https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
              */
             if (count($params) === 0) {
-                $data_array = $unifi_connection->{$method}();
+                $request_results = $unifi_connection->{$method}();
             } else {
-                $data_array = $unifi_connection->{$method}(...$params);
+                $request_results = $unifi_connection->{$method}(...$params);
             }
 
-            if (!empty($data_array)) {
+            if (!empty($request_results)) {
                 /**
                  * Count the array items and inject $data_array into $results.
                  */
-                $results['count'] = count($data_array);
+                if (is_array($request_results)) {
+                    $results['count'] = count($request_results);
+                }
 
                 /**
-                 * For results returned from API v2, we need to check for the 'data' key and count items in that array.
+                 * For results returned from API v2, the $request_results are an object, and we need to check for the
+                 * 'data' property and count items in that array.
                  */
-                if(key_exists('data', $data_array)) {
-                    $results['count'] = count($data_array['data']);
+                if(is_object($request_results) && property_exists($request_results, 'data', )) {
+                    $results['count'] = count($request_results->data);
                 }
 
                 if ($debug) {
@@ -184,7 +187,7 @@ if (!empty($_SESSION['controller'])) {
                      */
                     Kint::$display_called_from = false;
                     RichRenderer::$folder      = false;
-                    $results['data']           = @d($data_array);
+                    $results['data']           = @d($request_results);
                 } else {
                     if ($output_method === 'kint_plain') {
                         /**
@@ -193,9 +196,9 @@ if (!empty($_SESSION['controller'])) {
                         Kint::$display_called_from = false;
                         RichRenderer::$folder      = false;
                         TextRenderer::$decorations = false;
-                        $results['data']           = @s($data_array);
+                        $results['data']           = @s($request_results);
                     } else {
-                        $results['data'] = $data_array;
+                        $results['data'] = $request_results;
                     }
                 }
             }
