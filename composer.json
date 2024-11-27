@@ -2,7 +2,7 @@
     "require": {
         "twig/twig": ">=2.16.1",
         "kint-php/kint": "3.*",
-        "art-of-wifi/unifi-api-client": "^1.1",
+        "art-of-wifi/unifi-api-client": "^2.0.0",
         "php": ">=7.4.0",
         "ext-curl": "*",
         "ext-json": "*"

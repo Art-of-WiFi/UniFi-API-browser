@@ -12,6 +12,16 @@
  *
  * @var string $unknown_string
  */
+
+use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
+use UniFi_API\Exceptions\CurlGeneralErrorException;
+use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidBaseUrlException;
+use UniFi_API\Exceptions\InvalidSiteNameException;
+use UniFi_API\Exceptions\JsonDecodeException;
+use UniFi_API\Exceptions\LoginFailedException;
+use UniFi_API\Exceptions\LoginRequiredException;
+
 require_once '../common.php';
 require_once '../collections.php';
 
@@ -66,72 +76,99 @@ if (!empty($_SESSION['controller'])) {
              */
             fclose($fp);
 
-            /**
-             * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
-             */
-            $unifi_connection = new UniFi_API\Client(
-                trim($controller['user']),
-                trim($controller['password']),
-                trim(rtrim($controller['url'], "/")),
-                'default'
-            );
-
-            $login_results = $unifi_connection->login();
-
-            /**
-             * Check for login errors.
-             */
-            if ($login_results === 400) {
+            try {
+                /**
+                 * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
+                 */
+                $unifi_connection = new UniFi_API\Client(
+                    trim($controller['user']),
+                    trim($controller['password']),
+                    trim(rtrim($controller['url'], "/")),
+                    'default'
+                );
+                $login_results    = $unifi_connection->login();
+            } catch (CurlExtensionNotLoadedException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'cURL is not available in your PHP installation!';
+                return;
+            } catch (CurlGeneralErrorException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'We have encountered a general cURL error! Please check the logs';
+                return;
+            } catch (CurlTimeoutException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'UniFi controller connection timeout!';
+                return;
+            } catch (InvalidBaseUrlException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'UniFi controller login failure, base URL is invalid!';
+                return;
+            } catch (InvalidSiteNameException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'UniFi controller login failure, site name is invalid!';
+                return;
+            } catch (LoginFailedException $e) {
                 $results['state']   = 'error';
                 $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
-            } else {
-                /**
-                 * We can safely continue.
-                 */
+                return;
+            }
+
+            /**
+             * We can safely continue.
+             */
+            try {
                 $sites_array = $unifi_connection->list_sites();
+            } catch (JsonDecodeException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'JSON decode error!';
+                return;
+            } catch (LoginRequiredException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'Login is required for this endpoint';
+                return;
+            }
 
-                if (!empty($sites_array)) {
-                    if ($debug) {
-                        error_log('DEBUG: ' . count($sites_array) . ' sites collected');
+            if (!empty($sites_array)) {
+                if ($debug) {
+                    error_log('DEBUG: ' . count($sites_array) . ' sites collected');
+                }
+
+                /**
+                 * Store the cookies from the controller for faster reconnecting.
+                 */
+                $_SESSION['unificookie'] = $unifi_connection->get_cookie();
+
+                /**
+                 * Loop through the fetched sites.
+                 */
+                foreach ($sites_array as $site) {
+                    $results['data'][] = [
+                        'site_id'        => $site->name ?? $unknown_string,
+                        'site_full_name' => $site->desc ?? $unknown_string,
+                    ];
+                }
+
+                /**
+                 * Sort the site array by full name.
+                 */
+                usort($results['data'], function ($a, $b) {
+                    if ($a['site_full_name'] == $b['site_full_name']) {
+                        return 0;
                     }
 
-                    /**
-                     * Store the cookies from the controller for faster reconnecting.
-                     */
-                    $_SESSION['unificookie'] = $unifi_connection->get_cookie();
+                    return ($a['site_full_name'] < $b['site_full_name']) ? -1 : 1;
+                });
 
-                    /**
-                     * Loop through the fetched sites.
-                     */
-                    foreach ($sites_array as $site) {
-                        $results['data'][] = [
-                            'site_id'        => $site->name ?? $unknown_string,
-                            'site_full_name' => $site->desc ?? $unknown_string,
-                        ];
-                    }
+                /**
+                 * Get the first site from the $results array, just to be sure we use a valid site.
+                 */
+                $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
+                $site_info   = $unifi_connection->stat_sysinfo();
 
-                    /**
-                     * Sort the site array by full name.
-                     */
-                    usort($results['data'], function ($a, $b) {
-                        if ($a['site_full_name'] == $b['site_full_name']) {
-                            return 0;
-                        }
-
-                        return ($a['site_full_name'] < $b['site_full_name']) ? -1 : 1;
-                    });
-
-                    /**
-                     * Get the first site from the $results array, just to be sure we use a valid site.
-                     */
-                    $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
-                    $site_info   = $unifi_connection->stat_sysinfo();
-
-                    if (!empty($site_info) && isset($site_info[0]->version)) {
-                        $_SESSION['controller']['detected_version'] = $site_info[0]->version;
-                    } else {
-                        $_SESSION['controller']['detected_version'] = 'undetected';
-                    }
+                if (!empty($site_info) && isset($site_info[0]->version)) {
+                    $_SESSION['controller']['detected_version'] = $site_info[0]->version;
+                } else {
+                    $_SESSION['controller']['detected_version'] = 'undetected';
                 }
             }
         }

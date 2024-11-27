@@ -16,6 +16,14 @@ require_once '../collections.php';
 use Kint\Renderer\TextRenderer;
 use Kint\Renderer\RichRenderer;
 use UniFi_API\Client as ApiClient;
+use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
+use UniFi_API\Exceptions\CurlGeneralErrorException;
+use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidBaseUrlException;
+use UniFi_API\Exceptions\InvalidSiteNameException;
+use UniFi_API\Exceptions\JsonDecodeException;
+use UniFi_API\Exceptions\LoginFailedException;
+use UniFi_API\Exceptions\LoginRequiredException;
 
 /**
  * Load the configuration file if readable.
@@ -127,101 +135,130 @@ if (!empty($_SESSION['controller'])) {
         /**
          * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
          */
-        $unifi_connection = new ApiClient(
-            trim($controller['user']),
-            trim($controller['password']),
-            trim(rtrim($controller['url'], "/")),
-            $site_id
-        );
 
-        $login_results = $unifi_connection->login();
+        try {
+            $unifi_connection = new ApiClient(
+                trim($controller['user']),
+                trim($controller['password']),
+                trim(rtrim($controller['url'], "/")),
+                $site_id
+            );
 
-        /**
-         * Check for login errors.
-         */
-        if ($login_results === 400) {
+            $login_results = $unifi_connection->login();
+        } catch (CurlExtensionNotLoadedException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'cURL is not available in your PHP installation!';
+            return;
+        } catch (CurlGeneralErrorException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'We have encountered a general cURL error! Please check the logs';
+            return;
+        } catch (CurlTimeoutException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'UniFi controller connection timeout!';
+            return;
+        } catch (InvalidBaseUrlException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'UniFi controller login failure, base URL is invalid!';
+            return;
+        } catch (InvalidSiteNameException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'UniFi controller login failure, site name is invalid!';
+            return;
+        } catch (LoginFailedException $e) {
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
-        } else {
-            /**
-             * We can safely continue.
-             */
-            $time_1           = microtime(true);
-            $time_after_login = $time_1 - $time_start;
+            return;
+        }
 
-            /**
-             * We then determine which method is required and which parameters to pass.
-             * https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
-             */
+        /**
+         * We can safely continue.
+         */
+        $time_1           = microtime(true);
+        $time_after_login = $time_1 - $time_start;
+
+        /**
+         * We then determine which method is required and which parameters to pass.
+         * https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
+         */
+        try {
             if (count($params) === 0) {
                 $request_results = $unifi_connection->{$method}();
             } else {
                 $request_results = $unifi_connection->{$method}(...$params);
             }
+        } catch (JsonDecodeException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'JSON decode error!';
+            return;
+        } catch (LoginRequiredException $e) {
+            $results['state']   = 'error';
+            $results['message'] = 'Login is required for this endpoint';
+            return;
+        }
 
-            if (!empty($request_results)) {
-                /**
-                 * Count the array items and inject $data_array into $results.
-                 */
-                if (is_array($request_results)) {
-                    $results['count'] = count($request_results);
-                }
-
-                /**
-                 * For results returned from API v2, the $request_results are an object, and we need to check for the
-                 * 'data' property and count items in that array.
-                 */
-                if(is_object($request_results) && property_exists($request_results, 'data', )) {
-                    $results['count'] = count($request_results->data);
-                }
-
-                if ($debug) {
-                    error_log('DEBUG: ' . $results['count'] . ' objects collected');
-                }
-
-                if ($output_method === 'kint') {
-                    /**
-                     * For Kint, we need to return the results in a slightly different manner.
-                     *
-                     * @note using Rich render mode
-                     */
-                    Kint::$display_called_from = false;
-                    RichRenderer::$folder      = false;
-                    $results['data']           = @d($request_results);
-                } else {
-                    if ($output_method === 'kint_plain') {
-                        /**
-                         * @note using Plain render mode
-                         */
-                        Kint::$display_called_from = false;
-                        RichRenderer::$folder      = false;
-                        TextRenderer::$decorations = false;
-                        $results['data']           = @s($request_results);
-                    } else {
-                        $results['data'] = $request_results;
-                    }
-                }
+        if (!empty($request_results)) {
+            /**
+             * Count the array items and inject $data_array into $results.
+             */
+            if (is_array($request_results)) {
+                $results['count'] = count($request_results);
             }
 
             /**
-             * Execute timing of data collection from UniFi controller.
+             * For results returned from API v2, the $request_results are an object, and we need to check for the
+             * 'data' property and count items in that array.
              */
-            $time_2          = microtime(true);
-            $time_after_load = $time_2 - $time_start;
+            if (is_object($request_results) && property_exists($request_results, 'data',)) {
+                $results['count'] = count($request_results->data);
+            }
 
-            /**
-             * Calculate all the timings/percentages.
-             */
-            $time_end         = microtime(true);
-            $time_total       = $time_end - $time_start;
-            $login_percentage = ($time_after_login / $time_total) * 100;
-            $load_percentage  = (($time_after_load - $time_after_login) / $time_total) * 100;
+            if ($debug) {
+                error_log('DEBUG: ' . $results['count'] . ' objects collected');
+            }
 
-            $results['timings']['login']      = $time_after_login;
-            $results['timings']['load']       = $time_after_load;
-            $results['timings']['login_perc'] = $login_percentage;
-            $results['timings']['load_perc']  = $load_percentage;
+            if ($output_method === 'kint') {
+                /**
+                 * For Kint, we need to return the results in a slightly different manner.
+                 *
+                 * @note using Rich render mode
+                 */
+                Kint::$display_called_from = false;
+                RichRenderer::$folder      = false;
+                $results['data']           = @d($request_results);
+            } else {
+                if ($output_method === 'kint_plain') {
+                    /**
+                     * @note using Plain render mode
+                     */
+                    Kint::$display_called_from = false;
+                    RichRenderer::$folder      = false;
+                    TextRenderer::$decorations = false;
+                    $results['data']           = @s($request_results);
+                } else {
+                    $results['data'] = $request_results;
+                }
+            }
         }
+
+        /**
+         * Execute timing of data collection from UniFi controller.
+         */
+        $time_2          = microtime(true);
+        $time_after_load = $time_2 - $time_start;
+
+        /**
+         * Calculate all the timings/percentages.
+         */
+        $time_end         = microtime(true);
+        $time_total       = $time_end - $time_start;
+        $login_percentage = ($time_after_login / $time_total) * 100;
+        $load_percentage  = (($time_after_load - $time_after_login) / $time_total) * 100;
+
+        $results['timings']['login']      = $time_after_login;
+        $results['timings']['load']       = $time_after_load;
+        $results['timings']['login_perc'] = $login_percentage;
+        $results['timings']['load_perc']  = $load_percentage;
     }
 }
 
