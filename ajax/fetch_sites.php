@@ -145,7 +145,7 @@ if (!empty($_SESSION['controller'])) {
             return;
         }
 
-        if (!empty($sites_array)) {
+        if (!empty($sites_array) && is_array($sites_array)) {
             if ($debug) {
                 error_log('DEBUG: ' . count($sites_array) . ' sites collected');
             }
