@@ -115,7 +115,7 @@ $('.controller_idx').on('click', function(){
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR);
+                console.error(jqXHR);
                 controller.idx       = '';
                 controller.full_name = '';
             }
@@ -219,7 +219,7 @@ function switchCSS(new_theme) {
             //
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.log(jqXHR);
+            console.error(jqXHR);
         }
     });
 }
@@ -288,13 +288,13 @@ function fetchSites() {
                  */
                 updateAboutModal();
             } else {
-                console.log(json.message);
+                console.error(json.message);
                 $('#site_dropdown > li > div').html('<h5 class="dropdown-header">Error loading sites</h5>');
                 renderGeneralErrorAlert(json.message);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.log(jqXHR);
+            console.error(jqXHR);
 
             unifi_sites = [];
 
@@ -409,12 +409,12 @@ function fetchCollection() {
                  */
                 updateAboutModal();
             } else {
-                console.log(json.message);
+                console.error(json.message);
                 renderGeneralErrorAlert(json.message);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.log(jqXHR);
+            console.error(jqXHR);
         }
     });
 }
@@ -424,7 +424,7 @@ function fetchCollection() {
  */
 function renderGeneralErrorAlert(error_message) {
     /**
-     * hide any existings alerts
+     * hide any existing alerts
      */
     $('.alert_wrapper').addClass('d-none');
 
@@ -432,7 +432,7 @@ function renderGeneralErrorAlert(error_message) {
      * render the alert
      */
     $('#general_error_alert_wrapper').removeClass('d-none');
-    $('#general_error').html('We encountered the following error: ' + error_message);
+    $('#general_error').html(error_message);
 }
 
 /**
@@ -453,7 +453,7 @@ function updateAboutModal() {
             $('#span_memory_used').html(json.memory_used);
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.log(jqXHR);
+            console.error(jqXHR);
         }
     });
 }
@@ -563,7 +563,7 @@ $('#about_modal').on('shown.bs.modal', function (e) {
         error:    function(jqXHR, textStatus, errorThrown) {
             version_update_span.html('error checking updates');
             version_update_span.removeClass('badge-success').addClass('badge-danger');
-            console.log(jqXHR);
+            console.error(jqXHR);
         }
     });
 })

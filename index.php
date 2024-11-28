@@ -12,6 +12,13 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader;
 
+/**
+ * If we are using HTTPS, we need to set secure cookies.
+ */
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    session_set_cookie_params(0, '/', '', true, true);
+}
+
 session_start();
 
 /**

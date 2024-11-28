@@ -1,4 +1,5 @@
 {
+    "type": "project",
     "require": {
         "twig/twig": ">=2.16.1",
         "kint-php/kint": "3.*",

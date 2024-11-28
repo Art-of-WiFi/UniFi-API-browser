@@ -66,6 +66,8 @@ if (!empty($_SESSION['controller'])) {
     if (!empty($host) && !empty($port)) {
         /**
          * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
+         *
+         * @note the error *messages* are for consumption by the user, not for logging
          */
         try {
             $unifi_connection = new UniFi_API\Client(
@@ -82,7 +84,7 @@ if (!empty($_SESSION['controller'])) {
             error_log('Exception: ' . get_class($e) . ' - Message: ' . $e->getMessage());
         } catch (CurlGeneralErrorException $e) {
             $results['state']   = 'error';
-            $results['message'] = 'We have encountered a general cURL error! Response code: ' . $e->getHttpResponseCode();
+            $results['message'] = 'We have encountered a general cURL error: ' . $e->getMessage();
             error_log('Exception: ' . get_class($e) . ' - Message: ' . $e->getMessage());
         } catch (CurlTimeoutException $e) {
             $results['state']   = 'error';
@@ -116,6 +118,8 @@ if (!empty($_SESSION['controller'])) {
 
         /**
          * We can safely continue.
+         *
+         * @note the error *messages* are for consumption by the user, not for logging
          */
         try {
             $sites_array = $unifi_connection->list_sites();
@@ -175,8 +179,20 @@ if (!empty($_SESSION['controller'])) {
             /**
              * Get the first site from the $results array, just to be sure we use a valid site.
              */
-            $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
-            $site_info   = $unifi_connection->stat_sysinfo();
+            try {
+                $switch_site = $unifi_connection->set_site(($results['data'][0]['site_id']));
+                $site_info   = $unifi_connection->stat_sysinfo();
+            } catch (InvalidSiteNameException $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'The site name is invalid!';
+                error_log('Exception: ' . get_class($e) . ' - Message: ' . $e->getMessage());
+                return;
+            } catch (Exception $e) {
+                $results['state']   = 'error';
+                $results['message'] = 'An Exception was thrown:' . $e->getMessage();
+                error_log('Exception: ' . get_class($e) . ' - Message: ' . $e->getMessage());
+                return;
+            }
 
             if (!empty($site_info) && isset($site_info[0]->version)) {
                 $_SESSION['controller']['detected_version'] = $site_info[0]->version;

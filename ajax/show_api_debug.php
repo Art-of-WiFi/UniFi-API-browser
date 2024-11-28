@@ -72,7 +72,7 @@ if ($debug === true) {
                 exit;
             } catch (CurlGeneralErrorException $e) {
                 error_log('DEBUG - CurlGeneralErrorException: ' . $e->getMessage());
-                echo 'General cURL error! Response code: ' . $e->getHttpResponseCode() . PHP_EOL . PHP_EOL;
+                echo 'General cURL error: ' . $e->getMessage() . PHP_EOL . PHP_EOL;
                 exit;
             } catch (CurlTimeoutException $e) {
                 error_log('DEBUG - CurlTimeoutException: ' . $e->getMessage());

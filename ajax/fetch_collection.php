@@ -134,6 +134,8 @@ if (!empty($_SESSION['controller'])) {
 
         /**
          * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
+         *
+         * @note the error *messages* are for consumption by the user, not for logging
          */
         try {
             $unifi_connection = new ApiClient(
@@ -152,7 +154,7 @@ if (!empty($_SESSION['controller'])) {
         } catch (CurlGeneralErrorException $e) {
             error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
-            $results['message'] = 'We have encountered a general cURL error! Response code: ' . $e->getHttpResponseCode();
+            $results['message'] = 'We have encountered a general cURL error: ' . $e->getMessage();
             return;
         } catch (CurlTimeoutException $e) {
             error_log(get_class($e) . ': ' . $e->getMessage());
@@ -189,7 +191,9 @@ if (!empty($_SESSION['controller'])) {
 
         /**
          * We then determine which method is required and which parameters to pass.
-         * https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
+         *
+         * @see https://stackoverflow.com/questions/1005857/how-to-call-a-function-from-a-string-stored-in-a-variable
+         * @note the error *messages* are for consumption by the user, not for logging
          */
         try {
             if (count($params) === 0) {
