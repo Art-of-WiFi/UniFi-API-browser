@@ -10,6 +10,15 @@
  * Load required packages using the composer autoloader together with the files containing shared functions
  * and the menu options.
  */
+use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
+use UniFi_API\Exceptions\CurlGeneralErrorException;
+use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidBaseUrlException;
+use UniFi_API\Exceptions\InvalidSiteNameException;
+use UniFi_API\Exceptions\JsonDecodeException;
+use UniFi_API\Exceptions\LoginFailedException;
+use UniFi_API\Exceptions\LoginRequiredException;
+
 require_once '../common.php';
 require_once '../collections.php';
 
@@ -34,7 +43,7 @@ include '../config/config.php';
 session_start();
 
 if ($debug === true) {
-    if (!empty($_SESSION['controller']) && $debug === true) {
+    if (!empty($_SESSION['controller'])) {
         $controller = $_SESSION['controller'];
 
         /**
@@ -44,18 +53,10 @@ if ($debug === true) {
         $port = parse_url($controller['url'], PHP_URL_PORT) ?: 443;
 
         if (!empty($host) && !empty($port)) {
-            $fp = @fsockopen($host, $port, $errno, $errstr, 2);
-            if (!$fp) {
-                echo "we are unable to connect to the UniFi controller $errstr ($errno)" . PHP_EOL . PHP_EOL;
-            } else {
-                /**
-                 * And we can continue.
-                 */
-                fclose($fp);
-
-                /**
-                 * Create an instance of the Unifi API client class, log in to the controller and pull the sites.
-                 */
+            /**
+             * Create an instance of the Unifi API client class, log in to the controller and pull the sites.
+             */
+            try {
                 $unifi_connection = new UniFi_API\Client(
                     trim($controller['user']),
                     trim($controller['password']),
@@ -63,20 +64,55 @@ if ($debug === true) {
                     'default'
                 );
 
-                $set_debug_mode = $unifi_connection->set_debug($debug);
-                $login_results  = $unifi_connection->login();
+                $unifi_connection->set_debug(true);
+                $unifi_connection->login();
+            } catch (CurlExtensionNotLoadedException $e) {
+                error_log('DEBUG - CurlExtensionNotLoadedException: ' . $e->getMessage());
+                echo 'cURL not available in your PHP installation!' . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (CurlGeneralErrorException $e) {
+                error_log('DEBUG - CurlGeneralErrorException: ' . $e->getMessage());
+                echo 'General cURL error! Response code: ' . $e->getHttpResponseCode() . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (CurlTimeoutException $e) {
+                error_log('DEBUG - CurlTimeoutException: ' . $e->getMessage());
+                echo 'UniFi controller login failure, cURL timeout!' . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (InvalidBaseUrlException $e) {
+                error_log('DEBUG - InvalidBaseUrlException: ' . $e->getMessage());
+                echo 'UniFi controller login failure, invalid base URL!' . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (InvalidSiteNameException $e) {
+                error_log('DEBUG - InvalidSiteNameException: ' . $e->getMessage());
+                echo 'UniFi controller login failure, invalid site name!' . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (LoginFailedException $e) {
+                error_log('DEBUG - LoginFailedException: ' . $e->getMessage());
+                echo 'UniFi controller login failure, please check your credentials in config/config.php!' . PHP_EOL . PHP_EOL;
+                exit;
+            } catch (Exception $e) {
+                error_log('DEBUG - Exception: ' . $e->getMessage());
+                echo 'We have an Exception!' . PHP_EOL . PHP_EOL;
+                exit;
+            }
 
-                /**
-                 * Check for login errors.
-                 */
-                if ($login_results === 400) {
-                    echo 'UniFi controller login failure, please check your credentials in config/config.php!' . PHP_EOL . PHP_EOL;
-                } else {
-                    /**
-                     * We can safely continue.
-                     */
-                    $sites_array = $unifi_connection->list_sites();
-                }
+            /**
+             * We can safely continue.
+             */
+            try {
+                $sites_array = $unifi_connection->list_sites();
+            } catch (JsonDecodeException $e) {
+                error_log('DEBUG - JsonDecodeException: ' . $e->getMessage());
+                echo 'we have a JSON decode exception!' . PHP_EOL . PHP_EOL;
+            } catch (LoginRequiredException $e) {
+                error_log('DEBUG - LoginRequiredException: ' . $e->getMessage());
+                echo 'we have a login required exception!' . PHP_EOL . PHP_EOL;
+            } catch (LoginFailedException $e) {
+                error_log('DEBUG - LoginFailedException: ' . $e->getMessage());
+                echo 'UniFi controller login failure, please check your credentials in config/config.php!' . PHP_EOL . PHP_EOL;
+            } catch (Exception $e) {
+                error_log('DEBUG - Exception: ' . $e->getMessage());
+                echo 'we have an Exception!' . PHP_EOL . PHP_EOL;
             }
         } else {
             echo 'we have an invalid URL! ' . $controller['url'] . PHP_EOL . PHP_EOL;

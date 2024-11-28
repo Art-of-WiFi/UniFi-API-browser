@@ -135,7 +135,6 @@ if (!empty($_SESSION['controller'])) {
         /**
          * Create an instance of the Unifi API client class, log in to the controller and pull the requested data.
          */
-
         try {
             $unifi_connection = new ApiClient(
                 trim($controller['user']),
@@ -144,30 +143,41 @@ if (!empty($_SESSION['controller'])) {
                 $site_id
             );
 
-            $login_results = $unifi_connection->login();
+            $unifi_connection->login();
         } catch (CurlExtensionNotLoadedException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'cURL is not available in your PHP installation!';
             return;
         } catch (CurlGeneralErrorException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
-            $results['message'] = 'We have encountered a general cURL error! Please check the logs';
+            $results['message'] = 'We have encountered a general cURL error! Response code: ' . $e->getHttpResponseCode();
             return;
         } catch (CurlTimeoutException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller connection timeout!';
             return;
         } catch (InvalidBaseUrlException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller login failure, base URL is invalid!';
             return;
         } catch (InvalidSiteNameException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller login failure, site name is invalid!';
             return;
         } catch (LoginFailedException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
+            return;
+        } catch (Exception $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
+            $results['state']   = 'error';
+            $results['message'] = 'An Exception was thrown:' . $e->getMessage();
             return;
         }
 
@@ -188,12 +198,24 @@ if (!empty($_SESSION['controller'])) {
                 $request_results = $unifi_connection->{$method}(...$params);
             }
         } catch (JsonDecodeException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'JSON decode error!';
             return;
         } catch (LoginRequiredException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
             $results['state']   = 'error';
             $results['message'] = 'Login is required for this endpoint';
+            return;
+        } catch (LoginFailedException $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
+            $results['state']   = 'error';
+            $results['message'] = 'UniFi controller login failure, please check your credentials in config/config.php!';
+            return;
+        } catch (Exception $e) {
+            error_log(get_class($e) . ': ' . $e->getMessage());
+            $results['state']   = 'error';
+            $results['message'] = 'An Exception was thrown:' . $e->getMessage();
             return;
         }
 

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "638330aafe7f9c9f8b2b32cfa511193f",
+    "content-hash": "adf7f6451007af644eb0f78ec8aea023",
     "packages": [
         {
             "name": "art-of-wifi/unifi-api-client",
-            "version": "v2.0.1",
+            "version": "v2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Art-of-WiFi/UniFi-API-client.git",
-                "reference": "d81a3712394ce5bc4b9ce6944a8a2ccf9ff5a202"
+                "reference": "8acaa694cadd505c3272bcf1469118ad0f7d52e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/d81a3712394ce5bc4b9ce6944a8a2ccf9ff5a202",
-                "reference": "d81a3712394ce5bc4b9ce6944a8a2ccf9ff5a202",
+                "url": "https://api.github.com/repos/Art-of-WiFi/UniFi-API-client/zipball/8acaa694cadd505c3272bcf1469118ad0f7d52e6",
+                "reference": "8acaa694cadd505c3272bcf1469118ad0f7d52e6",
                 "shasum": ""
             },
             "require": {
@@ -50,13 +50,14 @@
                 "client",
                 "controller",
                 "ubiquiti",
-                "unifi"
+                "unifi",
+                "unifi os"
             ],
             "support": {
                 "issues": "https://github.com/Art-of-WiFi/UniFi-API-client/issues",
-                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v2.0.1"
+                "source": "https://github.com/Art-of-WiFi/UniFi-API-client/tree/v2.0.2"
             },
-            "time": "2024-11-26T11:04:10+00:00"
+            "time": "2024-11-28T11:11:08+00:00"
         },
         {
             "name": "kint-php/kint",

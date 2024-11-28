@@ -509,7 +509,7 @@ $('#back-to-top').click(function () {
 
 $(function() {
     /**
-     * handle multi Level dropdowns for the collections menu
+     * handle multi-level dropdowns for the "collections" menu
      */
     $("ul.dropdown-menu [data-toggle='dropdown']").on('click', function(event) {
         event.preventDefault();
