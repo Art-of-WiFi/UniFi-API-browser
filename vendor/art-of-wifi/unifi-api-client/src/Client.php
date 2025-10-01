@@ -14,6 +14,7 @@ use UniFi_API\Exceptions\JsonDecodeException;
 use UniFi_API\Exceptions\LoginFailedException;
 use UniFi_API\Exceptions\LoginRequiredException;
 use UniFi_API\Exceptions\MethodDeprecatedException;
+use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 
 /**
  * The UniFi API client class.
@@ -33,7 +34,7 @@ use UniFi_API\Exceptions\MethodDeprecatedException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.2';
+    const CLASS_VERSION        = '2.0.5';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -84,7 +85,7 @@ class Client
      *
      * @param string $user username to use when connecting to the UniFi controller
      * @param string $password password to use when connecting to the UniFi controller
-     * @param string $baseurl base URL of the UniFi controller which *must* include an 'https://' prefix,
+     * @param string $baseurl base URL of the UniFi controller which *must* include a 'https://' prefix,
      *                        a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
      *                        do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
      * @param string|null $site short site name to access, defaults to 'default'
@@ -97,13 +98,13 @@ class Client
      * @throws CurlExtensionNotLoadedException|InvalidBaseUrlException|InvalidSiteNameException
      */
     public function __construct(
-        string $user,
-        string $password,
-        string $baseurl = 'https://127.0.0.1:8443',
-        string $site = 'default',
-        string $version = '8.0.28',
-        bool   $ssl_verify = false,
-        string $unificookie_name = 'unificookie'
+        string  $user,
+        string  $password,
+        string  $baseurl = 'https://127.0.0.1:8443',
+        ?string $site = 'default',
+        ?string $version = '8.0.28',
+        bool    $ssl_verify = false,
+        string  $unificookie_name = 'unificookie'
     )
     {
         if (!extension_loaded('curl')) {
@@ -234,7 +235,7 @@ class Client
             return $this->is_logged_in = true;
         }
 
-        throw new LoginFailedException($http_code);
+        throw new LoginFailedException('HTTP response: ' . $http_code);
     }
 
     /**
@@ -301,12 +302,12 @@ class Client
      * @param int|null $up optional, upload speed limit in kbps
      * @param int|null $down optional, download speed limit in kbps
      * @param int|null $megabytes optional, data transfer limit in MB
-     * @param string|null $ap_mac optional, AP MAC address to which client is connected, should result in faster
-     *                            authorization for the client device
+     * @param string|null $ap_mac optional, AP MAC address to which the client is connected
+     *                            (should result in faster authorization for the client device)
      * @return bool true upon success
      * @throws Exception
      */
-    public function authorize_guest(string $mac, int $minutes, int $up = null, int $down = null, int $megabytes = null, string $ap_mac = null): bool
+    public function authorize_guest(string $mac, int $minutes, ?int $up = null, ?int $down = null, ?int $megabytes = null, ?string $ap_mac = null): bool
     {
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
@@ -420,12 +421,12 @@ class Client
      * @throws Exception
      */
     public function create_user(
-        string $mac,
-        string $user_group_id,
-        string $name = null,
-        string $note = null,
-        bool   $is_guest = null,
-        bool   $is_wired = null
+        string  $mac,
+        string  $user_group_id,
+        ?string $name = null,
+        ?string $note = null,
+        ?bool   $is_guest = null,
+        ?bool   $is_wired = null
     )
     {
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
@@ -499,7 +500,7 @@ class Client
      * @return array|bool returns an array of 5-minute stats objects for the current site
      * @throws Exception
      */
-    public function stat_5minutes_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -524,7 +525,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
-    public function stat_hourly_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -546,7 +547,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
-    public function stat_daily_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -568,7 +569,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
-    public function stat_monthly_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -616,7 +617,7 @@ class Client
      * @return array|bool returns an array of 5-minute stats objects
      * @throws Exception
      */
-    public function stat_5minutes_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_5minutes_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -645,7 +646,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_hourly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_hourly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() * 1000) : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -674,7 +675,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_daily_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_daily_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -703,7 +704,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_monthly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_monthly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -724,8 +725,8 @@ class Client
      *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for 5-minute stats is set to the correct value in
      *         the controller settings
-     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     *         section
+     *       - make sure that the "Clients Historical Data" option has been enabled in the UniFi controller settings in
+     *         the Maintenance section
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -736,7 +737,7 @@ class Client
      * @return array|bool returns an array of 5-minute stats objects
      * @throws Exception
      */
-    public function stat_5minutes_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -763,7 +764,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
-    public function stat_hourly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -794,7 +795,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
-    public function stat_daily_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -825,7 +826,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
-    public function stat_monthly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (13 * 7 * 24 * 3600 * 1000) : $start;
@@ -856,7 +857,7 @@ class Client
      * @return array|bool returns an array of 5-minute stats objects for the gateway belonging to the current site
      * @throws Exception
      */
-    public function stat_5minutes_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -878,7 +879,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
-    public function stat_hourly_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -900,7 +901,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
-    public function stat_daily_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -922,7 +923,7 @@ class Client
      * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
-    public function stat_monthly_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -942,7 +943,7 @@ class Client
      * @return array|bool returns an array of speed test result objects
      * @throws Exception
      */
-    public function stat_speedtest_results(int $start = null, int $end = null)
+    public function stat_speedtest_results(?int $start = null, ?int $end = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (24 * 3600 * 1000) : $start;
@@ -963,7 +964,7 @@ class Client
      * @return array|bool returns an array of IPS/IDS event objects
      * @throws Exception
      */
-    public function stat_ips_events(int $start = null, int $end = null, int $limit = null)
+    public function stat_ips_events(?int $start = null, ?int $end = null, ?int $limit = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (24 * 3600 * 1000) : $start;
@@ -982,12 +983,12 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, client MAC address to return sessions for (can only be used when start and end
      *                      are also provided)
-     * @param string $type optional, client type to return sessions for, can be 'all', 'guest' or 'user'; default
+     * @param string|null $type optional, client type to return sessions for, can be 'all', 'guest' or 'user'; default
      *                      value is 'all'
      * @return array|bool returns an array of login session objects for all devices or a single device
      * @throws Exception
      */
-    public function stat_sessions(int $start = null, int $end = null, string $mac = null, string $type = 'all')
+    public function stat_sessions(?int $start = null, ?int $end = null, ?string $mac = null, ?string $type = 'all')
     {
         if (!in_array($type, ['all', 'guest', 'user'])) {
             return false;
@@ -1014,7 +1015,7 @@ class Client
      * @return array|bool returns an array of login session objects for all devices or a single device
      * @throws Exception
      */
-    public function stat_sta_sessions_latest(string $mac, int $limit = null)
+    public function stat_sta_sessions_latest(string $mac, ?int $limit = null)
     {
         $limit   = empty($limit) ? 5 : $limit;
         $payload = ['mac' => strtolower($mac), '_limit' => $limit, '_sort' => '-assoc_time'];
@@ -1032,7 +1033,7 @@ class Client
      * @return array|bool returns an array of authorization objects
      * @throws Exception
      */
-    public function stat_auths(int $start = null, int $end = null)
+    public function stat_auths(?int $start = null, ?int $end = null)
     {
         $end     = empty($end) ? time() : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600) : $start;
@@ -1082,13 +1083,52 @@ class Client
      *                    single client device object, false upon error
      * @throws Exception
      */
-    public function list_clients(string $mac = null)
+    public function list_clients(?string $mac = null)
     {
         if (is_string($mac)) {
             $mac = strtolower(trim($mac));
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $mac);
+    }
+
+    /**
+     * Fetch active client devices
+     *
+     * @param bool $include_traffic_usage include the traffic usage of the client devices in the response
+     * @param bool $include_unifi_devices include UniFi devices in the response
+     * @return array|bool returns an array of active client device objects, false upon error
+     * @throws Exception
+     */
+    public function list_active_clients(bool $include_traffic_usage = true, bool $include_unifi_devices = true)
+    {
+        $query = http_build_query([
+            'include_traffic_usage' => $include_traffic_usage,
+            'include_unifi_devices' => $include_unifi_devices,
+        ]);
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/active?' . $query);
+    }
+
+    /**
+     * Fetch client devices history (offline client devices)
+     *
+     * @param bool $only_non_blocked include non-blocked client devices in the response
+     * @param bool $include_unifi_devices include UniFi devices in the response
+     * @param int $within_hours the number of hours a device has been offline to be included in the response
+     *                         (0 = no limit)
+     * @return array|bool returns an array of (offline) client device objects, false upon error
+     * @throws Exception
+     */
+    public function list_clients_history(bool $only_non_blocked = true, bool $include_unifi_devices = true, int $within_hours = 0)
+    {
+        $query = http_build_query([
+            'only_non_blocked'      => $only_non_blocked,
+            'include_unifi_devices' => $include_unifi_devices,
+            'within_hours'          => $within_hours,
+        ]);
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/history?' . $query);
     }
 
     /**
@@ -1142,7 +1182,7 @@ class Client
      * @return array|bool returns an array containing a single object with attributes of the updated client on success
      * @throws Exception
      */
-    public function edit_client_fixedip(string $client_id, bool $use_fixedip, string $network_id = null, string $fixed_ip = null)
+    public function edit_client_fixedip(string $client_id, bool $use_fixedip, ?string $network_id = null, ?string $fixed_ip = null)
     {
         $this->curl_method = 'PUT';
 
@@ -1514,7 +1554,7 @@ class Client
      * @return bool return true on success
      * @throws Exception
      */
-    public function create_tag(string $name, array $macs = null): bool
+    public function create_tag(string $name, ?array $macs = null): bool
     {
         $payload = ['name' => $name];
 
@@ -2151,7 +2191,7 @@ class Client
      * @return array|bool containing hotspot voucher objects
      * @throws Exception
      */
-    public function stat_voucher(int $create_time = null)
+    public function stat_voucher(?int $create_time = null)
     {
         $payload = isset($create_time) ? ['create_time' => $create_time] : [];
 
@@ -2165,7 +2205,7 @@ class Client
      * @return array|bool containing hotspot payments
      * @throws Exception
      */
-    public function stat_payment(int $within = null)
+    public function stat_payment(?int $within = null)
     {
         $path_suffix = isset($within) ? '?within=' . $within : '';
 
@@ -2223,9 +2263,9 @@ class Client
         int    $count = 1,
         int    $quota = 0,
         string $note = '',
-        int    $up = null,
-        int    $down = null,
-        int    $megabytes = null
+        ?int   $up = null,
+        ?int   $down = null,
+        ?int   $megabytes = null
     )
     {
         $payload = [
@@ -2313,7 +2353,7 @@ class Client
      * @return array|bool containing filtered DPI stats
      * @throws Exception
      */
-    public function list_dpi_stats_filtered(string $type = 'by_cat', array $cat_filter = null)
+    public function list_dpi_stats_filtered(string $type = 'by_cat', ?array $cat_filter = null)
     {
         if (!in_array($type, ['by_cat', 'by_app'])) {
             return false;
@@ -2752,10 +2792,10 @@ class Client
      * Update "Super Management" settings, base.
      *
      * @param string $settings_id value of _id for the site settings section where key = "super_mgmt", settings
-     *                                  can be obtained using the list_settings() function
+     *                            can be obtained using the list_settings() function
      * @param object|array $payload stdClass object or associative array containing the "Super Management" settings
-     *                                  to apply, must be a (partial) object/array structured in the same manner as is
-     *                                  returned by list_settings() for the "super_mgmt" section.
+     *                              to apply, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the "super_mgmt" section.
      * @return bool true on success
      * @throws Exception
      */
@@ -2768,10 +2808,10 @@ class Client
      * Update "Super SMTP" settings, base.
      *
      * @param string $settings_id value of _id for the site settings section where key = "super_smtp", settings
-     *                                  can be obtained using the list_settings() function
+     *                            can be obtained using the list_settings() function
      * @param object|array $payload stdClass object or associative array containing the "Super SMTP" settings to
-     *                                  apply, must be a (partial) object/array structured in the same manner as is
-     *                                  returned by list_settings() for the "super_smtp" section.
+     *                              apply, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the "super_smtp" section.
      * @return bool true on success
      * @throws Exception
      */
@@ -2862,9 +2902,8 @@ class Client
      * Create dynamic DNS settings, base (using REST).
      *
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              site, must be a
-     *                              (partial) object/array structured in the same manner as is returned by
-     *                              list_dynamicdns() for the site.
+     *                              site, must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_dynamicdns() for the site.
      * @return bool true on success
      * @throws Exception
      */
@@ -2878,9 +2917,8 @@ class Client
      *
      * @param string $dynamicdns_id _id of the settings which can be found with the list_dynamicdns() function
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to
-     *                                    the site, must be a
-     *                                    (partial) object/array structured in the same manner as is returned by
-     *                                    list_dynamicdns() for the site.
+     *                              the site, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_dynamicdns() for the site.
      * @return bool true on success
      * @throws Exception
      */
@@ -2924,8 +2962,8 @@ class Client
      *
      * @param string $network_id the "_id" value for the network you wish to update
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to
-     *                                 the network, must be a (partial) object/array structured in the same manner as
-     *                                 is returned by list_networkconf() for the network.
+     *                              the network, must be a (partial) object/array structured in the same manner as
+     *                              is returned by list_networkconf() for the network.
      * @return bool true on success
      * @throws Exception
      */
@@ -2956,7 +2994,7 @@ class Client
      *
      * @param string $wlan_id optional, _id value of the wlan to fetch the settings for
      * @return array|bool containing wireless networks and their settings, or an array containing a single wireless network
-     *               when using the <wlan_id> parameter
+     *                    when using the <wlan_id> parameter
      * @throws Exception
      */
     public function list_wlanconf(string $wlan_id = '')
@@ -2969,7 +3007,7 @@ class Client
      *
      * @param string $name SSID
      * @param string $x_passphrase new pre-shared key, minimal length is 8 characters, maximum length is 63,
-     *                                  assign a value of null when security = 'open'
+     *                             assign a value of null when security = 'open'
      * @param string $usergroup_id user group id that can be found using the list_usergroups() function
      * @param string $wlangroup_id wlan group id that can be found using the list_wlan_groups() function
      * @param boolean $enabled optional, enable/disable wlan
@@ -2991,23 +3029,23 @@ class Client
      * @throws Exception
      */
     public function create_wlan(
-        string $name,
-        string $x_passphrase,
-        string $usergroup_id,
-        string $wlangroup_id,
-        bool   $enabled = true,
-        bool   $hide_ssid = false,
-        bool   $is_guest = false,
-        string $security = 'open',
-        string $wpa_mode = 'wpa2',
-        string $wpa_enc = 'ccmp',
-        bool   $vlan_enabled = null,
-        string $vlan_id = null,
-        bool   $uapsd_enabled = false,
-        bool   $schedule_enabled = false,
-        array  $schedule = [],
-        array  $ap_group_ids = null,
-        array  $payload = []
+        string  $name,
+        string  $x_passphrase,
+        string  $usergroup_id,
+        string  $wlangroup_id,
+        bool    $enabled = true,
+        bool    $hide_ssid = false,
+        bool    $is_guest = false,
+        string  $security = 'open',
+        string  $wpa_mode = 'wpa2',
+        string  $wpa_enc = 'ccmp',
+        ?bool   $vlan_enabled = null,
+        ?string $vlan_id = null,
+        bool    $uapsd_enabled = false,
+        bool    $schedule_enabled = false,
+        array   $schedule = [],
+        ?array  $ap_group_ids = null,
+        array   $payload = []
     ): bool
     {
         $payload = array_merge($payload, [
@@ -3111,13 +3149,11 @@ class Client
     /**
      * Update MAC filter for a wlan.
      *
-     * @param string $wlan_id the "_id" value for the WLAN which can be found with the list_wlanconf()
-     *                                   function
+     * @param string $wlan_id the "_id" value for the WLAN which can be found with the list_wlanconf() function
      * @param string $mac_filter_policy string, "allow" or "deny"; default MAC policy to apply
      * @param bool $mac_filter_enabled true enables the policy, false disables it
      * @param array $macs must contain valid MAC strings to be placed in the MAC filter list,
-     *                                   replacing existing values. Existing MAC filter list can be obtained
-     *                                   through list_wlanconf().
+     *                    replacing existing values. Existing MAC filter list can be obtained through list_wlanconf().
      * @return bool true on success
      * @throws Exception
      */
@@ -3143,7 +3179,7 @@ class Client
      *
      * @param integer $historyhours optional, hours to go back, default value is 720 hours
      * @param integer $start optional, which event number to start with (useful for paging of results), default
-     *                              value is 0
+     *                       value is 0
      * @param integer $limit optional, number of events to return, default value is 3000
      * @return array|bool containing known events
      * @throws Exception
@@ -3179,11 +3215,11 @@ class Client
      * Count alarms.
      *
      * @param bool|null $archived optional, if true all alarms are counted, if false only non-archived (active) alarms are
-     *                       counted, by default all alarms are counted
+     *                            counted, by default all alarms are counted
      * @return array|bool containing the alarm count
      * @throws Exception
      */
-    public function count_alarms(bool $archived = null)
+    public function count_alarms(?bool $archived = null)
     {
         $path_suffix = $archived === false ? '?archived=false' : null;
 
@@ -3220,6 +3256,40 @@ class Client
     public function check_controller_update()
     {
         return $this->fetch_results('/api/s/' . $this->site . '/stat/fwupdate/latest-version');
+    }
+
+    /**
+     * Get the recent firmware update for an UniFi-OS console
+     *
+     * @return array|bool returns an array with a single object containing details of the current known latest
+     *                     UniFi OS version info on success, else returns false
+     * @throws Exception
+     */
+    public function get_update_os_console()
+    {
+        if (!$this->is_unifi_os) {
+            throw new NotAUnifiOsConsoleException();
+        }
+
+        return $this->fetch_results('/api/firmware/update', null, false, true, false);
+    }
+
+    /**
+     * Update the OS for an UniFi-OS console
+     *
+     * @note triggers an UniFi OS Update in Control Plane > Updates > UniFi OS
+     * @return bool true upon success
+     * @throws Exception
+     */
+    public function update_os_console(): bool
+    {
+        if (!$this->is_unifi_os) {
+            throw new NotAUnifiOsConsoleException();
+        }
+
+        $payload = ['persistFullData' => true];
+
+        return $this->fetch_results_boolean('/api/firmware/update', $payload, true, false);
     }
 
     /**
@@ -3457,11 +3527,11 @@ class Client
      * @throws Exception
      */
     public function create_radius_account(
-        string $name,
-        string $x_password,
-        int    $tunnel_type = null,
-        int    $tunnel_medium_type = null,
-        string $vlan = null
+        string  $name,
+        string  $x_password,
+        ?int    $tunnel_type = null,
+        ?int    $tunnel_medium_type = null,
+        ?string $vlan = null
     )
     {
         $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -3501,8 +3571,8 @@ class Client
      * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @param object|array $payload stdClass object or associative array containing the new profile to apply to the
-     *                                 account, must be a (partial) object/array structured in the same manner as is
-     *                                 returned by list_radius_accounts() for the account.
+     *                              account, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_radius_accounts() for the account.
      * @return bool true on success
      * @throws Exception
      */
@@ -3576,12 +3646,12 @@ class Client
      * @param array $custom_payload optional, an array of additional parameters to pass with the request. Is merged
      *                              with the default payload array constructed by this method using array_merge().
      * @return array array containing results from the selected system log section/class.
-     *                    The 'data' key in the returned array contains the actual system log entries.
-     *                    The returned array also contains the page number and size, and the total number of entries
-     *                    available.
+     *               The 'data' key in the returned array contains the actual system log entries.
+     *               The returned array also contains the page number and size, and the total number of entries
+     *               available.
      * @throws Exception
      */
-    public function get_system_log(string $class = 'device-alert', int $start = null, int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
+    public function get_system_log(string $class = 'device-alert', ?int $start = null, ?int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
     {
         $end   = empty($end) ? time() * 1000  : $end;
         $start = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -3617,6 +3687,62 @@ class Client
         }
 
         return $this->fetch_results('/v2/api/site/' . $this->site . '/system-log/' . $class, array_merge($payload, $custom_payload));
+    }
+
+    /**
+     * Get a list of all DNS records.
+     *
+     * @return array|null The list of DNS records, or null on failure.
+     * @throws Exception If the request fails.
+     */
+    public function list_dns_records(): ?array
+    {
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/static-dns');
+    }
+
+    /**
+     * Create a new DNS record.
+     *
+     * @param string $record_type The DNS record type, can be A, AAAA, MX, TXT, SRV, NS (for forwarding)
+     * @param string $value The value of the DNS record (e.g., IP address for A records or DNS server address for NS records).
+     * @param string $key The domain name or subdomain for the DNS record.
+     * @param int|null $ttl Time-to-Live value for the record (leave null to set to "auto").
+     * @param bool $enabled Whether the DNS record is enabled.
+     * @throws Exception If the request fails.
+     * @return object|null The response from the API, or null on failure.
+     */
+    public function create_dns_record(string $record_type, string $value, string $key, ?int $ttl = null, bool $enabled = true): ?object
+    {
+        if (!in_array($record_type, ['A', 'AAAA', 'MX', 'TXT', 'SRV', 'NS'])) {
+            throw new Exception('Invalid record type: ' . $record_type);
+        }
+
+        $payload = [
+            'record_type' => $record_type,
+            'value'       => $value,
+            'key'         => $key,
+            'enabled'     => $enabled,
+        ];
+
+        if ($ttl !== null) {
+            $payload['ttl'] = $ttl;
+        }
+
+        return $this->fetch_results( '/v2/api/site/' . $this->site . '/static-dns', $payload);
+    }
+
+    /**
+     * Delete a DNS record.
+     *
+     * @param string $record_id The ID of the DNS record to delete.
+     * @return bool True if the deletion was successful, false otherwise.
+     * @throws Exception If the request fails.
+     */
+    public function delete_dns_record(string $record_id): bool
+    {
+        $this->curl_method = 'DELETE';
+
+        return $this->fetch_results_boolean('/v2/api/site/' . $this->site . '/static-dns/' . $record_id);
     }
 
     /**
@@ -4076,14 +4202,15 @@ class Client
      * @param boolean $boolean optional, whether the method should return a boolean result, else return
      *                         the "data" array
      * @param boolean $login_required optional, whether the method requires to be logged in or not
-     * @return bool|array returns an array with the "data" array on success, else returns boolean if $boolean is true
+     * @return bool|array|object returns an array with the "data" array on success, returns boolean if $boolean is true
      * @throws Exception
      */
     protected function fetch_results(
         string $path,
                $payload = null,
         bool   $boolean = false,
-        bool   $login_required = true
+        bool   $login_required = true,
+        bool   $prefix_path = true
     )
     {
         /** Guard clause to check if logged in when needed. */
@@ -4091,11 +4218,14 @@ class Client
             throw new LoginRequiredException();
         }
 
-        $this->last_results_raw = $this->exec_curl($path, $payload);
+        $this->last_results_raw = $this->exec_curl($path, $payload, $prefix_path);
 
         if (is_string($this->last_results_raw)) {
             $response = json_decode($this->last_results_raw);
-            $this->get_json_last_error();
+
+            if (!empty($this->last_results_raw)) {
+                $this->get_json_last_error();
+            }
 
             if (isset($response->meta->rc)) {
                 if ($response->meta->rc === 'ok') {
@@ -4135,6 +4265,24 @@ class Client
 
                 return $response;
             }
+
+            /** Deal with a responses from an UniFi OS console */
+            if (strpos($path, '/api/') === 0) {
+                if (isset($response->code)) {
+                    $this->last_error_message = 'An unknown error was returned by an UniFi OS endpoint.';
+                    if (isset($response->message)) {
+                        $this->last_error_message = $response->message;
+                    }
+
+                    throw new Exception('Error code: ' . $response->code . ', message: ' . $this->last_error_message);
+                }
+
+                if (is_object($response) && !$boolean) {
+                    return [$response];
+                }
+
+                return true;
+            }
         }
 
         return false;
@@ -4150,9 +4298,14 @@ class Client
      * @return bool [description]
      * @throws Exception
      */
-    protected function fetch_results_boolean(string $path, $payload = null, bool $login_required = true): bool
+    protected function fetch_results_boolean(
+        string $path,
+               $payload = null,
+        bool   $login_required = true,
+        bool   $prefix_path = true
+    ): bool
     {
-        return $this->fetch_results($path, $payload, true, $login_required);
+        return $this->fetch_results($path, $payload, true, $login_required, $prefix_path);
     }
 
     /**
@@ -4300,7 +4453,7 @@ class Client
     /**
      * Callback function for cURL to extract and store cookies as needed.
      *
-     * @param object|resource $ch the cURL instance (type hinting is unavailable for cURL resources)
+     * @param object|resource|false $ch the cURL instance (type hinting is unavailable for cURL resources)
      * @param string $header_line the response header line number
      * @return int length of the header line
      */
@@ -4342,7 +4495,7 @@ class Client
      * @return bool|string response returned by the controller API
      * @throws CurlGeneralErrorException|CurlTimeoutException|InvalidCurlMethodException|LoginFailedException
      */
-    protected function exec_curl(string $path, $payload = null)
+    protected function exec_curl(string $path, $payload = null, $prefix_path = true)
     {
         if (!in_array($this->curl_method, self::CURL_METHODS_ALLOWED)) {
             throw new InvalidCurlMethodException();
@@ -4350,7 +4503,7 @@ class Client
 
         $url = $this->baseurl . $path;
 
-        if ($this->is_unifi_os) {
+        if ($this->is_unifi_os && $prefix_path) {
             $url = $this->baseurl . '/proxy/network' . $path;
         }
 
@@ -4438,11 +4591,8 @@ class Client
 
                 curl_close($ch);
 
-                /** Login, again. */
-                $this->login();
-
-                /** When the re-login was successful, execute the same cURL request again. */
-                if ($this->is_logged_in) {
+                /** Re-login, and if successful, execute the same cURL request again. */
+                if ($this->login()) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
                     }
@@ -4491,7 +4641,7 @@ class Client
     {
         $ch           = curl_init();
         $curl_options = [
-            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTP_VERSION   => $this->curl_http_version,
             CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
             CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,

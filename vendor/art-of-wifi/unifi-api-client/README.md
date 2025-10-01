@@ -16,10 +16,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Supported Versions
 
-| Software                             | Versions                                            |
-|--------------------------------------|-----------------------------------------------------|
-| UniFi Network Application/controller | 5.x.x, 6.x.x, 7.x.x, 8.x.x (**8.6.9 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x (**4.1.9 is confirmed**)                   |
+| Software                             | Versions                                             |
+|--------------------------------------|------------------------------------------------------|
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.0.x (**9.0.101 is confirmed**) |
+| UniFi OS                             | 3.x, 4.1.x (**4.1.9 is confirmed**)                  |
 
 
 ## Requirements
@@ -74,14 +74,10 @@ When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the class
 - test the client with your code for any breaking changes
 - make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single file
+- see the note [here](#looking-for-version-1xx) regarding the single file version (1.x.x) of the API client
 
 
 ## Installation
-
-Use [Composer](#composer) or [Git](#git) to install the API client class.
-
-
-### Composer
 
 The preferred installation method is through [Composer](https://getcomposer.org). 
 Follow these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you don't have Composer
@@ -110,23 +106,6 @@ Finally, be sure to include the composer autoloader in your code if your framewo
  * load the class using the composer autoloader
  */
 require_once 'vendor/autoload.php';
-```
-
-### Git
-
-Execute the following `git` command from the shell in your project directory:
-
-```sh
-git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
-```
-
-When git is done cloning, include the file containing the class like so in your code:
-
-```php
-/**
- * load the class directly instead of using the composer autoloader
- */
-require_once 'path/to/src/Client.php';
 ```
 
 ## Example usage
@@ -199,11 +178,11 @@ require_once 'vendor/autoload.php';
  */
 require_once 'config.php';
 
+/**
+ * initialize the UniFi API connection class, log in to the controller and request the alarms collection
+ * (this example assumes you have already assigned the correct values to the variables in config.php)
+ */
 try {
-    /**
-     * initialize the UniFi API connection class, log in to the controller and request the alarms collection
-     * (this example assumes you have already assigned the correct values to the variables used)
-     */
     $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
     $login            = $unifi_connection->login();
     $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
@@ -247,14 +226,18 @@ Please refer to the comments/PHP DocBlocks in the source code for more details o
 their purpose, and their respective parameters.
 
 If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
-features to explore the available functions/methods thanks to the extensive PHPDoc comments in the code.
+features to explore the available functions/methods thanks to the extensive PHP DocBlocks throughout the code.
+
+For a quick overview of the available functions/methods, you can also check the API Reference here:
+
+[API Reference](API_REFERENCE.md)
 
 
 ## Looking for version 1.x.x?
 
-With versions 1.x.x of the API client, the code was contained within a single file which can be useful in specific
-cases.
-This has changed with version 2.0.0 where the code is now split into multiple files and is managed using composer.
+With versions 1.x.x of the API client, the entire client was contained within a single file which can be useful in
+specific cases.
+This has changed with version 2.0.0 where the code is now split across multiple files and is managed using composer.
 
 If you are looking for the version 1.x.x code, you can tell composer to install that version by using the following
 syntax in your `composer.json` file:
@@ -268,6 +251,8 @@ syntax in your `composer.json` file:
 ```
 
 Alternatively, you can download the latest 1.x.x code from the [releases page](https://github.com/Art-of-WiFi/UniFi-API-client/releases).
+
+Whenever necessary, we will make sure to update the **version_1** branch with the latest 1.x.x code.
 
 ## Need help or have suggestions?
 
