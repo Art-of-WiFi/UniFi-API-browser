@@ -98,7 +98,7 @@ $collections = [
             ],
             [
                 'type'   => 'collection', // or divider
-                'label'  => 'list port configuration',
+                'label'  => 'list port profiles',
                 'method' => 'list_portconf',
                 'params' => [],
             ],

@@ -10,16 +10,19 @@ There, you will also find examples and detailed instructions on how to use it.
 
 Please keep the following in mind when using the UniFi API browser:
 
-- The tool does not support all available data collections and API endpoints. See the list below for those currently supported.
-- Currently, versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X of the UniFi Controller software are supported (version **8.5.60** has been confirmed to work)
-- The Network Application on UniFi OS-based controllers is also supported, same versions as above
+- The tool does not support all available data collections and API endpoints. See the list below for those currently
+  supported.
+- Currently, versions 5.X.X, 6.X.X, 7.X.X, 8.X.X, and 9.X.X of the UniFi Controller/Networking Application software are
+  supported (version **9.4.19** has been confirmed to work)
+- Network Application on UniFi OS-based consoles and servers is also supported, same versions as above
 - When accessing UniFi OS-based controllers through this tool, please read the remarks regarding UniFi OS support
 - Please read the Security Notice before installing this tool.
 
 
 ### Upgrading from 1.x to 2.x
 
-Because the structure of the configuration file has changed, we recommend creating a fresh install when upgrading from 1.x to 2.x.
+Because the structure of the configuration file has changed, we recommend creating a fresh install when upgrading from
+1.x to 2.x.
 
 
 ### Features
@@ -27,14 +30,17 @@ Because the structure of the configuration file has changed, we recommend creati
 The UniFi API browser tool offers the following features:
 - Browse data collections and API endpoints exposed by the UniFi Controller API in an easy manner
 - Switch between sites managed by the connected controller
-- Switch between output formats (currently **JSON**, **JSON highlighted**, **PHP array**, **interactive**, and **PHP array, highlighted**)
-- Copy the results to clipboard (this is only supported with the JSON output format and will fail gracefully with large collections)
+- Switch between output formats (currently **JSON**, **JSON highlighted**, **PHP array**, **interactive**, and
+  **PHP array, highlighted**)
+- Copy the results to clipboard (this is only supported with the JSON output format and will fail gracefully with
+  large collections)
 - Switch between the default Bootstrap theme and the [Bootswatch](https://bootswatch.com/) themes
 - An **About** modal that shows version information for PHP, cURL, and the UniFi Controller
 - Very easy setup with minimal dependencies
 - Timing details of API calls can be useful to "benchmark" your UniFi Controller
 - A useful tool when developing applications that make use of the UniFi Controller API
-- The API exposes more data than is visible through the UniFi controller's web interface, making it useful for troubleshooting purposes
+- The API exposes more data than is visible through the UniFi controller's web interface, making it useful for
+  troubleshooting purposes
 - Debug mode to troubleshoot cURL connections (set `$debug` to `true` in the config file to enable debug mode)
 
 
@@ -101,56 +107,75 @@ The UniFi API browser tool offers the following features:
   - list IDS/IPS events
   - list system log entries
 
-Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser though.
+Please note that the bundled API client supports many more API endpoints, not all make sense to add to the API browser
+though.
 
 
 ### Requirements
 
 - A web server with PHP (7.4.0 or higher) and the php-curl module installed
-- Network connectivity between this web server and the server (and port) where the UniFi controller is running (in case you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
-- Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from public CDNs.
-- Using an administrator account with **read-only** permissions can limit visibility on certain collection/object properties. 
-  See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) 
-  for an example where the WPA2 password isn't accessible for **read-only** administrator accounts.
+- Network connectivity between this web server and the server (and port) where the UniFi controller is running (in case
+  you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
+- Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from
+  public CDNs.
+- Using an administrator account with **read-only** permissions can limit visibility on certain collection/object
+  properties. See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password isn't accessible for
+  **read-only** administrator accounts.
 
 
 ### Installation
 
-Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows for easy updates:
-- open up a terminal window on your server and `cd` to the root folder of your web server (on Ubuntu this is `/var/www/html`) and execute the following command from your command prompt:
+Installation of this tool is quite straightforward. The easiest way to do this is by using `git clone` which also allows
+for easy updates:
+- open up a terminal window on your server and `cd` to the root folder of your web server (on Ubuntu this is
+  `/var/www/html`) and execute the following command from your command prompt:
 ```bash
 git clone https://github.com/Art-of-WiFi/UniFi-API-browser.git
 ```
-- when git is done cloning, follow the configuration steps below to configure the settings for access to your UniFi Controller's API
+- when git is done cloning, follow the configuration steps below to configure the settings for access to your UniFi
+  Controller's API
 
-Alternatively, you may choose to download the zip file and unzip it in your directory of choice, then follow the configuration steps below.
+Alternatively, you may choose to download the zip file and unzip it in your directory of choice, then follow the
+configuration steps below.
 
 
 ### Installation using Docker
 
-@scyto maintains Docker containers for quick and easy deployment of the UniFi API browser tool. Please refer to [this Wiki page](https://github.com/Art-of-WiFi/UniFi-API-browser/wiki/Docker-Hosting) within the repository for more details. Please note we don't provide support related to Docker-based installs.
+@scyto maintains Docker containers for quick and easy deployment of the UniFi API browser tool. Please refer to
+[this Wiki page](https://github.com/Art-of-WiFi/UniFi-API-browser/wiki/Docker-Hosting) within the repository for more details. Please note we don't provide support related to
+Docker-based installs.
 
 
 ### Configuration
 
-- Credentials for access to the UniFi Controller API are configured in the file named `config/config-template.php` which should be copied/renamed to `config/config.php`
-- Starting with version 1.0.3, you can store **multiple controller configurations** in an array inside the `config/config.php` file
+- Credentials for access to the UniFi Controller API are configured in the file named `config/config-template.php` which
+  should be copied/renamed to `config/config.php`
+- Starting with version 1.0.3, you can store **multiple controller configurations** in an array inside the
+  `config/config.php` file
 - Please refer to the `config/config-template.php` file for further configuration instructions
-- Starting with API browser tool version 2.0.0, you can restrict access to the tool by creating user accounts and passwords. Please refer to the instructions in the `config/users-template.php` file for further details
-- After following these steps, you can open the tool in your browser (assuming you installed it in the root folder of your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
+- Starting with API browser tool version 2.0.0, you can restrict access to the tool by creating user accounts and
+  passwords. Please refer to the instructions in the `config/users-template.php` file for further details
+- After following these steps, you can open the tool in your browser (assuming you installed it in the root folder of
+  your web server as suggested above) by going to this url: `http(s)://<server IP address>/UniFi-API-browser/`
 
 
 ### UniFi OS support
 
-Support for UniFi OS-based controllers (for example, the UniFi Dream Machine Pro) has been added with version 2.0.7. When adding the details for a UniFi OS device to the `config/config.php` file, please make sure not to add a port suffix or trailing slashes to the URL.
+Support for UniFi OS-based controllers (for example, the UniFi Dream Machine Pro or UniFi OS Server) has been added with
+version 2.0.7. When adding the details for a UniFi OS console to the `config/config.php` file, please make sure not to
+add trailing slashes to the URL. For UniFi OS Consoles (e.g., UDM PRO) use port 443 for the connection.
 
-When using the UniFi API browser to connect to a Network Application on a UniFi OS-based gateway via the WAN interface, it is necessary to create a specific firewall rule to allow external access to port 443 on the gateway's local interface. For more information, please refer to the following blog post for further details:
+When using the UniFi API browser to connect to a Network Application on a UniFi OS-based gateway via the WAN interface, 
+it is necessary to create a specific firewall rule to allow external access to port 443 on the gateway's local
+interface. For more information, please refer to the following blog post for further details:
 https://artofwifi.net/2022/04/07/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro/
 
+When connecting to a **UniFi OS Server**, make sure to use port **11443** for the connection.
 
 ### Extending the Collections dropdown menu
 
-Since version 2.0.0 you can extend the Collections dropdown menu with your own options by adding them to the `config.php` file.
+Since version 2.0.0 you can extend the Collections dropdown menu with your own options by adding them to the
+`config.php` file.
 
 Here's an example:
 ```php
@@ -202,9 +227,11 @@ This is what the result looks like for the above example:
 
 ### Updates
 
-If you installed the tool using the `git clone` command, you can apply updates by going into the directory where the tool is installed, and running the `git pull` command from there.
+If you installed the tool using the `git clone` command, you can apply updates by going into the directory where the
+tool is installed, and running the `git pull` command from there.
 
-Otherwise, you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been installed.
+Otherwise, you can simply copy the contents from the latest [zip file](https://github.com/Art-of-WiFi/UniFi-API-browser/archive/master.zip) to the directory where the tool has been
+installed.
 
 
 ### Credits
@@ -240,7 +267,10 @@ Other included libraries:
 
 
 ### Support and Feedback
-This project is actively maintained, and feedback and suggestions are always welcome. If you encounter any issues or have any suggestions for improvements, please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas and questions.
+This project is actively maintained, and feedback and suggestions are always welcome. If you encounter any issues or
+have any suggestions for improvements, please use the GitHub [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues) list or the Ubiquiti Community forums
+(https://community.ubnt.com/t5/UniFi-Wireless/UniFi-API-browser-tool-released/m-p/1392651) to share your ideas and
+questions.
 
 
 ### Screenshots
@@ -274,3 +304,9 @@ Showing the site settings collection in interactive PHP format:
 The "About" modal:
 
 ![About modal](https://user-images.githubusercontent.com/12016131/67586311-9e320280-f751-11e9-9576-c0590c951edc.png "About modal")
+
+
+
+## Recommendations
+
+For prioritized technology and user experience recommendations, see RECOMMENDATIONS.md.

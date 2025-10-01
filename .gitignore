@@ -13,3 +13,6 @@ desktop.ini
 ehthumbs.db
 Thumbs.db
 /.idea
+
+# ignore Work in Progress files
+RECOMMENDATIONS.md
