@@ -10,7 +10,7 @@ require_once 'vendor/autoload.php';
 
 use UniFi_API\Client as ApiClient;
 
-const TOOL_VERSION = '2.0.34';
+const TOOL_VERSION = '2.0.35';
 
 /**
  * Gather some basic information for the About modal.
