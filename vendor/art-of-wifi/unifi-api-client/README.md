@@ -16,10 +16,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Supported Versions
 
-| Software                             | Versions                                             |
-|--------------------------------------|------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.0.x (**9.0.101 is confirmed**) |
-| UniFi OS                             | 3.x, 4.1.x (**4.1.9 is confirmed**)                  |
+| Software                             | Versions                                          |
+|--------------------------------------|---------------------------------------------------|
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.3.45 is confirmed**) |
+| UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.3.6 is confirmed**)        |
 
 
 ## Requirements
@@ -28,18 +28,20 @@ easy inclusion in your projects. See the [installation instructions](#Installati
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
     for PHP 7.3.x and lower)
   - PHP json and PHP cURL modules enabled
-- direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
-  UniFi OS) where the UniFi Controller is running
-- you **must** use an **account with local access permissions** to access the UniFi Controller API through this class
-- do not use UniFi Cloud accounts and do not enable 2FA for the accounts that you use with this class
+- direct network connectivity between this server and the host and port (usually TCP port 8443, port 11443 for UniFi OS
+  Server, or port 443 for UniFi OS consoles) where the UniFi Network Application is running
+- you **must** use an admin **account with local access permissions** to access the API through this class as explained
+  here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
+- do **not** use UniFi Cloud accounts and do not enable MFA/2FA for the accounts that you use with this class
 
 
 ## UniFi OS Support
 
-Besides the "software-based" UniFi controllers, this class also supports UniFi OS-based controllers starting from
-version **1.1.47**.
+Besides the classic "software-based" UniFi Network Application, this class also supports UniFi OS-based
+controllers starting from version **1.1.47**.
 
 These devices/services have been verified to work:
+- UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
@@ -51,13 +53,16 @@ These devices/services have been verified to work:
 - UniFi CloudKey Enterprise (CK-Enterprise)
 - UniFi Enterprise Fortress Gateway (EFG)
 - Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
+- HostiFi UniFi Cloud Hosting, details [here](https://hostifi.com/unifi)
 
-The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
+The class automatically detects UniFi OS consoles/servers and adjusts the URLs and several functions/methods
+accordingly.
 
-UniFi OS-based controllers require you to connect using port **443** instead of **8443** which is used for
-"software-based" controllers. If your own code implements strict validation of the URL that is passed to the
-constructor, please adapt your logic to allow URLs without a port suffix or with port 443 when working with a
-UniFi OS-based controller.
+UniFi OS-based consoles require you to connect using port **443** instead of **8443** which is used for
+the classic "software-based" controllers. When using **UniFi OS Server**, you are required to use port **11443**.
+
+If your own code implements strict validation of the URL that is passed to the constructor, please adapt your logic to
+allow URLs without a port suffix, with port 443 or port 11443 when working with a UniFi OS-based controller.
 
 
 ### Remote API access to UniFi OS-based controllers
@@ -73,7 +78,8 @@ The "custom firewall rule" approach described there is the recommended method.
 When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the class
 - test the client with your code for any breaking changes
-- make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single file
+- make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single
+  file
 - see the note [here](#looking-for-version-1xx) regarding the single file version (1.x.x) of the API client
 
 
@@ -287,6 +293,16 @@ A big thanks to all the contributors who have helped with this project!
 
 If you would like to contribute to this project, please open an issue and include
 your suggestions or code there or else create a pull request.
+
+
+## About Art of WiFi
+
+Art of WiFi develops software and tools that enhance the capabilities of UniFi networks. From captive portals and
+reporting solutions to device search utilities, our goal is to make UniFi deployments more powerful and easier to
+manage.
+
+If you're looking for a specific solution or just want to see what else we offer, feel free to explore our web site:
+- https://www.artofwifi.net
 
 
 ## Important Disclaimer
