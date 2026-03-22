@@ -472,6 +472,7 @@ function fetchCollection() {
      */
     if (controller.type === 'official') {
         post_data.selected_collection_resource = selected_collection.resource;
+        post_data.selected_collection_paginated = selected_collection.paginated ? '1' : '0';
         post_data.response_mode = selected_response_mode;
     }
 
@@ -596,6 +597,7 @@ function fetchAllPages() {
         selected_collection_params:   JSON.stringify(selected_collection.params),
         selected_collection_group:    selected_collection.group,
         selected_collection_resource: selected_collection.resource,
+        selected_collection_paginated: selected_collection.paginated ? '1' : '0',
         selected_site_id:             selected_site.id || '',
         selected_output_method:       selected_output_method,
         controller_type:              controller.type,

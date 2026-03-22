@@ -77,9 +77,18 @@ if (!empty($_SESSION['controller'])) {
                     $controller['verify_ssl'] ?? true,
                 );
 
-                $response  = $client->sites()->list();
-                $json      = $response->json();
-                $sites_raw = $json['data'] ?? [];
+                $sites_raw = [];
+                $offset    = 0;
+                $limit     = 200;
+
+                do {
+                    $response  = $client->sites()->list(offset: $offset, limit: $limit);
+                    $json      = $response->json();
+                    $page_data = $json['data'] ?? [];
+                    $sites_raw = array_merge($sites_raw, $page_data);
+                    $total     = $json['totalCount'] ?? $json['total'] ?? count($page_data);
+                    $offset   += $limit;
+                } while ($offset < $total && !empty($page_data));
 
                 if (!empty($sites_raw) && is_array($sites_raw)) {
                     foreach ($sites_raw as $site) {

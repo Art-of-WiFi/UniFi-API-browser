@@ -131,6 +131,7 @@ if (!empty($_SESSION['controller'])) {
          */
         $resource_name = $_POST['selected_collection_resource'] ?? '';
         $fetch_all     = !empty($_POST['fetch_all']);
+        $is_paginated  = !empty($_POST['selected_collection_paginated']);
         $response_mode = $_POST['response_mode'] ?? 'data_only';
 
         if (!empty($method) && !empty($resource_name)) {
@@ -172,7 +173,15 @@ if (!empty($_SESSION['controller'])) {
                     $results['count']     = count($all_data);
                     $results['pagination'] = ['total' => $total, 'fetched_all' => true];
                 } else {
-                    $response = $resource->{$method}();
+                    /**
+                     * Use an explicit default page size for paginated official API endpoints
+                     * instead of relying on the controller's default page size.
+                     */
+                    if ($is_paginated) {
+                        $response = $resource->{$method}(limit: 100);
+                    } else {
+                        $response = $resource->{$method}();
+                    }
                     $json     = $response->json();
 
                     if ($response_mode === 'full') {
