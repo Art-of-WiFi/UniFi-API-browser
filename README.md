@@ -29,7 +29,7 @@ Please keep the following in mind when using the UniFi API browser:
 
 Version 3.0.0 introduces the following major changes:
 
-- **PHP 8.1 or higher is now required** (previously PHP 7.4)
+- **PHP 8.2 or higher is now required** (previously PHP 7.4)
 - **Official UniFi Network Application API support**: you can now configure controllers that use API key
   authentication alongside the classic username/password controllers
 - **Twig 3.x** replaces Twig 2.x (end of life)
@@ -184,7 +184,7 @@ though.
 
 ### Requirements
 
-- A web server with PHP (8.1.0 or higher) and the php-curl module installed
+- A web server with PHP (8.2.0 or higher) and the php-curl module installed
 - Network connectivity between this web server and the server (and port) where the UniFi controller is running (in case
   you are seeing errors, please check out [this issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/4))
 - Web browsers accessing this tool should have full internet access because several CSS and JS files are loaded from

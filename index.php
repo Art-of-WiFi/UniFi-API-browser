@@ -148,16 +148,16 @@ if (!function_exists('curl_version')) {
 }
 
 /**
- * check whether the minimum required PHP version (5.6.0) is met
+ * check whether the minimum required PHP version (8.2.0) is met
  * - if not, stop and display an error message
  */
-if (version_compare(PHP_VERSION, '8.1.0') < 0) {
+if (version_compare(PHP_VERSION, '8.2.0') < 0) {
     /**
      * render the config error page
      */
     try {
         echo $twig->render('config_error.html.twig', [
-            'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 8.1.0. Please upgrade before proceeding!<br>',
+            'error_message' => 'The current PHP version (' . PHP_VERSION . ') does not meet the minimum required version which is 8.2.0. Please upgrade before proceeding!<br>',
         ]);
     } catch (LoaderError $e) {
         error_log('Twig LoaderError: ' . $e->getMessage());
